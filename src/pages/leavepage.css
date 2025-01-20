@@ -1,0 +1,60 @@
+body{
+    background-color: gray;
+}
+.leave{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height:98vh;
+    width:100%;
+    /* border:0.1rem solid tomato; */
+}
+.leave .box{
+    /* border:0.2rem solid tomato; */
+    width:80%;
+    height:20vh;
+    transform: translateY(-50%);
+}
+.leave .text{
+    text-align: center;
+    color:white;
+    width: 100%;
+    font-size: 2.5rem;
+}
+.leave .btn-wrapper{
+    margin-top: 3rem;
+
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.leave .btn {
+    width:25rem;
+    font-size: 1.8rem;
+
+    padding:2rem 1rem;
+    /* width:30rem; */
+    padding:1rem 1.5rem;
+    background-color: #355dd5;
+    border-radius: 1.5rem;
+    color: white;
+    font-size: 1.6rem;
+    outline:none;
+    border:none;
+    cursor: pointer;
+    text-transform: capitalize;
+    letter-spacing: 0.1rem;
+    margin: 1rem 1.5rem;
+}
+@media screen and (max-width:800px){
+   html{
+    font-size: 50%;
+   }
+    .leave .text{
+        font-size: 3rem;
+    }
+    .leave .btn {
+        padding:2.5rem 1.5rem;
+        font-size: 2.2rem;
+    }
+}

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./homepage.css"/>
+</head>
+<body>
+    <header >
+        <img src={logo}/>
+    </header>
+    <div className="flex-container">
+        <div className='flex-child1'>
+            <h1>Vitt Video Chat App</h1>
+            <div className="options">
+                <div className='input-wrapper'>
+                    <input                     
+                        type="tel" 
+                        pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+                        name="phone"
+                        className="client-mob"
+                        placeholder="User Code" 
+                        value={mobile}
+                        onChange={(e)=>setMobile(e.target.value)}
+                        
+                    /> 
+                </div>
+                <button 
+                    id="newMeeting" 
+                    className="btn" 
+                    onClick={()=>newMeeting()} >
+                        meeting link
+                </button>
+                <br/> 
+            </div>
+            <div className='options'>
+                <textarea 
+                    id="txtArea"
+                    rows={7}  
+                >
+                </textarea>
+            </div>
+            <p>Or</p>
+            <div className='options'>
+                <div className='input-wrapper'>
+                    <input 
+                        type="text" 
+                        id="meetingInput" 
+                       
+                        placeholder="Enter link here"
+                       
+                    />
+                </div>
+                 
+                <button id="join" className="btn" >join</button>
+                
+            </div>
+        </div>
+        <div className="images">
+            <!-- <img style={{display:"none"}} src="https://media.istockphoto.com/photos/african-american-customer-woman-talking-to-support-service-employee-picture-id1355302972?b=1&k=20&m=1355302972&s=170667a&w=0&h=Hqyu97HPCdr7P3qu1TfCCVuzWZb5vLtUV7By-bwWzA8="/>
+            <img style={{display:"none"}} src="https://media.istockphoto.com/photos/business-team-in-video-conference-picture-id1410142294?b=1&k=20&m=1410142294&s=170667a&w=0&h=l3pHf2oCpdhVWUkSCD8QJMMiO167augTs7T41TY8ZaU="/>
+            <img style={{display: "none"}} src="https://images.unsplash.com/photo-1616587894289-86480e533129?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"/> -->
+            <img src="https://cdn.pixabay.com/photo/2020/09/25/10/10/education-5600987_960_720.png"/>
+        </div>
+    </div>
+</body>
+<script>
+
+    let mobInput = document.querySelector('.input-wrapper input')
+    let newMeetingBtn = document.querySelector('#newMeeting')
+    let txtArea  = document.querySelector('txtArea')
+    let meetingInput = document.querySelector('#meetingInput')
+    let joinBtn = document.querySelector('#join')
+
+    joinBtn.addEventListener('click',()=>{
+        join(meetingInput.value)
+    })
+    meetingInput.addEventListener('click',()=>{
+        if(tx)
+        handleCopyToClipboard()
+    })
+
+    function join(joiningLink){
+       if(joiningLink==='')
+       return ;
+      // window.location.replace(joiningLink)
+      //console.log(location.href)
+       // window.location= joiningLink
+       let tempArr=joiningLink.split('#')
+       console.log(tempArr)
+      // window.location.href = tempArr[1]
+       //navigate(tempArr[1])
+   }
+   console.log(join('3789-182-72-76-34.ngrok-free.app/#/meeting/room_id=f1c91a50-e9a1-46a4-93ed-2b024c14ee1e&cust_id=5e20a07d-22c4-451c-a9b6-ae8aaecca052&mob=8368751774'))
+   
+
+   async function handleCopyToClipboard(){
+    if(navigator.clipboard)
+    console.log("clipboard available")
+
+    txtArea.select();
+    txtArea.setSelectionRange(0,99999);
+    console.log("handle copy fn",txtArea.value);
+    await navigator.clipboard.writeText(txtArea.value);
+
+    alert("Copied link")
+   }
+
+   async function newMeeting(){
+     //  let mobile= '8708213235'
+     if(mobile ==='')
+     return ;
+     console.log(mobile)
+       let roomId = uuidv4()
+        let custId =uuidv4();
+
+
+        //add roomId as local storage in the browser 
+        if(localStorage.getItem('created_by_admin') !=null){
+            let d = new Date()
+            let storedArr = localStorage.getItem('created_by_admin')
+            //@ts-ignore
+            let tempArr = JSON.parse(storedArr)
+            tempArr.push( {id:roomId,time:d.getTime()} )
+            //console.log(tempArr)
+            
+            //add links to browser
+            localStorage.setItem('created_by_admin',JSON.stringify(tempArr));
+            
+        }
+        else{
+            //if creating link first time
+            let d = new Date()
+            localStorage.setItem('created_by_admin',JSON.stringify([{id:roomId,time:d.getTime()}]))
+        }
+
+        //verifying mobile number 
+       await fetch('https://qhpv9mvz1h.execute-api.ap-south-1.amazonaws.com/prod/fetch-customerid',{
+        method:'POST',
+        headers:{
+            'Accept':'application.json',
+            'Content-Type':'application/json'
+        },
+        body:JSON.stringify({mobileno:mobile}),
+        cache:'default'
+        }).then((res)=>{
+            return res.json()
+        }).then(result=>{
+            console.log('i am value',result)
+            if(result.custid===null)
+            return ;
+            else custId = result.custid;
+
+        }).catch((err)=>{
+            console.log('error in verifying mobile',err)
+            //meetingBtn.disabled = false
+        })
+
+        setLink(`${window.location.host}/#/meeting/room_id=${roomId}&cust_id=${custId}&mob=${mobile}`)
+   }
+
+
+</script>
+</html>

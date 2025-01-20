@@ -1,0 +1,113 @@
+import React, { useRef, useState,useEffect } from 'react'
+import { useNavigate,useParams } from 'react-router-dom';
+import './leavepage.css'
+import { useData } from '../context/DataWrapper';
+
+
+export default function Leave() {
+  
+  const [count,setCount] = useState(0)
+  const {link} = useParams()
+  const [isUrlValid,setIsUrlValid] = useState(false);
+  let navigate= useNavigate();
+  let renderFlag = useRef(0)
+  //@ts-ignore
+  const {users,setUsers,usersArrRef,peersObjRef,peers2ObjRef,peersArrRef,peers2ArrRef,peer,peer2,myId,
+    //@ts-ignore
+    socket,setSocket,socket2,setSocket2,setPeer,setPeer2} = useData()
+
+  useEffect(()=>{
+  
+    console.log('useEffect inside leave rendered')
+    // for(let id in peersObjRef.current){
+    //   console.log("id is",id,peersObjRef.current[id])
+    //   peersObjRef.current[id].call.close()
+
+    // }
+    // for(let id in peers2ObjRef.current){
+    //   console.log("id2 is",id,peers2ObjRef.current[id])
+    //   peers2ObjRef.current[id].call.close()
+    // }
+
+    
+    peer?.disconnect()
+    peer2?.disconnect()
+    //socket?.emit('to-leave-page-transmitter',myId)
+    
+
+    socket.disconnect()
+    socket2.disconnect()
+    socket.close()
+    socket2.close()
+    
+    peers2ArrRef.current = []
+    peersArrRef.current=[]
+    usersArrRef.current=[]
+    //@ts-ignore
+    setUsers((prev:any)=>[...usersArrRef.current])
+    //peer.disconnect()
+    setTimeout(()=>{
+      peer?.destroy()
+      peer2?.destroy()
+      setPeer(null)
+      setPeer2(null)
+      setSocket(null)
+      setSocket2(null)
+    },2000)
+    
+
+  },[])
+
+  useEffect(()=>{
+    if(!link)
+    return ;
+    
+    let params = new URLSearchParams(link)
+
+    if(!params.get('room_id') || !params.get('cust_id') || !params.get('mob')){
+     return ;
+    }else{
+      setIsUrlValid(true)
+    } 
+  },[])
+
+  function rejoin(url:string){
+    console.log('i am link',url)
+  }
+
+  function returnToMainScreen(){
+    navigate('/#')
+  }
+
+  useEffect(()=>{
+    if(count<30)
+    return ;
+
+    returnToMainScreen()
+  },[count])
+
+  useEffect(()=>{
+
+    let intervalId= setInterval(()=>{
+      
+      setCount(prev=>prev+1)
+    },1000)
+    return ()=>clearInterval(intervalId)
+  },[])
+
+  return (
+    <div className='leave'>
+      <div className='box'>
+          <p className='text'>U have Successfully Left</p>
+          <div className='btn-wrapper'>
+            {isUrlValid!=false?
+            <button onClick={()=>navigate(`/meeting/${link}`)} className='btn'>Rejoin</button>:
+            null
+            }
+            
+            <button onClick={()=>returnToMainScreen()} className='btn'>Return to main screen {30-count}</button>
+          </div>
+      </div>
+    </div>
+  )
+}

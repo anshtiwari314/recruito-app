@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./leave.css">
+</head>
+<body>
+    <div class='leave'>
+        <div class='box'>
+            <p class='text'>U have Successfully Left</p>
+            <div class='btn-wrapper'>
+              
+              <button id="rejoin" class='btn'>Rejoin</button>:
+              <button id="mainScreen" class='btn'></button>
+            </div>
+        </div>
+      </div>
+</body>
+<script>
+    let rejoinBtn = document.querySelector('#rejoin')
+    let mainScreenBtn = document.querySelector('#mainScreen')
+    let count = 0;
+
+    mainScreenBtn.addEventListener('click',()=>{
+
+    })
+    rejoinBtn.addEventListener('click',()=>{
+        //first check url is valid or not 
+
+    })
+    setInterval(()=>{
+        // if(count>30)
+        // window.
+        count++;
+        mainScreenBtn.innerText = `Return to main screen ${30-count}`
+    },1000)
+
+</script>
+</html>
