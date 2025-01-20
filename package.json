@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "copy":"mv dist/index.html dist/meeting.html && cp dist/meeting.html combined_dist && cp dist/assets/*.js combined_dist/assets && cp dist/assets/*.css combined_dist/assets",
+    "copy": "mv dist/index.html dist/meeting.html && cp dist/meeting.html combined_dist && cp dist/assets/*.js combined_dist/assets && cp dist/assets/*.css combined_dist/assets",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -19,7 +19,9 @@
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@mui/icons-material": "^5.14.9",
     "@mui/material": "^5.14.9",
+    "@ricky0123/vad-web": "^0.0.22",
     "html-react-parser": "^4.2.0",
+    "onnxruntime-web": "^1.20.1",
     "peerjs": "^1.4.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
