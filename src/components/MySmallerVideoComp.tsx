@@ -130,22 +130,14 @@ export function Display({e,muted,isMobile}){
 }
 
 export default function MySmallerVideoComp({e,num,setSelectedNumber,isMobile}){
-    //let isMobile = false
-   // let muted = false
-    
     function displayOnLargeScreen(){
         
       if(setSelectedNumber===null)
-      return ;
+        return ;
 
       setSelectedNumber(num)
     }
-    // useEffect(()=>{
-    //     console.log("smaller comp",e)
-    // },[])
-   // console.log("smaller comp",e)
-
-//num===0?true:e.microphoneStatus
+    
     return (
     <div onClick={displayOnLargeScreen} 
         style={{
