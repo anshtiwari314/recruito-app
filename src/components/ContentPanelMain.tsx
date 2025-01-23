@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useData } from "@/context/DataWrapper";
+import { useAppSelector } from "@/store/store";
+import { v4 as uuidv4 } from "uuid";
+import type { CuesDataType } from "@/reducers/cuesReducer";
 
-export default function ContentPanelMain({
-  preloadedQuestions,
-}: {
-  preloadedQuestions: string[];
-}) {
+export default function ContentPanelMain() {
+  const currentCues = useAppSelector((state) => state.cuesReducer.CuesList);
   return (
     <>
       <div
@@ -69,7 +69,7 @@ export default function ContentPanelMain({
         <h3 className="text-lg font-semibold mb-4 text-neutral-900">AI Suggestions</h3>
         <div className="space-y-3">
               {/* Details of each suggestion to be fetched from API server ; for loop */}
-              {preloadedQuestions.map((question, index) => (
+              {currentCues && currentCues.map((question:CuesDataType, index:number) => (
                 <div
                   key={index}
                   className="p-3 bg-neutral-50 rounded-lg border border-neutral-200"
@@ -77,7 +77,7 @@ export default function ContentPanelMain({
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center space-x-3">
                     <i className="fa-regular fa-circle text-neutral-600"></i>
-                    <span className="text-neutral-900">{question}</span>
+                    <span className="text-neutral-900">{question.similarity_query}</span>
                   </div>
                   {/*<span className="px-2 py-1 bg-neutral-200 rounded text-sm">95% match</span>*/}
                 </div>

@@ -10,7 +10,12 @@ import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import ContentPanel from "@/components/ContentPanel";
 import ContentPanelHeader from "@/components/ContentPanelHeader";
+import type { CuesDataType } from "@/reducers/cuesReducer";
+import { setCues } from "@/reducers/cuesReducer";
+import { useAppSelector } from "@/store/store";
+import { useDispatch } from "react-redux";
 
+/*
 //@ts-ignore
 export function Tray({
   openSideWindow,
@@ -275,6 +280,9 @@ export function Tray({
     </div>
   );
 }
+*/
+
+/*
 //@ts-ignore
 export function SideWindow({
   openSideWindow,
@@ -583,11 +591,6 @@ export function SideWindow({
                     </div>
                   );
               })}
-
-              {/* <p>hi</p>
-                  <p>hi</p>
-                  <p>hi</p>
-                  <p>hi</p> */}
             </div>
             <div className="input-wrapper">
               <input
@@ -610,26 +613,14 @@ export function SideWindow({
     </div>
   );
 }
+*/
 
+/*
 export function RmLayout() {
   //@ts-ignore
   const { cues, cueLoading } = useData();
   return (
     <div className="msg-box" style={{ border: "0.1rem solid red" }}>
-      {/* {data && data.map((e:any,i:number)=>{
-                    console.log(e)
-                    if(e.type ==="TextMsg")
-                        return <AddTextMsg data={e} key={i}/>
-                    else if(e.type === "SuggestiveMsg")
-                        return <AddOnlySuggestiveMsg data={e} key={i}/>
-                    else if(e.type === "ImageMsg")
-                        return <AddImageMsg data={e} key={i}/>
-                    else if(e.type === "InputForm")
-                        return <AddInputForm data={e} key={i}/>
-                    else if(e.type === "RadioForm")
-                        return <AddRadioForm data={e} key={i}/>;
-                })} */}
-
       {cueLoading == true ? (
         <div className="msg-loader-wrapper">
           <img
@@ -642,23 +633,22 @@ export function RmLayout() {
         cues.map((e: any, i: number) => {
           return <Msg e={e} key={e.id} />;
         })}
-      {/* <Msg e={Data} /> */}
     </div>
   );
 }
+*/
 
 export interface InitialLoadData {
   jobTitle: string;
   jobDescription: string;
   interviewGuide: string;
-  preloadedQuestions: string[];
+  preloadedQuestions: CuesDataType[];
 }
 
 export default function MainPage() {
   //@ts-ignore
   const {
     setRoomId,
-    users,
     myStream,
     setMob,
     roomId,
@@ -674,6 +664,9 @@ export default function MainPage() {
     videoUploadUrl,
     setVideoUploadUrl,
   } = useData();
+  const currentCues = useAppSelector((state) => state.cuesReducer.CuesList);
+  const dispatch = useDispatch();
+
   const { link } = useParams();
   // const [searchParams,setSearchParams] = useSearchParams()
   const navigate = useNavigate();
@@ -688,19 +681,11 @@ export default function MainPage() {
     jobDescription: "https://arxiv.org/pdf/2301.12652", //pdf
     interviewGuide: "https://arxiv.org/pdf/2301.12652", //pdf
     preloadedQuestions: [
-      "Ask about specific EDI protocols experience",
-      "Discuss experience with mapping tools",
-      "Probe cloud integration knowledge",
+      {content: "", sessionid: "1", audiofiletimestamp: "2022-01-01T00:00:00Z", common_id: "1", similarity_query: "Ask about specific EDI protocols experience"},
+      {content: "", sessionid: "1", audiofiletimestamp: "2022-01-01T00:00:00Z", common_id: "2", similarity_query: "Discuss experience with mapping tools"},
+      {content: "", sessionid: "1", audiofiletimestamp: "2022-01-01T00:00:00Z", common_id: "3", similarity_query: "Probe cloud integration knowledge"},
     ],
   };
-
-  function diff_minutes(time2: number, time1: number) {
-    var diff = (time2 - time1) / 1000;
-    let diff_in_min = diff / 60;
-    return Math.abs(Math.round(diff_in_min));
-  }
-
-  console.log("Start time", new Date().getTime());
 
   useEffect(() => {
     // Declare a variable to store the user's name
@@ -748,45 +733,48 @@ export default function MainPage() {
   }, []);
 
   useEffect(() => {
-    let params = new URL(window.location.href).searchParams;
+    if (!currentCues) {
+      let params = new URL(window.location.href).searchParams;
 
-    console.log("params", params.get("room_id"));
-    if (
-      !params.get("room_id")?.trim() ||
-      !params.get("cust_id")?.trim() ||
-      !params.get("mob")?.trim()
-    ) {
-      navigate("/404");
-    } else {
-      let tempId = "";
-      //console.log(link,params.get('room_id'),params.get('cust_id'),params.get('mob') )
-      setRoomId(params.get("room_id"));
-      setMob(params.get("mob"));
-
-      // Determine if the user is the host based on the is_host parameter
-      let tempIsHost = params.get("is_host") === "true" ? true : false;
-      if (tempIsHost) {
-        // If the user is the host, generate a new temporary ID
-        tempId = uuidv4();
-        // Code block for calling API to fetch interview details like JD, candidate profile, job details, etc.
-        // API call to fetch interview details
-        // meetingDetails =
+      if (
+        !params.get("room_id")?.trim() ||
+        !params.get("cust_id")?.trim() ||
+        !params.get("mob")?.trim()
+      ) {
+        navigate("/404");
       } else {
-        // If the user is not the host, use the cust_id as the temporary ID
-        tempId = params.get("cust_id") ?? "";
-      }
+        let tempId = "";
+        setRoomId(params.get("room_id"));
+        setMob(params.get("mob"));
 
-      // Set the cust_id state variable
-      setCustId(params.get("cust_id"));
-      // Set the myId state variable to the temporary ID
-      setMyId(tempId);
-      // Set the isHost state variable
-      setIsHost(tempIsHost);
-      // Update the isHostRef reference to the current host status
-      isHostRef.current = tempIsHost;
+        // Determine if the user is the host based on the is_host parameter
+        let tempIsHost = params.get("is_host") === "true" ? true : false;
+        if (tempIsHost) {
+          // If the user is the host, generate a new temporary ID
+          tempId = uuidv4();
+          // Code block for calling API to fetch interview details like JD, candidate profile, job details, etc.
+          // API call to fetch interview details
+          // meetingDetails =
+          dispatch(setCues({CuesList: meetingDetails.preloadedQuestions}));
+          console.log(currentCues);
+        } else {
+          // If the user is not the host, use the cust_id as the temporary ID
+          tempId = params.get("cust_id") ?? "";
+        }
+
+        // Set the cust_id state variable
+        setCustId(params.get("cust_id"));
+        // Set the myId state variable to the temporary ID
+        setMyId(tempId);
+        // Set the isHost state variable
+        setIsHost(tempIsHost);
+        // Update the isHostRef reference to the current host status
+        isHostRef.current = tempIsHost;
+      }
     }
   }, []);
 
+  console.log("currentcues", currentCues);
   //http://localhost:5173/?room_id=123&cust_id=123&mob=123&is_host=true
   //http://localhost:5173/?room_id=123&cust_id=123&mob=123&is_host
 

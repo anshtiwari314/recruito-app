@@ -9,6 +9,31 @@ const Context = createContext("");
 export function useData(){
     return useContext(Context);
 }
+
+export interface cuesDataType {
+        color?: string,
+        content?: string,
+        iconColor?: string,
+        initquery?: string,
+        match_score?: string,
+        matched_query?: string,
+        query?: string[],
+        raw_modded_query?: string,
+        sessionid?: string,
+        similarity_query?: string,
+        loading?: boolean,
+        audiourl?: string,
+        imageUrl?: string,
+        common_id?: string,
+        type?: string,
+        audiofiletimestamp?: string,
+        iconName?: string,
+        value?: string,
+        radio?: string,
+        label?: string,
+        replies?: string[]
+    }
+
 type users = {
     id:string,
     peer2Id:string,
@@ -118,8 +143,8 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
     let isHostRef = useRef<null|boolean>(null)
     let [mob,setMob] = useState('')
     
-    const [cues,setCues] = useState([]);
-    const cuesArrRef = useRef([]);
+    const [cues,setCues] = useState<cuesDataType[]>([]);
+    const cuesArrRef = useRef<cuesDataType[]>([]);
 
     const [msg,setMsg] = useState([]);
     const [cueLoading,setCueLoading] = useState(false)
@@ -159,6 +184,7 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
 
     const [videoUploadUrl,setVideoUploadUrl] = useState('https://qhpv9mvz1h.execute-api.ap-south-1.amazonaws.com/prod/postfacto-upload-test')
 
+      
     //@ts-ignore
     function sendToServer(blob,url,data){
         //console.log("url",url,blob)
@@ -455,35 +481,59 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
         })
     }
     
-    function handleData(data:any){
+    function handleData(inputHandleData:cuesDataType = {} as cuesDataType) {
+        const data = {
+            color: "#7D11E9",
+            content: "",
+            iconColor: "blue",
+            initquery: " ",
+            match_score: "0",
+            matched_query: " ",
+            query: [" "],
+            raw_modded_query: " ",
+            sessionid: 'xyz',
+            similarity_query: " ",
+            loading: false,
+            audiourl: "",
+            imageUrl: "",
+            common_id: "",
+            type: "",
+            audiofiletimestamp: "",
+            iconName: "",
+            value: "",
+            radio: "",
+            label: "",
+            replies: [],
+            ...inputHandleData
+        }
 
         let date = new Date()
-            console.log(`%c inside handle Data ${date.toLocaleTimeString()+':'+date.getMilliseconds()}`,'background-color:teal;color:white')
+        console.log(`%c inside handle Data ${date.toLocaleTimeString()+':'+date.getMilliseconds()}`,'background-color:teal;color:white')
 
         setCueLoading(false)
         //@ts-ignore
-        let arr:Data[] =[]
+        let arr:cuesDataType[] =[]
         //@ts-ignore
-        let obj:Data = {}
+        let obj:cuesDataType = {}
 // "sessionid": <str>, "audiofiletimestamp": <str>
         
 
         if(data?.loading){
             return ;
         }
-        if(data?.audiourl!=null){
+        if(data?.audiourl && data?.audiourl !== ""){
             //@ts-ignore
-            audioUrlRef.current = data?.audiourl
+            // audioUrlRef.current = data?.audiourl
             //@ts-ignore
            // setAudioUrlFlag(prev=>!prev)
             //setAudioUrl('https://files.gospeljingle.com/uploads/music/2023/04/Taylor_Swift_-_August.mp3')
         }
-        if(data?.imageurl){
+        if(data?.imageUrl && data?.imageUrl !== ""){
             //@ts-ignore
             obj["id"]= uuidv4()
-            obj["common_id"] = data?.id
+            obj["common_id"] = data?.common_id
             obj["type"]="ImageMsg"
-            obj["imageUrl"] = data?.imageurl;
+            obj["imageUrl"] = data?.imageUrl;
             obj["iconName"] = 'fa-solid fa-forward-fast'
             obj["similarity_query"] = data?.similarity_query;
             obj["color"]= data?.color;
@@ -492,14 +542,14 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
             obj["audiofiletimestamp"]=data?.audiofiletimestamp
             
             //arr.push(obj)
-            arr = [obj,...arr]
+            arr = [...arr, obj]
             //@ts-ignore
             obj = {}
         }
-        if(data?.value){
+        if(data?.value && data?.value !== ""){
             //@ts-ignore
             obj["id"]= uuidv4()
-            obj["common_id"] = data?.id
+            obj["common_id"] = data?.common_id
             obj["type"]="InputForm"
             obj["iconName"] = "fa-regular fa-pen-to-square"
             obj["value"] = data?.value 
@@ -511,14 +561,14 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
             obj["audiofiletimestamp"]=data?.audiofiletimestamp
             
             //arr.push(obj)
-            arr = [obj,...arr]
+            arr = [...arr, obj]
             //@ts-ignore
             obj = {}
         }
-        if(data?.radio){
+        if(data?.radio && data?.radio !== ""){
             //@ts-ignore
             obj["id"]= uuidv4()
-            obj["common_id"] = data?.id
+            obj["common_id"] = data?.common_id
             obj["type"]="RadioForm"
             obj["iconName"] = 'fa-regular fa-pen-to-square'
             obj["label"] = data?.label 
@@ -530,35 +580,33 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
             obj["audiofiletimestamp"]=data?.audiofiletimestamp
            
             //arr.push(obj)
-            arr = [obj,...arr]
+            arr = [...arr, obj]
             //@ts-ignore
             obj={}
         }
-        if(data?.content){
-            data.content.map((e:any,i:number)=>{
-                //@ts-ignore
-                obj["id"]= uuidv4()
-                obj["common_id"] = data?.id
-                obj["type"]="TextMsg"
-                obj["content"] = e 
-                obj["iconName"] = 'fa-solid fa-circle-question'
-                obj["color"]= data?.color 
-                obj["iconColor"] = data?.iconColor
-                obj["similarity_query"] = data?.similarity_query;
-                obj["sessionid"] = data?.sessionid
-                obj["audiofiletimestamp"]=data?.audiofiletimestamp
 
-                //arr.push(obj)
-                arr = [obj,...arr]
-                //@ts-ignore
-                obj={}
-            })
-            
-        }
-        if(data?.replies){
+        if(data?.content || data?.similarity_query){
             //@ts-ignore
             obj["id"]= uuidv4()
-            obj["common_id"] = data?.id
+            obj["common_id"] = data?.common_id
+            obj["type"]="TextMsg"
+            obj["content"] = data.content
+            obj["iconName"] = 'fa-solid fa-circle-question'
+            obj["color"]= data?.color 
+            obj["iconColor"] = data?.iconColor
+            obj["similarity_query"] = data?.similarity_query;
+            obj["sessionid"] = data?.sessionid
+            obj["audiofiletimestamp"]=data?.audiofiletimestamp
+
+            //arr.push(obj)
+            arr = [...arr, obj]
+            //@ts-ignore
+            obj={}  
+        }
+        if(data?.replies && data?.replies?.length > 0){
+            //@ts-ignore
+            obj["id"]= uuidv4()
+            obj["common_id"] = data?.common_id
             obj["type"] = "SuggestiveMsg"
             obj["replies"] = data?.replies
             obj["color"] = data?.color
@@ -569,15 +617,14 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
             obj["audiofiletimestamp"]=data?.audiofiletimestamp
 
             //arr.push(obj)
-            arr = [obj,...arr]
+            arr = [...arr, obj]
             //@ts-ignore
             obj={}
            
         } 
-       //console.log(arr)
        //@ts-ignore
 
-       cuesArrRef.current =  [...arr,...cuesArrRef.current]
+       cuesArrRef.current =  [...cuesArrRef.current,...arr]
        setCues([...cuesArrRef.current])
        
     }
@@ -609,13 +656,35 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
 
     },[isHost,custId])
 
-    function updateCues(data:any){
+    function updateCues(data:cuesDataType = {
+        color: "#7D11E9",
+        content: "",
+        iconColor: "blue",
+        initquery: " ",
+        match_score: "0",
+        matched_query: " ",
+        query: [" "],
+        raw_modded_query: " ",
+        sessionid: 'xyz',
+        similarity_query: " ",
+        loading: false,
+        audiourl: "",
+        imageUrl: "",
+        common_id: "",
+        type: "",
+        audiofiletimestamp: "",
+        iconName: "",
+        value: "",
+        radio: "",
+        label: "",
+        replies: [""]
+    }) {
         let date = new Date()
             console.log(`%c inside update cues ${date.toLocaleTimeString()+':'+date.getMilliseconds()}`,'background-color:teal;color:white')
         
             let filteredCues= cuesArrRef.current.map(e=>{
-            if(e.common_id ===data.id){
-                e.content = e.content +' '+ data.content[0]
+            if(e.common_id ===data.common_id){
+                e.content = e.content +' '+ data.content
             }
             return e
         })
@@ -857,15 +926,10 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
     //     console.log(filteredCues)
     //     setCues(filteredCues)
     // },[cues])
-
-
-
-
-
-
+    /*
     let Data = {
         color: "#7D11E9",
-        content: ['Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32. The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested. Sections 1.10.32 and 1.10.33 from "de Finibus Bonorum et Malorum" by Cicero are also reproduced in their exact original form, accompanied by English versions from the 1914 translation by H. Rackham.'],
+        content: 'Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32. The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested. Sections 1.10.32 and 1.10.33 from "de Finibus Bonorum et Malorum" by Cicero are also reproduced in their exact original form, accompanied by English versions from the 1914 translation by H. Rackham.',
         iconColor: "blue",
         initquery: "what is mutual fund? what is mutual fund? is mutual fund what is mutual fund what is mutual fund",
         match_score: "0.9741857",
@@ -875,6 +939,7 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
         sessionid: ['aff2b452-5014-4132-8d6d-6ccfa8d520b1'],
         similarity_query: "Definition of mutual fund"
     }
+    */
     
     useEffect(()=>{
         
@@ -882,11 +947,6 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
     },[users])
 
     useEffect( ()=>{
-        //handleData(Data)
-        //handleData(Data)
-        //handleData(Data)
-        //handleData(Data)
-        //handleData(Data)
         if(socket2===null || myId==='' || custId==='' || isHost===null)
         return ;
 
@@ -2477,6 +2537,7 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
         isHost,setIsHost,
         isHostRef,
         cues,setCues,
+        cuesArrRef,
         name,setName,
         cameraToggle,setCameraToggle,
         microphoneToggle,setMicroPhoneToggle,
@@ -2488,7 +2549,7 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
         largeVideo,setLargeVideo,
         custId,setCustId,
         adminUrl,setAdminUrl,
-        videoUploadUrl,setVideoUploadUrl,stopVideoRecording
+        videoUploadUrl,setVideoUploadUrl,stopVideoRecording,
     }   
 
     return (

@@ -72,10 +72,7 @@ export default function VideoLayout({
           ) : (
             <ContentPanelHeader jobTitle="" />
           )}
-
-          <ContentPanelMain
-            preloadedQuestions={meetingDetails.preloadedQuestions}
-          />
+          <ContentPanelMain />
         </>
       ) : (
         largeVideo && (
