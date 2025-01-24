@@ -1,4 +1,9 @@
-<div id="app" className="min-h-screen bg-neutral-50">
+import React from 'react'
+import RightPanel from '@/components/RightPanel'
+
+export default function Comp(){
+  return (
+    <div id="app" className="min-h-screen bg-neutral-50">
   <header
     id="header"
     className="w-full bg-white border-b border-neutral-200 px-4 py-3 flex items-center justify-between shadow-sm"
@@ -152,93 +157,7 @@
         </div>
       </div>
     </div>
-    <div
-      id="right-panel"
-      className="w-80 bg-white border-l border-neutral-200 flex flex-col"
-    >
-      <div className="p-4 border-b border-neutral-200">
-        <h2 className="font-semibold mb-4 text-neutral-900">
-          Participants (2)
-        </h2>
-        <div className="space-y-4">
-          <div className="relative">
-            <div className="aspect-video bg-neutral-200 rounded-lg overflow-hidden">
-              <img
-                src="https://api.dicebear.com/7.x/notionists/svg?scale=200&amp;seed=VA"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-              <span className="text-sm bg-black/50 text-white px-2 py-1 rounded">
-                Varun
-              </span>
-              <div className="flex space-x-1">
-                <i className="fa-solid fa-microphone-slash bg-black/50 text-white p-1 rounded"></i>
-                <i className="fa-solid fa-video bg-black/50 text-white p-1 rounded"></i>
-              </div>
-            </div>
-          </div>
-          <div className="relative">
-            <div className="aspect-video bg-neutral-200 rounded-lg overflow-hidden">
-              <img
-                src="https://api.dicebear.com/7.x/notionists/svg?scale=200&amp;seed=INT"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-              <span className="text-sm bg-black/50 text-white px-2 py-1 rounded">
-                Interviewer
-              </span>
-              <div className="flex space-x-1">
-                <i className="fa-solid fa-microphone bg-black/50 text-white p-1 rounded"></i>
-                <i className="fa-solid fa-video bg-black/50 text-white p-1 rounded"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div id="resources" className="flex-grow p-4 overflow-y-auto">
-        <h2 className="font-semibold mb-4 text-neutral-900">Resources</h2>
-        <div className="space-y-3">
-          <div className="p-3 bg-neutral-50 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="flex items-center">
-                  <i className="fa-regular fa-file-lines mr-2 text-neutral-600"></i>
-                  <div className="text-sm font-medium text-neutral-900">
-                    Job Description
-                  </div>
-                </div>
-                <div className="text-sm text-neutral-600 mt-1">
-                  EDI Developer Position Details
-                </div>
-              </div>
-              <button className="p-2 hover:bg-neutral-100 rounded-lg text-neutral-600">
-                <i className="fa-solid fa-download"></i>
-              </button>
-            </div>
-          </div>
-          <div className="p-3 bg-neutral-50 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="flex items-center">
-                  <i className="fa-regular fa-clipboard mr-2 text-neutral-600"></i>
-                  <div className="text-sm font-medium text-neutral-900">
-                    Interview Guide
-                  </div>
-                </div>
-                <div className="text-sm text-neutral-600 mt-1">
-                  Technical Assessment Framework
-                </div>
-              </div>
-              <button className="p-2 hover:bg-neutral-100 rounded-lg text-neutral-600">
-                <i className="fa-solid fa-download"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <RightPanel/>
   </main>
   <div
     id="control-panel"
@@ -283,4 +202,12 @@
       </div>
     </div>
   </div>
-</div>;
+</div>
+
+  )
+}
+
+
+
+
+

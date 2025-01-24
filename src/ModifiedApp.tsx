@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import DataWrapper from "./context/DataWrapper";
 import ReduxProvider from "@/store/Providers";
 import NotFoundPage from "./pages/NotFoundPage";
+import BiBhutiUiPage from './pages/BibhutiUiPage';
 
 export default function App() {
   return (
@@ -12,7 +13,7 @@ export default function App() {
         <DataWrapper>
           <Routes>
             {/* Main Page Route */}
-            <Route path="/" element={<MainPage />} />
+            <Route path="/" element={<MainPage/>} />
             {/* 404 Page Route */}
             <Route path="/404" element={<NotFoundPage />} />
             {/* Catch-all Route for undefined paths */}
