@@ -16,6 +16,8 @@ import { setQP } from "@/reducers/queryparamReducer";
 import { useAppSelector } from "@/store/store";
 import { useDispatch } from "react-redux";
 import ControlPanel from "@/components/ControlPanel";
+import { RightPanelResource } from "@/components/RightPanelResource";
+import RightPanel from "@/components/RightPanel";
 
 /*
 //@ts-ignore
@@ -660,7 +662,6 @@ export default function MainPage() {
     videoUploadUrl,
     setVideoUploadUrl,
   } = useData();
-  const currentCuesState = useAppSelector((state) => state.cuesReducer.CuesList);
   const { isHost } = useAppSelector((state) => state.qpReducer);
   const dispatch = useDispatch();
 
@@ -767,7 +768,7 @@ export default function MainPage() {
       // Code block for calling API to fetch interview details like JD, candidate profile, job details, etc.
       // API call to fetch interview details
       // meetingDetails =
-      dispatch(setCues({CuesList: meetingDetails.preloadedQuestions}));
+      dispatch(setCues({CuesList: meetingDetails.preloadedQuestions, interviewGuide: meetingDetails.interviewGuide, jobDescription: meetingDetails.jobDescription}));
     } 
     // Set the myId state variable to the temporary ID
     setMyId(tempId);
@@ -839,6 +840,7 @@ export default function MainPage() {
 
         {/* Right Panel */}
         <div id="right-panel" className="w-80 bg-white border-l border-neutral-200 flex flex-col">
+          <RightPanel />
         </div>
 
         {/*

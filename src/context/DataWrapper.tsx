@@ -78,7 +78,7 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
     ]
 
     const dispatch = useDispatch();
-    const currentCuesState = useAppSelector((state) => state.cuesReducer.CuesList);
+    const { CuesList, jobDescription, interviewGuide}  = useAppSelector((state) => state.cuesReducer);
     const { roomId, custEmailId, isHost } = useAppSelector((state) => state.qpReducer);
 
     const [socket,setSocket] = useState<any>(null)
@@ -570,7 +570,7 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
            
         } 
        //@ts-ignore
-       dispatch(addCues({CuesList:arr}));
+       dispatch(addCues(arr));
        
     }
 
@@ -578,7 +578,7 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
         let date = new Date()
         console.log(`%c inside update cues ${date.toLocaleTimeString()+':'+date.getMilliseconds()}`,'background-color:teal;color:white')
     
-        let filteredCues = currentCuesState?.map(e => {
+        let filteredCues = CuesList?.map(e => {
             if (e.common_id === data?.common_id) {
                 return { 
                     ...e, 
@@ -590,7 +590,7 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
 
         if (!filteredCues) {return;}
         
-        dispatch(setCues({CuesList:filteredCues}));
+        dispatch(setCues({CuesList:filteredCues, jobDescription:jobDescription, interviewGuide:interviewGuide}));
     }
 
     function uploadFile(uploadFileparam:Blob) {
