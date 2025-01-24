@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./mainpage.css";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { useData } from "../context/DataWrapper";
+import { useData } from "@/context/DataWrapper";
 import { v4 as uuidv4 } from "uuid";
 import DisplayLargerComp from "../components/DisplayLargerComp";
 import DisplaySmallerComp from "../components/DisplaySmallerComp";
@@ -9,11 +9,13 @@ import Msg from "../components/Msg";
 import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import ContentPanel from "@/components/ContentPanel";
-import ContentPanelHeader from "@/components/ContentPanelHeader";
 import type { CuesDataType } from "@/reducers/cuesReducer";
 import { setCues } from "@/reducers/cuesReducer";
+import type { QPState } from "@/reducers/queryparamReducer";
+import { setQP } from "@/reducers/queryparamReducer";
 import { useAppSelector } from "@/store/store";
 import { useDispatch } from "react-redux";
+import ControlPanel from "@/components/ControlPanel";
 
 /*
 //@ts-ignore
@@ -648,14 +650,8 @@ export interface InitialLoadData {
 export default function MainPage() {
   //@ts-ignore
   const {
-    setRoomId,
     myStream,
-    setMob,
-    roomId,
-    setIsHost,
     setMyId,
-    isHostRef,
-    normalize,
     setName,
     setValidUrl,
     setCustId,
@@ -664,7 +660,8 @@ export default function MainPage() {
     videoUploadUrl,
     setVideoUploadUrl,
   } = useData();
-  const currentCues = useAppSelector((state) => state.cuesReducer.CuesList);
+  const currentCuesState = useAppSelector((state) => state.cuesReducer.CuesList);
+  const { isHost } = useAppSelector((state) => state.qpReducer);
   const dispatch = useDispatch();
 
   const { link } = useParams();
@@ -676,6 +673,8 @@ export default function MainPage() {
   const [toggleAudio, setToggleAudio] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [toggleRmWindow, setToggleRmWindow] = useState(false);
+  let tempIsHost = false;
+  let tempId = "";
   let meetingDetails: InitialLoadData = {
     jobTitle: "EDI Developer",
     jobDescription: "https://arxiv.org/pdf/2301.12652", //pdf
@@ -733,50 +732,51 @@ export default function MainPage() {
   }, []);
 
   useEffect(() => {
-    if (!currentCues) {
       let params = new URL(window.location.href).searchParams;
 
       if (
         !params.get("room_id")?.trim() ||
-        !params.get("cust_id")?.trim() ||
-        !params.get("mob")?.trim()
+        !params.get("cust_email_id")?.trim() ||
+        !params.get("agent_id")?.trim() ||
+        !params.get("job_id")?.trim()
       ) {
         navigate("/404");
       } else {
-        let tempId = "";
-        setRoomId(params.get("room_id"));
-        setMob(params.get("mob"));
-
         // Determine if the user is the host based on the is_host parameter
-        let tempIsHost = params.get("is_host") === "true" ? true : false;
-        if (tempIsHost) {
-          // If the user is the host, generate a new temporary ID
-          tempId = uuidv4();
-          // Code block for calling API to fetch interview details like JD, candidate profile, job details, etc.
-          // API call to fetch interview details
-          // meetingDetails =
-          dispatch(setCues({CuesList: meetingDetails.preloadedQuestions}));
-          console.log(currentCues);
-        } else {
-          // If the user is not the host, use the cust_id as the temporary ID
-          tempId = params.get("cust_id") ?? "";
-        }
+        tempIsHost = params.get("is_host") === "true" ? true : false;
+        const qParams: QPState = {
+          roomId: params.get("room_id") ?? "",
+          jobId: params.get("job_id") ?? "",
+          custEmailId: params.get("cust_email_id") ?? "",
+          agentId: params.get("agent_id") ?? "",
+          isHost: tempIsHost,
+        };
+        // Set the query params state for this meeting
+        dispatch(setQP(qParams));
+        // Set the cust_email_id state variable
+        setCustId(params.get("cust_email_id"));
 
-        // Set the cust_id state variable
-        setCustId(params.get("cust_id"));
-        // Set the myId state variable to the temporary ID
-        setMyId(tempId);
-        // Set the isHost state variable
-        setIsHost(tempIsHost);
-        // Update the isHostRef reference to the current host status
-        isHostRef.current = tempIsHost;
-      }
+        tempId = params.get("cust_email_id") ?? "";
     }
   }, []);
 
-  console.log("currentcues", currentCues);
-  //http://localhost:5173/?room_id=123&cust_id=123&mob=123&is_host=true
-  //http://localhost:5173/?room_id=123&cust_id=123&mob=123&is_host
+  useEffect(() => {
+    if (tempIsHost) {
+      // If the user is the host, generate a new temporary ID
+      tempId = uuidv4();
+      // Code block for calling API to fetch interview details like JD, candidate profile, job details, etc.
+      // API call to fetch interview details
+      // meetingDetails =
+      dispatch(setCues({CuesList: meetingDetails.preloadedQuestions}));
+    } 
+    // Set the myId state variable to the temporary ID
+    setMyId(tempId);
+  }, []);
+
+
+  console.log("from main", isHost)
+  //http://localhost:5173/?room_id=123&cust_email_id=saurabhahlawat89@gmail.com&agent_id=43123&job_id=123&is_host=true
+  //http://localhost:5173/?room_id=123&cust_email_id=saurabhahlawat89@gmail.com&agent_id=43123&job_id=123&is_host=false
 
   return (
     <div className="overflow-hidden w-screen min-h-screen relative bg-neutral-50">
@@ -795,7 +795,7 @@ export default function MainPage() {
           <div className="text-md text-neutral-500">Recruiter Copilot</div>
         </div>
 
-        {isHostRef.current && (
+        {isHost && (
           <div className="flex place-items-center space-x-4">
             <button className="flex place-items-center px-3 py-1.5 bg-neutral-50 rounded-full text-md text-neutral-600">
               <i className="fa-solid fa-circle text-green-500 mr-2 text-xs"></i>
@@ -839,6 +839,7 @@ export default function MainPage() {
 
         {/* Right Panel */}
         <div id="right-panel" className="w-80 bg-white border-l border-neutral-200 flex flex-col">
+        </div>
 
         {/*
           
@@ -862,8 +863,11 @@ export default function MainPage() {
             link={link}
           />
           */}
-          </div>
       </main>
+      <footer id="footer" className="w-full bg-white border-t border-neutral-200">
+        {/* Control Panel */}
+        <ControlPanel />
+      </footer>
     </div>
   );
 }

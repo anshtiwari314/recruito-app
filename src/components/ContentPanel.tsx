@@ -4,8 +4,10 @@ import MyLargerVideoComp from "@/components/MyLargerVideoComp";
 import ContentPanelHeader from "./ContentPanelHeader";
 import { InitialLoadData } from "@/pages/MainPage";
 import ContentPanelMain from "./ContentPanelMain";
+import ContentPanelFooter from "./ContentPanelFooter";
+import { useAppSelector } from "@/store/store";
 
-export default function VideoLayout({
+export default function ContentPanel({
   openSideWindow,
   isMobile,
   toggleRmWindow,
@@ -17,6 +19,7 @@ export default function VideoLayout({
   meetingDetails: InitialLoadData;
 }) {
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
+  const { isHost } = useAppSelector((state) => state.qpReducer);
   //@ts-ignore
   const {
     users,
@@ -24,7 +27,6 @@ export default function VideoLayout({
     largeVideo,
     setLargeVideo,
     largeVideoRef,
-    isHost,
   } = useData();
 
   let number = 3;
@@ -73,6 +75,7 @@ export default function VideoLayout({
             <ContentPanelHeader jobTitle="" />
           )}
           <ContentPanelMain />
+          <ContentPanelFooter />
         </>
       ) : (
         largeVideo && (

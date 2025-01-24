@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useData } from "@/context/DataWrapper";
-import NewUi from "@/components/NewUi";
+import NewUi from "@/components/old-NewUi";
 import MyLargerVideoComp from "@/components/MyLargerVideoComp";
 import MySmallerVideoComp from "@/components/MySmallerVideoComp";
 

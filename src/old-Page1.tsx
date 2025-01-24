@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useData } from './context/DataWrapper'
 import {useParams,useSearchParams,useNavigate} from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid';
-import Video from './Video'
+import Video from './old-Video'
 import Audio from './components/Audio'
 
 export default function Page1() {

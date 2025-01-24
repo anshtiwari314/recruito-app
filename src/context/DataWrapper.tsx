@@ -3,36 +3,16 @@ import io from 'socket.io-client'
 import { v4 as uuidv4 } from 'uuid';
 import Peer from 'peerjs';
 import WavToMp3 from '../functions/wavToMp3';
+import type { CuesDataType } from '@/reducers/cuesReducer';
+import { setCues, addCues } from '@/reducers/cuesReducer';
+import { useAppSelector } from '@/store/store';
+import { useDispatch } from 'react-redux';
 
 const Context = createContext("");
 
 export function useData(){
     return useContext(Context);
 }
-
-export interface cuesDataType {
-        color?: string,
-        content?: string,
-        iconColor?: string,
-        initquery?: string,
-        match_score?: string,
-        matched_query?: string,
-        query?: string[],
-        raw_modded_query?: string,
-        sessionid?: string,
-        similarity_query?: string,
-        loading?: boolean,
-        audiourl?: string,
-        imageUrl?: string,
-        common_id?: string,
-        type?: string,
-        audiofiletimestamp?: string,
-        iconName?: string,
-        value?: string,
-        radio?: string,
-        label?: string,
-        replies?: string[]
-    }
 
 type users = {
     id:string,
@@ -51,7 +31,7 @@ type users = {
     isAudioStream:boolean,
     isLoading:boolean,
     roomId:string ,
-    mob:string|number,
+    custEmailId:string|number,
     remove:boolean,
     name:string,
     isScreenSharingEnabled:boolean,
@@ -78,7 +58,7 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
         isAudioStream:false,
         isLoading:true,
         roomId:'',
-        mob:'',
+        custEmailId:'',
         remove:false,
         
         isScreenSharingEnabled:false,
@@ -96,10 +76,14 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
             msg:"is elss fund is better than other mutual funds"
         },
     ]
+
+    const dispatch = useDispatch();
+    const currentCuesState = useAppSelector((state) => state.cuesReducer.CuesList);
+    const { roomId, custEmailId, isHost } = useAppSelector((state) => state.qpReducer);
+
     const [socket,setSocket] = useState<any>(null)
     const [socket2,setSocket2] = useState<any>(null)
 
-    const [roomId ,setRoomId] = useState<string>('')
     const [myId,setMyId] = useState<string>('')
     const [custId,setCustId] = useState<string>('')
     
@@ -139,13 +123,7 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
     let tempData2 = useRef<users[]>([])
     let usersFlag = useRef(2)
     let usersArrRef = useRef<users[]>([])
-    let [isHost,setIsHost] = useState<null|boolean>(null)
-    let isHostRef = useRef<null|boolean>(null)
-    let [mob,setMob] = useState('')
     
-    const [cues,setCues] = useState<cuesDataType[]>([]);
-    const cuesArrRef = useRef<cuesDataType[]>([]);
-
     const [msg,setMsg] = useState([]);
     const [cueLoading,setCueLoading] = useState(false)
     const msgArrRef = useRef([])
@@ -220,7 +198,7 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
                     sessionid:data.id,
                     roomid:data.roomId,
                     isadmin:data.isAdmin, 
-                    mob:data.mob,
+                    custemailid:data.custEmailId,
                     init:data.init,
                     //@ts-ignore
                     audiomessage:base64data.split(',')[1],
@@ -481,53 +459,22 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
         })
     }
     
-    function handleData(inputHandleData:cuesDataType = {} as cuesDataType) {
-        const data = {
-            color: "#7D11E9",
-            content: "",
-            iconColor: "blue",
-            initquery: " ",
-            match_score: "0",
-            matched_query: " ",
-            query: [" "],
-            raw_modded_query: " ",
-            sessionid: 'xyz',
-            similarity_query: " ",
-            loading: false,
-            audiourl: "",
-            imageUrl: "",
-            common_id: "",
-            type: "",
-            audiofiletimestamp: "",
-            iconName: "",
-            value: "",
-            radio: "",
-            label: "",
-            replies: [],
-            ...inputHandleData
-        }
-
+    function handleData(data:CuesDataType = {} as CuesDataType) {
         let date = new Date()
         console.log(`%c inside handle Data ${date.toLocaleTimeString()+':'+date.getMilliseconds()}`,'background-color:teal;color:white')
 
         setCueLoading(false)
         //@ts-ignore
-        let arr:cuesDataType[] =[]
+        let arr:CuesDataType[] =[]
         //@ts-ignore
-        let obj:cuesDataType = {}
+        let obj:CuesDataType = {}
 // "sessionid": <str>, "audiofiletimestamp": <str>
         
 
         if(data?.loading){
             return ;
         }
-        if(data?.audiourl && data?.audiourl !== ""){
-            //@ts-ignore
-            // audioUrlRef.current = data?.audiourl
-            //@ts-ignore
-           // setAudioUrlFlag(prev=>!prev)
-            //setAudioUrl('https://files.gospeljingle.com/uploads/music/2023/04/Taylor_Swift_-_August.mp3')
-        }
+
         if(data?.imageUrl && data?.imageUrl !== ""){
             //@ts-ignore
             obj["id"]= uuidv4()
@@ -623,75 +570,27 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
            
         } 
        //@ts-ignore
-
-       cuesArrRef.current =  [...cuesArrRef.current,...arr]
-       setCues([...cuesArrRef.current])
+       dispatch(addCues({CuesList:arr}));
        
     }
 
-
-    useEffect(()=>{
-        console.log("cues modified",cues)
-    },[cues])
-
-    useEffect(()=>{
-        if(isHost===null && isHost===true && custId)
-        return ;
-
-        // fetch(adminUrl,{
-        //     method:'POST',
-        //     headers:{
-        //        'Accept':'application.json',
-        //        'Content-Type':'application/json'
-        //     },
-        //     body:JSON.stringify({
-        //         uid:custId,
-        //         sessionid:custId,
-        //         isadmin:true, 
-        //     }),
-        //     cache:'default',}).then(res=>{
-        //        console.log("res from audio server",res)
-        //     })
-        
-
-    },[isHost,custId])
-
-    function updateCues(data:cuesDataType = {
-        color: "#7D11E9",
-        content: "",
-        iconColor: "blue",
-        initquery: " ",
-        match_score: "0",
-        matched_query: " ",
-        query: [" "],
-        raw_modded_query: " ",
-        sessionid: 'xyz',
-        similarity_query: " ",
-        loading: false,
-        audiourl: "",
-        imageUrl: "",
-        common_id: "",
-        type: "",
-        audiofiletimestamp: "",
-        iconName: "",
-        value: "",
-        radio: "",
-        label: "",
-        replies: [""]
-    }) {
+    function updateCues(data:CuesDataType = {} as CuesDataType) {
         let date = new Date()
-            console.log(`%c inside update cues ${date.toLocaleTimeString()+':'+date.getMilliseconds()}`,'background-color:teal;color:white')
-        
-            let filteredCues= cuesArrRef.current.map(e=>{
-            if(e.common_id ===data.common_id){
-                e.content = e.content +' '+ data.content
+        console.log(`%c inside update cues ${date.toLocaleTimeString()+':'+date.getMilliseconds()}`,'background-color:teal;color:white')
+    
+        let filteredCues = currentCuesState?.map(e => {
+            if (e.common_id === data?.common_id) {
+                return { 
+                    ...e, 
+                    content: e.content + ' ' + (data.content ?? '') 
+                };
             }
-            return e
-        })
+            return e;
+        });
 
-        console.log("filtered cues",filteredCues)
-        cuesArrRef.current = filteredCues
-        setCues(filteredCues)
+        if (!filteredCues) {return;}
+        
+        dispatch(setCues({CuesList:filteredCues}));
     }
 
     function uploadFile(uploadFileparam:Blob) {
@@ -907,25 +806,6 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
             }
       }
 
-      useEffect(()=>{
-        // setInterval(()=>{
-        //     globalStreamRef.current
-        // },4000)
-      },[])
-    // const updateCues=useCallback((data:any){
-    //     let date = new Date()
-    //         console.log(`%c inside update cues ${date.toLocaleTimeString()+':'+date.getMilliseconds()}`,'background-color:teal;color:white')
-        
-    //         let filteredCues= cues.map(e=>{
-    //         if(e.common_id ===data.id){
-    //             e.content = e.content + data.content[0]
-    //         }
-            
-    //     })
-
-    //     console.log(filteredCues)
-    //     setCues(filteredCues)
-    // },[cues])
     /*
     let Data = {
         color: "#7D11E9",
@@ -947,7 +827,7 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
     },[users])
 
     useEffect( ()=>{
-        if(socket2===null || myId==='' || custId==='' || isHost===null)
+        if(socket2===null || myId==='' || custId==='')
         return ;
 
         //console.log("socket2 useEffect execution",socket2)
@@ -968,10 +848,8 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
                 console.log(data);
             
                 //console.log(data)
-                if(data?.type==="cues-update") 
-                updateCues(data)  
-                else 
-                handleData(data)
+                if(data?.type==="cues-update") { updateCues(data)  }
+                else { handleData(data) }
                // handleAudio(data.speech_bytes,data.file_name)
                 }
         }
@@ -1067,7 +945,7 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
 
     useEffect(()=>{
         
-        if(myId==='' || roomId==='' ||isHost===null || mob===''||name===''||audioPeer===null)
+        if(myId==='' || roomId==='' || custEmailId===''||name===''||audioPeer===null)
         return;
         
         //variables listed above change only one time 
@@ -1080,7 +958,7 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
              
             tempObj.isLoading =false    
             tempObj.roomId = roomId 
-            tempObj.mob = mob   
+            tempObj.custEmailId = custEmailId   
             tempObj.name = name 
             tempObj.audioPeerId = audioPeer.id  
 
@@ -1145,7 +1023,7 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
         //        setUsers([tempObj])
         //     })
         // })
-    },[myId,roomId,isHost,mob,name,audioPeer])
+    },[myId,roomId,isHost,custEmailId,name,audioPeer])
 
     useEffect(()=>{
         //this code is responsible for enable & disable videostream 
@@ -1187,42 +1065,7 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
         console.log("myData modified",usersArrRef.current)
     },[socket,myAudioStream,microphoneToggle])
 
-    // function ShareScreentoOneUser(id){
-
-    //     gettingScreenStream().then(screenStream=>{
-    //         //@ts-ignore
-    //         //tempStream = stream
-
-    //         //add screen sharing as new user 
-    //         let tempUser = {...initialUser} 
-    //         tempUser.id = uuidv4()
-    //         tempUser.containsScreenStream =true
-    //         tempUser.cameraStatus = true 
-    //         tempUser.isLoading = false
-    //         tempUser.name = usersArrRef.current[0].name 
-    //         tempUser.isScreenSharingEnabled = false 
-    //         tempUser.microphoneStatus = false 
-    //         tempUser.stream = screenStream
-    //         tempUser.peer2Id = peer2.id
-
-
-    //         //send this tempUsr info to every joined peer
-    //         socket.emit('screen-share-transmitter',{...tempUser,isLoading:true})
-
-            
-    //         //make connection to every other user 
-    //         setTimeout(()=>{
-    //             peers2ArrRef.current.map((peerId)=>{
-    //                 ShareScreenToUser(screenStream,peerId)
-    //             })
-    //         },2000)
-            
-            
-    //     }).catch(err=>{
-    //         console.log("error at getting screen stream",err)
-    //     })
-    // }
-
+    
     useEffect(()=>{
         if(myStream===null||socket===null|| peer2===null || usersArrRef.current.length===0)
         return ;
@@ -1502,7 +1345,7 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
     },[socket2,myStream,myId])
 
     useEffect(()=>{
-        if(myStream===null || isHost===null ||isHost===true)
+        if(myStream===null || isHost===true)
         return ;
 
         //sending stream for transcription 
@@ -1523,7 +1366,7 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
     },[myStream,isHost])
 
     useEffect(()=>{
-        if(myStream ===null || isHost ===null || isHost===false)
+        if(myStream ===null || isHost===false)
         return ;
 
         //sending admin stream 
@@ -1556,12 +1399,6 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
         return ;
 
         let intervalId = setTimeout(()=>{
-            //console.log('listener count',peer.listenerCount('connection'))
-            //console.log('peer status',peer,peer.disconnected,peer.destroyed)
-            //peer.disconnect()
-           // console.log('peer after disconnected',peer,peer.disconnected,peer.destroyed)
-            //peer.destroy()
-           // console.log('peer after destroy',peer,peer.disconnected,peer.destroyed)
             if(peer.disconnected===false){
                // console.log("join-room-first-time")
                 firstTimeConnectRef.current = false;
@@ -1575,7 +1412,7 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
 
     useEffect(()=>{
 
-        if(peer===null && isHost===null)
+        if(peer===null)
         return ;
 
         let timeoutId:any =null 
@@ -2258,7 +2095,7 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
 
     useEffect(()=>{
         
-        if(myAudioStream===null || isHost===null ||users.length===0 || socket===null )
+        if(myAudioStream===null ||users.length===0 || socket===null )
         return ;
         // if(vadEffectRender.current>0)
         // return ;
@@ -2522,7 +2359,6 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
 
     let values = {
         validUrl,setValidUrl,
-        roomId,setRoomId,
         myId,setMyId,
         socket,setSocket,
         socket2,setSocket2,
@@ -2533,11 +2369,6 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
         usersArrRef,
         users,setUsers,
         myStream,setMyStream,
-        mob,setMob,
-        isHost,setIsHost,
-        isHostRef,
-        cues,setCues,
-        cuesArrRef,
         name,setName,
         cameraToggle,setCameraToggle,
         microphoneToggle,setMicroPhoneToggle,

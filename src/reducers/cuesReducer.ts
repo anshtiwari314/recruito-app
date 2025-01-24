@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { v4 as uuidv4 } from "uuid";
 
 type CuesDataType = {
-  id?: string;
+  id?: string | null;
   color?: string;
   content?: string;
   iconColor?: string;
@@ -37,13 +37,13 @@ const initialCuesState = {
 
 // Create a slice for "cues"
 const cuesSlice = createSlice({
-  name: "cues",
+  name: "cuesReducer",
   initialState: initialCuesState,
   reducers: {
-    addCue: (state, action: PayloadAction<CuesDataType>) => {
+    addCues: (state, action: PayloadAction<CuesState>) => {
       // Declare default value for state.CuesList
-      let data = {
-        id: "",
+      let data: CuesDataType = {
+        id: null,
         color: "#7D11E9",
         content: "",
         iconColor: "blue",
@@ -65,28 +65,28 @@ const cuesSlice = createSlice({
         radio: "",
         label: "",
         replies: [],
-        ...action.payload,
       };
 
-      data["id"] = uuidv4();
-
-      // Add if condition to check if state.CuesList exists and append to array in that case otherwise set it to an array with the new job
-      console.log("data in reducer", data);
-
-      if (state.CuesList) {
-        state.CuesList.push(data);
-      } else {
-        state.CuesList = [data];
+      // Add if condition to check if state.CuesList exists and append to array in that case
+      if (action.payload.CuesList) {
+        let newState = action.payload.CuesList.map((passedState) => {
+            passedState["id"] ?? (data["id"] = uuidv4());
+            return { ...data, ...passedState };
+        });
+        state.CuesList = [...(state.CuesList ?? []), ...newState];
       }
+      return state;
     },
+    
     // Optionally, you can add actions like reset
     resetCue: (state) => {
-      state.CuesList = null;
+      return initialCuesState;
     },
+
     setCues: (state, action: PayloadAction<CuesState>) => {
         // Declare default value for state.CuesList
         let data: CuesDataType = {
-          id: "",
+          id: null,
           color: "#7D11E9",
           content: "",
           iconColor: "blue",
@@ -110,21 +110,22 @@ const cuesSlice = createSlice({
           replies: [],
         };
     
-        // Add if condition to check if state.CuesList exists and append to array in that case otherwise set it to an array with the new job
+        // Add if condition to check if state.CuesList exists and append to array in that case
         if (action.payload.CuesList) {
             let newState = action.payload.CuesList.map((passedState) => {
-                data["id"] = uuidv4();
+                passedState["id"] ?? (data["id"] = uuidv4());
                 return { ...data, ...passedState };
             });
             state.CuesList = newState;
         }
+        return state;
       },
   },
 });
 
 export type { CuesState, CuesDataType };
 // Export actions so they can be dispatched from components
-export const { addCue, resetCue, setCues } = cuesSlice.actions;
+export const { addCues, resetCue, setCues } = cuesSlice.actions;
 
 // Export the reducer to be included in the store
 export default {

@@ -6,7 +6,7 @@ import Time from '../assets/calendar.png'
 import Calendar from '../assets/time.png'
 //import MsgWrapper from '../components/MsgWrapper'
 import { useData } from '../context/DataWrapper';
-import Msg from '../components/Msg';
+import Msg from './Msg';
 import TokenMsg from './TokenMsg'
 
 

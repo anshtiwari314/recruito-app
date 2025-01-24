@@ -1,12 +1,14 @@
 //import {createStore } from 'redux';
 import { configureStore } from "@reduxjs/toolkit";
 import cuesReducer from "@/reducers/cuesReducer";
+import queryparamReducer from "@/reducers/queryparamReducer";
 import { TypedUseSelectorHook, useSelector } from "react-redux";
 
 // Create and configure the Redux store
 export const store = configureStore({
   reducer: {
     cuesReducer: cuesReducer.cuesReducer,
+    qpReducer: queryparamReducer.qpReducer,
   },
 });
 
