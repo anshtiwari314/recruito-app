@@ -18,6 +18,7 @@ import { useDispatch } from "react-redux";
 import ControlPanel from "@/components/ControlPanel";
 import { RightPanelResource } from "@/components/RightPanelResource";
 import RightPanel from "@/components/RightPanel";
+import NotFound from "./NotFoundPage";
 
 /*
 //@ts-ignore
@@ -664,6 +665,7 @@ export default function MainPage() {
   } = useData();
   const { isHost } = useAppSelector((state) => state.qpReducer);
   const dispatch = useDispatch();
+  const [meetingIsLegit, setMeetingIsLegit] = useState<boolean>(true);
 
   const { link } = useParams();
   // const [searchParams,setSearchParams] = useSearchParams()
@@ -681,34 +683,29 @@ export default function MainPage() {
     jobDescription: "https://arxiv.org/pdf/2301.12652", //pdf
     interviewGuide: "https://arxiv.org/pdf/2301.12652", //pdf
     preloadedQuestions: [
-      {content: "", sessionid: "1", audiofiletimestamp: "2022-01-01T00:00:00Z", common_id: "1", similarity_query: "Ask about specific EDI protocols experience"},
-      {content: "", sessionid: "1", audiofiletimestamp: "2022-01-01T00:00:00Z", common_id: "2", similarity_query: "Discuss experience with mapping tools"},
-      {content: "", sessionid: "1", audiofiletimestamp: "2022-01-01T00:00:00Z", common_id: "3", similarity_query: "Probe cloud integration knowledge"},
+      {
+        content: "",
+        sessionid: "1",
+        audiofiletimestamp: "2022-01-01T00:00:00Z",
+        common_id: "1",
+        similarity_query: "Ask about specific EDI protocols experience",
+      },
+      {
+        content: "",
+        sessionid: "1",
+        audiofiletimestamp: "2022-01-01T00:00:00Z",
+        common_id: "2",
+        similarity_query: "Discuss experience with mapping tools",
+      },
+      {
+        content: "",
+        sessionid: "1",
+        audiofiletimestamp: "2022-01-01T00:00:00Z",
+        common_id: "3",
+        similarity_query: "Probe cloud integration knowledge",
+      },
     ],
   };
-
-  useEffect(() => {
-    // Declare a variable to store the user's name
-    let myName: string = "";
-
-    // Check if the user's name is already stored in sessionStorage
-    if (sessionStorage.getItem("userName") !== null) {
-      // If the name is found, set it using setName function
-      setName(sessionStorage.getItem("userName"));
-    } else {
-      // If the name is not found, prompt the user to enter their name
-      while (myName.length < 2) {
-        myName = prompt("Please enter your name") ?? "";
-
-        // Alert the user if the entered name is less than 2 characters long
-        if (myName.length < 2) alert("Name must have 2 letters long");
-      }
-      // Set the entered name using setName function
-      setName(myName);
-      // Store the entered name in sessionStorage
-      sessionStorage.setItem("userName", myName);
-    }
-  }, []);
 
   useEffect(() => {
     function Resizing() {
@@ -733,117 +730,151 @@ export default function MainPage() {
   }, []);
 
   useEffect(() => {
-      let params = new URL(window.location.href).searchParams;
+    let params = new URL(window.location.href).searchParams;
 
-      if (
-        !params.get("room_id")?.trim() ||
-        !params.get("cust_email_id")?.trim() ||
-        !params.get("agent_id")?.trim() ||
-        //!params.get("job_id")?.trim()
-      ) {
-       // navigate("/404");
-      } else {
-        // Determine if the user is the host based on the is_host parameter
-        tempIsHost = params.get("is_host") === "true" ? true : false;
-        const qParams: QPState = {
-          roomId: params.get("room_id") ?? "",
-          jobId: params.get("job_id") ?? "",
-          custEmailId: params.get("cust_email_id") ?? "",
-          agentId: params.get("agent_id") ?? "",
-          isHost: tempIsHost,
-        };
-        // Set the query params state for this meeting
-        dispatch(setQP(qParams));
-        // Set the cust_email_id state variable
-        setCustId(params.get("cust_email_id"));
+    if (
+      !params.get("room_id")?.trim() ||
+      !params.get("cust_email_id")?.trim() ||
+      !params.get("agent_id")?.trim() ||
+      !params.get("job_id")?.trim()
+    ) {
+      setMeetingIsLegit(false);
+    } else {
+      // Determine if the user is the host based on the is_host parameter
+      tempIsHost = params.get("is_host") === "true" ? true : false;
+      const qParams: QPState = {
+        roomId: params.get("room_id") ?? "",
+        jobId: params.get("job_id") ?? "",
+        custEmailId: params.get("cust_email_id") ?? "",
+        agentId: params.get("agent_id") ?? "",
+        isHost: tempIsHost,
+      };
+      // Set the query params state for this meeting
+      dispatch(setQP(qParams));
+      // Set the cust_email_id state variable
+      setCustId(params.get("cust_email_id"));
 
-        tempId = params.get("cust_email_id") ?? "";
+      tempId = params.get("cust_email_id") ?? "";
     }
   }, []);
 
   useEffect(() => {
-    if (tempIsHost) {
+    if (meetingIsLegit) {
+      // Declare a variable to store the user's name
+      let myName: string = "";
+
+      // Check if the user's name is already stored in sessionStorage
+      if (sessionStorage.getItem("userName") !== null) {
+        // If the name is found, set it using setName function
+        setName(sessionStorage.getItem("userName"));
+      } else {
+        // If the name is not found, prompt the user to enter their name
+        while (myName.length < 2) {
+          myName = prompt("Please enter your name") ?? "";
+
+          // Alert the user if the entered name is less than 2 characters long
+          if (myName.length < 2) alert("Name must have 2 letters long");
+        }
+        // Set the entered name using setName function
+        setName(myName);
+        // Store the entered name in sessionStorage
+        sessionStorage.setItem("userName", myName);
+      }
+    }
+  }, [meetingIsLegit]);
+
+  useEffect(() => {
+    if (tempIsHost && meetingIsLegit) {
       // If the user is the host, generate a new temporary ID
       tempId = uuidv4();
       // Code block for calling API to fetch interview details like JD, candidate profile, job details, etc.
       // API call to fetch interview details
       // meetingDetails =
-      dispatch(setCues({CuesList: meetingDetails.preloadedQuestions, interviewGuide: meetingDetails.interviewGuide, jobDescription: meetingDetails.jobDescription}));
-    } 
+      dispatch(
+        setCues({
+          CuesList: meetingDetails.preloadedQuestions,
+          interviewGuide: meetingDetails.interviewGuide,
+          jobDescription: meetingDetails.jobDescription,
+        })
+      );
+    }
     // Set the myId state variable to the temporary ID
     setMyId(tempId);
-  }, []);
+  }, [meetingIsLegit]);
 
-
-  console.log("from main", isHost)
+  console.log("from main", meetingIsLegit);
   //http://localhost:5173/?room_id=123&cust_email_id=saurabhahlawat89@gmail.com&agent_id=43123&job_id=123&is_host=true
   //http://localhost:5173/?room_id=123&cust_email_id=saurabhahlawat89@gmail.com&agent_id=43123&job_id=123&is_host=false
 
   return (
-    <div className="overflow-hidden w-screen min-h-screen relative bg-neutral-50">
-      {/* App header */}
-      <header
-        id="header"
-        className="w-full bg-white border-b border-neutral-200 px-4 py-3 flex place-items-center justify-between shadow-sm"
-      >
-        <div className="flex place-items-center space-x-4">
-          <div className="h-8 w-[2px] bg-neutral-200"></div>
-          <img
-            src="https://api.dicebear.com/7.x/notionists/svg?scale=200&amp;seed=Logo"
-            className="h-8"
-            alt="Logo"
-          />
-          <div className="text-md text-neutral-500">Recruiter Copilot</div>
-        </div>
+    <>
+      {meetingIsLegit ? (
+        <div className="overflow-hidden w-screen min-h-screen relative bg-neutral-50">
+          {/* App header */}
+          <header
+            id="header"
+            className="w-full bg-white border-b border-neutral-200 px-4 py-3 flex place-items-center justify-between shadow-sm"
+          >
+            <div className="flex place-items-center space-x-4">
+              <div className="h-8 w-[2px] bg-neutral-200"></div>
+              <img
+                src="https://api.dicebear.com/7.x/notionists/svg?scale=200&amp;seed=Logo"
+                className="h-8"
+                alt="Logo"
+              />
+              <div className="text-md text-neutral-500">Recruiter Copilot</div>
+            </div>
 
-        {isHost && (
-          <div className="flex place-items-center space-x-4">
-            <button className="flex place-items-center px-3 py-1.5 bg-neutral-50 rounded-full text-md text-neutral-600">
-              <i className="fa-solid fa-circle text-green-500 mr-2 text-xs"></i>
-              Live
-            </button>
-            <button className="px-3 py-1.5 bg-neutral-50 rounded-full">
-              <i className="fa-solid fa-download text-neutral-600"></i>
-            </button>
-            <button className="px-3 py-1.5 bg-neutral-50 rounded-full">
-              <i className="fa-solid fa-ellipsis-vertical text-neutral-600"></i>
-            </button>
+            {isHost && (
+              <div className="flex place-items-center space-x-4">
+                <button className="flex place-items-center px-3 py-1.5 bg-neutral-50 rounded-full text-md text-neutral-600">
+                  <i className="fa-solid fa-circle text-green-500 mr-2 text-xs"></i>
+                  Live
+                </button>
+                <button className="px-3 py-1.5 bg-neutral-50 rounded-full">
+                  <i className="fa-solid fa-download text-neutral-600"></i>
+                </button>
+                <button className="px-3 py-1.5 bg-neutral-50 rounded-full">
+                  <i className="fa-solid fa-ellipsis-vertical text-neutral-600"></i>
+                </button>
+              </div>
+            )}
+          </header>
+
+          {/* Text bar for loading backend api url */}
+          <div className="flex justify-around place-items-center mt-2 bg-white border-b border-neutral-200 shadow-sm">
+            <input
+              type="text"
+              value={adminUrl}
+              onChange={(e) => setAdminUrl(e.target.value)}
+              placeholder="enter an ngrok url"
+              className="p-4 px-12 mx-auto w-1/2 rounded-lg border-2"
+            />
           </div>
-        )}
-        
-      </header>
 
-      {/* Text bar for loading backend api url */}
-      <div className="flex justify-around place-items-center mt-2 bg-white border-b border-neutral-200 shadow-sm">
-        <input
-          type="text"
-          value={adminUrl}
-          onChange={(e) => setAdminUrl(e.target.value)}
-          placeholder="enter an ngrok url"
-          className="p-4 px-12 mx-auto w-1/2 rounded-lg border-2"
-        />
-      </div>
+          {/* Main Content */}
+          <main id="main-content" className="flex h-[calc(100vh-120px)]">
+            {/* Content Panel */}
+            <div id="content-panel" className="grow p-6 overflow-y-auto">
+              <ContentPanel
+                openSideWindow={openSideWindow}
+                isMobile={isMobile}
+                toggleRmWindow={toggleRmWindow}
+                meetingDetails={meetingDetails}
+              />
 
-      {/* Main Content */}
-      <main id="main-content" className="flex h-[calc(100vh-120px)]">
-        {/* Content Panel */}
-        <div id="content-panel" className="grow p-6 overflow-y-auto">
-          <ContentPanel
-            openSideWindow={openSideWindow}
-            isMobile={isMobile}
-            toggleRmWindow={toggleRmWindow}
-            meetingDetails={meetingDetails}
-          />
-        
-        {/**/}
-        </div>
+              {/**/}
+            </div>
 
-        {/* Right Panel */}
-        <div id="right-panel" className="w-80 bg-white border-l border-neutral-200 flex flex-col">
-          <RightPanel />
-        </div>
+            {/* Right Panel */}
+            <div
+              id="right-panel"
+              className="w-80 bg-white border-l border-neutral-200 flex flex-col"
+            >
+              <RightPanel />
+            </div>
 
-        {/*
+            {/*
           
           <SideWindow
             openSideWindow={openSideWindow}
@@ -853,7 +884,7 @@ export default function MainPage() {
             isMobile={isMobile}
           />
         */}
-        {/*
+            {/*
           <Tray
             openSideWindow={openSideWindow}
             setOpenSideWindow={setOpenSideWindow}
@@ -865,12 +896,19 @@ export default function MainPage() {
             link={link}
           />
           */}
-      </main>
-      <footer id="footer" className="w-full bg-white border-t border-neutral-200">
-        {/* Control Panel */}
-        <ControlPanel />
-      </footer>
-    </div>
+          </main>
+          <footer
+            id="footer"
+            className="w-full bg-white border-t border-neutral-200"
+          >
+            {/* Control Panel */}
+            <ControlPanel />
+          </footer>
+        </div>
+      ) : (
+        <NotFound />
+      )}
+    </>
   );
 }
 

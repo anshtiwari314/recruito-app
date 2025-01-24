@@ -11,14 +11,7 @@ export default function App() {
     <Router>
         <ReduxProvider>
         <DataWrapper>
-          <Routes>
-            {/* Main Page Route */}
-            <Route path="/" element={<MainPage/>} />
-            {/* 404 Page Route */}
-            <Route path="/404" element={<NotFoundPage />} />
-            {/* Catch-all Route for undefined paths */}
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
+            <MainPage/>
           </DataWrapper>
         </ReduxProvider>
     </Router>
