@@ -1,7 +1,9 @@
 import React from 'react'
 import RightPanel from '@/components/RightPanel'
+import { useData } from '@/context/DataWrapper'
 
 export default function Comp(){
+  
   return (
     <div id="app" className="min-h-screen bg-neutral-50">
   <header

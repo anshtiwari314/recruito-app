@@ -1,7 +1,10 @@
 import { RightPanelVideo } from "./RightPanelVideo"
 import { RIghtPanelResource } from "./RightPanelResource"
+import { useData } from "@/context/DataWrapper"
 
 export default function RightPanel(){
+  const {users} = useData()
+
     return (
       <div
         id="right-panel"
@@ -13,8 +16,9 @@ export default function RightPanel(){
             Participants (2)
           </h2>
           <div className="space-y-4">
-              <RightPanelVideo/>
-              <RightPanelVideo/>
+            {users.map((e,i)=> <RightPanelVideo data={e} key={i}/>)}
+              
+              {/* <RightPanelVideo/> */}
           </div>
         </div>
         <div id="resources" className="flex-grow p-4 overflow-y-auto">

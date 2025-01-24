@@ -738,9 +738,9 @@ export default function MainPage() {
         !params.get("room_id")?.trim() ||
         !params.get("cust_email_id")?.trim() ||
         !params.get("agent_id")?.trim() ||
-        !params.get("job_id")?.trim()
+        //!params.get("job_id")?.trim()
       ) {
-        navigate("/404");
+       // navigate("/404");
       } else {
         // Determine if the user is the host based on the is_host parameter
         tempIsHost = params.get("is_host") === "true" ? true : false;
