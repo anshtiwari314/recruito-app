@@ -162,7 +162,7 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
 
     const [videoUploadUrl,setVideoUploadUrl] = useState('https://qhpv9mvz1h.execute-api.ap-south-1.amazonaws.com/prod/postfacto-upload-test')
 
-      
+    
     //@ts-ignore
     function sendToServer(blob,url,data){
         //console.log("url",url,blob)
@@ -823,8 +823,8 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
     
     useEffect(()=>{
         
-        console.log("users render count",++globalRef.current.usersArrRefRenderCount,users)
-    },[users])
+        console.log("users render count",++globalRef.current.usersArrRefRenderCount,users,myId)
+    },[users,myId])
 
     useEffect( ()=>{
         if(socket2===null || myId==='' || custId==='')
