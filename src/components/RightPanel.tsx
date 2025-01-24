@@ -10,7 +10,7 @@ export default function RightPanel() {
   return (
     <div
       id="right-panel"
-      className="w-80 bg-white border-l border-neutral-200 flex flex-col"
+      className="w-2/12 bg-white border-l border-neutral-200 flex flex-col"
     >
       <div className="p-4 border-b border-neutral-200">
         <h2 className="font-semibold mb-4 text-neutral-900">

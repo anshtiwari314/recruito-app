@@ -2,10 +2,11 @@ import React from "react";
 import { useAppSelector } from "@/store/store";
 
 export function RightPanelResource() {
-  const { jobDescription, interviewGuide } = useAppSelector(
+  const { jobDescription, interviewGuide, jobTitle } = useAppSelector(
     (state) => state.cuesReducer
   );
 
+  console.log("trying here",jobDescription, interviewGuide, jobTitle);
   return (
     <>
       <div className="p-3 bg-neutral-50 rounded-lg">
@@ -18,18 +19,18 @@ export function RightPanelResource() {
               </div>
             </div>
             <div className="text-sm text-neutral-600 mt-1">
-            <a 
-              href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" 
-              download="dummy.pdf" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-blue-500 underline"
-            />
-              EDI Developer Position Details
+              {jobTitle} Position Details
             </div>
           </div>
           <button className="p-2 hover:bg-neutral-100 rounded-lg text-neutral-600">
-            <i className="fa-solid fa-download"></i>
+            <a
+              href={jobDescription}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 underline"
+            >
+              <i className="fa-solid fa-download"></i>
+            </a>
           </button>
         </div>
       </div>
@@ -43,21 +44,22 @@ export function RightPanelResource() {
               </div>
             </div>
             <div className="text-sm text-neutral-600 mt-1">
-            <a 
-              href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" 
-              download="dummy.pdf" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-blue-500 underline"
-            />
-            Technical Assessment Framework
+              Technical Assessment Framework
             </div>
           </div>
           <button className="p-2 hover:bg-neutral-100 rounded-lg text-neutral-600">
+          <a
+              href={interviewGuide}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 underline"
+            >
             <i className="fa-solid fa-download"></i>
+            </a>
           </button>
         </div>
       </div>
     </>
   );
 }
+

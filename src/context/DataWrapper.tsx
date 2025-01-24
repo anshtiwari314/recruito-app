@@ -78,7 +78,7 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
     ]
 
     const dispatch = useDispatch();
-    const { CuesList, jobDescription, interviewGuide}  = useAppSelector((state) => state.cuesReducer);
+    const { CuesList, jobDescription, interviewGuide, jobTitle}  = useAppSelector((state) => state.cuesReducer);
     const { roomId, custEmailId, isHost } = useAppSelector((state) => state.qpReducer);
 
     const [socket,setSocket] = useState<any>(null)
@@ -590,7 +590,7 @@ export default function DataWrapper({children}:{children:React.ReactNode}) {
 
         if (!filteredCues) {return;}
         
-        dispatch(setCues({CuesList:filteredCues, jobDescription:jobDescription, interviewGuide:interviewGuide}));
+        dispatch(setCues({CuesList:filteredCues, jobDescription:jobDescription, interviewGuide:interviewGuide, jobTitle:jobTitle}));
     }
 
     function uploadFile(uploadFileparam:Blob) {

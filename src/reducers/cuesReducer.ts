@@ -30,13 +30,15 @@ type CuesDataType = {
 type CuesState = {
   CuesList: Array<CuesDataType> | null;
   jobDescription: string, 
-  interviewGuide: string
+  interviewGuide: string,
+  jobTitle: string,
 };
 
 const initialCuesState = {
   CuesList: null,
   jobDescription: "", 
   interviewGuide: "", 
+  jobTitle: "",
 } as CuesState;
 
 // Create a slice for "cues"
@@ -125,6 +127,7 @@ const cuesSlice = createSlice({
         }
         state.interviewGuide = action.payload.interviewGuide;
         state.jobDescription = action.payload.jobDescription;
+        state.jobTitle = action.payload.jobTitle;
         return state;
       },
   },

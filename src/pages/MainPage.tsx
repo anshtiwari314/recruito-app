@@ -681,7 +681,7 @@ export default function MainPage() {
   let meetingDetails: InitialLoadData = {
     jobTitle: "EDI Developer",
     jobDescription: "https://arxiv.org/pdf/2301.12652", //pdf
-    interviewGuide: "https://arxiv.org/pdf/2301.12652", //pdf
+    interviewGuide: "https://arxiv.org/pdf/2410.08174", //pdf
     preloadedQuestions: [
       {
         content: "",
@@ -795,6 +795,7 @@ export default function MainPage() {
           CuesList: meetingDetails.preloadedQuestions,
           interviewGuide: meetingDetails.interviewGuide,
           jobDescription: meetingDetails.jobDescription,
+          jobTitle: meetingDetails.jobTitle,
         })
       );
     }
@@ -867,12 +868,7 @@ export default function MainPage() {
             </div>
 
             {/* Right Panel */}
-            <div
-              id="right-panel"
-              className="w-80 bg-white border-l border-neutral-200 flex flex-col"
-            >
-              <RightPanel />
-            </div>
+            <RightPanel />
 
             {/*
           

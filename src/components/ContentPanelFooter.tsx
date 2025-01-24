@@ -74,7 +74,7 @@ export default function ContentPanelFooter() {
   }, [status]);
 
   return (
-    <div id="ai-query" className="fixed bottom-20 left-6 right-[340px]">
+    <div id="ai-query" className="fixed bottom-20 left-6 w-9/12">
       <div className="bg-white rounded-lg shadow-lg p-4 border border-neutral-200">
         <div className="flex items-center space-x-3">
           <textarea
