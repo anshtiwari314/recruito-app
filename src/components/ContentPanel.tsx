@@ -75,7 +75,7 @@ export default function ContentPanel({
             <ContentPanelHeader jobTitle="" />
           )}
           <ContentPanelMain />
-          <ContentPanelFooter />
+          {/* <ContentPanelFooter /> */}
         </>
       ) : (
         largeVideo && (

@@ -16,6 +16,7 @@ import { setQP } from "@/reducers/queryparamReducer";
 import { useAppSelector } from "@/store/store";
 import { useDispatch } from "react-redux";
 import ControlPanel from "@/components/ControlPanel";
+import RightPanel from "@/components/RightPanel";
 
 /*
 //@ts-ignore
@@ -737,7 +738,7 @@ export default function MainPage() {
       if (
         !params.get("room_id")?.trim() ||
         !params.get("cust_email_id")?.trim() ||
-        !params.get("agent_id")?.trim() ||
+        !params.get("agent_id")?.trim() 
         //!params.get("job_id")?.trim()
       ) {
        // navigate("/404");
@@ -784,6 +785,7 @@ export default function MainPage() {
       <header
         id="header"
         className="w-full bg-white border-b border-neutral-200 px-4 py-3 flex place-items-center justify-between shadow-sm"
+        style={{border:'0.1rem solid red'}}
       >
         <div className="flex place-items-center space-x-4">
           <div className="h-8 w-[2px] bg-neutral-200"></div>
@@ -813,7 +815,7 @@ export default function MainPage() {
       </header>
 
       {/* Text bar for loading backend api url */}
-      <div className="flex justify-around place-items-center mt-2 bg-white border-b border-neutral-200 shadow-sm">
+      <div className="flex justify-around place-items-center mt-2 bg-white border-b border-neutral-200 shadow-sm" >
         <input
           type="text"
           value={adminUrl}
@@ -824,7 +826,7 @@ export default function MainPage() {
       </div>
 
       {/* Main Content */}
-      <main id="main-content" className="flex h-[calc(100vh-120px)]">
+      <main id="main-content" className="flex h-[calc(100vh-120px)]" >
         {/* Content Panel */}
         <div id="content-panel" className="grow p-6 overflow-y-auto">
           <ContentPanel
@@ -838,9 +840,9 @@ export default function MainPage() {
         </div>
 
         {/* Right Panel */}
-        <div id="right-panel" className="w-80 bg-white border-l border-neutral-200 flex flex-col">
-        </div>
-
+        {/* <div id="right-panel" className="w-80 bg-white border-l border-neutral-200 flex flex-col">
+        </div> */}
+        <RightPanel/>
         {/*
           
           <SideWindow

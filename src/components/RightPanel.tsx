@@ -1,10 +1,10 @@
+import React from 'react'
 import { RightPanelVideo } from "./RightPanelVideo"
 import { RIghtPanelResource } from "./RightPanelResource"
-import { useData } from "@/context/DataWrapper"
+import { useData } from '../context/DataWrapper'
 
 export default function RightPanel(){
   const {users} = useData()
-
     return (
       <div
         id="right-panel"
@@ -16,7 +16,9 @@ export default function RightPanel(){
             Participants (2)
           </h2>
           <div className="space-y-4">
-            {users.map((e,i)=> <RightPanelVideo data={e} key={i}/>)}
+              {
+                users.map((e,i)=><RightPanelVideo e={e} key={i} muted={i===0?true:false}/>)
+              }
               
               {/* <RightPanelVideo/> */}
           </div>

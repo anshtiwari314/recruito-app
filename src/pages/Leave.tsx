@@ -9,6 +9,8 @@ export default function Leave() {
  // const {link} = useParams()
   const [isUrlValid,setIsUrlValid] = useState(false);
 
+  const navigate= useNavigate()
+
   let renderFlag = useRef(0)
  
 
@@ -24,7 +26,7 @@ export default function Leave() {
     //@ts-ignore
     let params =new URL(window.location).searchParams;
 
-    if(!params.get('room_id') || !params.get('cust_id') || !params.get('mob')){
+    if(!params.get('room_id') || !params.get('cust_email_id') || !params.get('agent_id')||!params.get('job_id')){
      //  
     }else{
       setIsUrlValid(true)
@@ -33,12 +35,16 @@ export default function Leave() {
 
   function rejoin(url:string){
     console.log('i am link',url)
-    window.location.href = `${window.location.protocol}//${window.location.host}/meeting.html${url.split('leave.html')[1]}`
+     
+    //window.location.href = `${window.location.protocol}//${window.location.host}/${url.split('leave')[1]}`
+   //http://localhost:5173/leave?room_id=123&cust_email_id=saurabhahlawat89@gmail.com&agent_id=43123&job_id=123&is_host=true
+    navigate(`/${url.split('leave')[1]}`)
   }
 
   function returnToMainScreen(){
    // navigate('/#')
    window.location.href = `${window.location.protocol}//${window.location.host}/`
+   
   }
 
   useEffect(()=>{

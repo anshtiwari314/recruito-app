@@ -10,6 +10,7 @@ export default function ContentPanelMain() {
       <div
         id="transcription"
         className="mb-6 bg-white rounded-lg p-4 shadow-sm border border-neutral-200"
+        style={{border:'0.1rem solid red'}}
       >
         {/* Header of transcription section */}
         <div className="flex items-center justify-between mb-4">
@@ -64,6 +65,7 @@ export default function ContentPanelMain() {
       <div
         id="ai-suggestions"
         className="mb-6 bg-white rounded-lg p-4 shadow-sm border border-neutral-200"
+        style={{border:'0.1rem solid red'}}
       > 
         {/* AI Suggestions section header */}
         <h3 className="text-lg font-semibold mb-4 text-neutral-900">AI Suggestions</h3>

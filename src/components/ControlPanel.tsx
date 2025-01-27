@@ -1,26 +1,38 @@
 import { useEffect, useState } from "react";
+import { useData } from "@/context/DataWrapper";
+import { useNavigate } from "react-router-dom";
 
 export default function ControlPanel() {
   const [isAudioMuted, setIsAudioMuted] = useState(false);
   const [isVideoMuted, setIsVideoMuted] = useState(false);
   const [isScreenShared, setIsScreenShared] = useState(false);
 
+  const navigate = useNavigate();
+
+  //@ts-ignore
+  const {users,cameraToggle,setCameraToggle ,microphoneToggle,setMicroPhoneToggle,screenSharing,setScreenSharing,isHost,stopVideoRecording} = useData()
+  
   const handleCloseCall = () => {
+    navigate("/leave?room_id=123&cust_email_id=saurabhahlawat89@gmail.com&agent_id=43123&job_id=123&is_host=true");
+    
     console.log("Closing the call...");
   };
 
   const shareScreen = () => {
-    isScreenShared ? setIsScreenShared(false) : setIsScreenShared(true);
+    //isScreenShared ? setIsScreenShared(false) : setIsScreenShared(true);
+    setScreenSharing((p:boolean)=>!p)
     console.log("Sharing the screen...");
   };
 
   const toggleAudio = () => {
-    isAudioMuted ? setIsAudioMuted(false) : setIsAudioMuted(true);
+   // isAudioMuted ? setIsAudioMuted(false) : setIsAudioMuted(true);
+    setMicroPhoneToggle((p:boolean)=>!p)
     console.log("toggling the audio...");
   };
 
   const toggleVideo = () => {
-    isVideoMuted ? setIsVideoMuted(false) : setIsVideoMuted(true);
+   // isVideoMuted ? setIsVideoMuted(false) : setIsVideoMuted(true);
+   setCameraToggle((p:boolean)=>!p)
     console.log("toggling the video...");
   };
 
@@ -36,28 +48,30 @@ export default function ControlPanel() {
             className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
             onClick={toggleVideo}
           >
-            {isVideoMuted ? (
-              <i className="fa-solid fa-video-slash fa-lg"></i>
-            ) : (
+            {cameraToggle ? (
               <i className="fa-solid fa-video fa-lg"></i>
+              
+            ) : (
+              <i className="fa-solid fa-video-slash fa-lg"></i>
             )}
           </button>
           <button
             className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
             onClick={toggleAudio}
           >
-            {isAudioMuted ? (
-              <i className="fa-solid fa-microphone-slash fa-lg"></i>
-            ) : (
+            {microphoneToggle ? (
               <i className="fa-solid fa-microphone fa-lg"></i>
+            ) : (
+              <i className="fa-solid fa-microphone-slash fa-lg"></i>
             )}
           </button>
           <button
             className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-600"
             onClick={shareScreen}
           >
-            {isScreenShared ? (
+            {screenSharing ? (
               <i className="fa-solid fa-window-close fa-lg"></i>
+              
             ) : (
               <i className="fa-solid fa-laptop fa-lg"></i>
             )}

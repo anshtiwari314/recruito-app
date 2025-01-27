@@ -5,6 +5,8 @@ import DataWrapper from "./context/DataWrapper";
 import ReduxProvider from "@/store/Providers";
 import NotFoundPage from "./pages/NotFoundPage";
 import BiBhutiUiPage from './pages/BibhutiUiPage';
+import LeavePage from "./pages/Leave";
+import HomePage from "./pages/old-HomePage";
 
 export default function App() {
   return (
@@ -12,11 +14,14 @@ export default function App() {
         <ReduxProvider>
         <DataWrapper>
           <Routes>
+            
+            {/* <Route path="/" element={<HomePage/>}/> */}
             {/* Main Page Route */}
             <Route path="/" element={<MainPage/>} />
             {/* 404 Page Route */}
             <Route path="/404" element={<NotFoundPage />} />
             {/* Catch-all Route for undefined paths */}
+            <Route path="/leave" element={<LeavePage />}/>
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
           </DataWrapper>

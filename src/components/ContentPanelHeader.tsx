@@ -26,7 +26,7 @@ export default function ContentPanelHeader({ jobTitle }: { jobTitle: string }) {
   };
 
   return (
-    <div className="mb-6 flex justify-between items-start">
+    <div className="mb-6 flex justify-between items-start" style={{border:'0.1rem solid red'}}>
       <div>
         <h1 className="p-0 text-2xl font-semibold mb-2 text-neutral-900">
           Interview: {jobTitle}
