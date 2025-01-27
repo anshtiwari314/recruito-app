@@ -29,10 +29,16 @@ type CuesDataType = {
 // Define the initial state for the Cues
 type CuesState = {
   CuesList: Array<CuesDataType> | null;
+  jobDescription: string, 
+  interviewGuide: string,
+  jobTitle: string,
 };
 
 const initialCuesState = {
   CuesList: null,
+  jobDescription: "", 
+  interviewGuide: "", 
+  jobTitle: "",
 } as CuesState;
 
 // Create a slice for "cues"
@@ -40,7 +46,7 @@ const cuesSlice = createSlice({
   name: "cuesReducer",
   initialState: initialCuesState,
   reducers: {
-    addCues: (state, action: PayloadAction<CuesState>) => {
+    addCues: (state, action: PayloadAction<CuesDataType[]>) => {
       // Declare default value for state.CuesList
       let data: CuesDataType = {
         id: null,
@@ -68,8 +74,8 @@ const cuesSlice = createSlice({
       };
 
       // Add if condition to check if state.CuesList exists and append to array in that case
-      if (action.payload.CuesList) {
-        let newState = action.payload.CuesList.map((passedState) => {
+      if (action.payload) {
+        let newState = action.payload.map((passedState) => {
             passedState["id"] ?? (data["id"] = uuidv4());
             return { ...data, ...passedState };
         });
@@ -110,14 +116,18 @@ const cuesSlice = createSlice({
           replies: [],
         };
     
+        state.CuesList = null;
         // Add if condition to check if state.CuesList exists and append to array in that case
         if (action.payload.CuesList) {
             let newState = action.payload.CuesList.map((passedState) => {
                 passedState["id"] ?? (data["id"] = uuidv4());
                 return { ...data, ...passedState };
             });
-            state.CuesList = newState;
+            state.CuesList = newState;    
         }
+        state.interviewGuide = action.payload.interviewGuide;
+        state.jobDescription = action.payload.jobDescription;
+        state.jobTitle = action.payload.jobTitle;
         return state;
       },
   },

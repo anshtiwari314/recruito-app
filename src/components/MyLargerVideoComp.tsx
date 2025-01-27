@@ -22,8 +22,6 @@ export function Display({ e, isMobile }: { e: any; isMobile: boolean }) {
 
   let videoId = e.id;
 
-  const loadingcheck = false;
-
   //let isMobile = false
   let muted = false;
   let num = 0;
@@ -54,11 +52,8 @@ export function Display({ e, isMobile }: { e: any; isMobile: boolean }) {
   }, [e.videoStream, e.audioStream]);
 
   return (
-    <div
-      className="relative w-full h-full"
-    >
-      {loadingcheck === false ||
-      e.isLoading === true ||
+    <div className="relative w-full h-full">
+      {e.isLoading === true ||
       e.cameraStatus === false ||
       e.isCameraAvailable === false ? (
         <TextPlaceHolder e={e} />
@@ -113,3 +108,4 @@ export default function MyLargerVideoComp({
     </div>
   );
 }
+
