@@ -64,6 +64,7 @@ export default function ContentPanel({
       }
     }
   }, [users, selectedNumber]);
+  console.log("users updated", users);
 
   return (
     <>
@@ -75,7 +76,7 @@ export default function ContentPanel({
             <ContentPanelHeader jobTitle="" />
           )}
           <ContentPanelMain />
-          {/* <ContentPanelFooter /> */}
+          <ContentPanelFooter />
         </>
       ) : (
         largeVideo && (

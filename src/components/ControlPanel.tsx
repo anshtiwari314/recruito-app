@@ -13,9 +13,13 @@ export default function ControlPanel() {
   const {users,cameraToggle,setCameraToggle ,microphoneToggle,setMicroPhoneToggle,screenSharing,setScreenSharing,isHost,stopVideoRecording} = useData()
   
   const handleCloseCall = () => {
-    navigate("/leave?room_id=123&cust_email_id=saurabhahlawat89@gmail.com&agent_id=43123&job_id=123&is_host=true");
-    
-    console.log("Closing the call...");
+    const confirmQuit = window.confirm("Are you sure you want to quit?");
+    if (confirmQuit) {
+      sessionStorage.setItem("exitdone", "true");
+      // Include logic here to send audio out along with corresponding ui
+      navigate("/leave");
+      console.log("Closing the call...");
+    }
   };
 
   const shareScreen = () => {
@@ -39,7 +43,7 @@ export default function ControlPanel() {
   return (
     <div
       id="control-panel"
-      className="fixed bottom-0 w-full bg-white border-t border-neutral-200 shadow-lg"
+      className="w-full bg-white border-t border-neutral-200 shadow-lg"
     >
       <div className="flex items-center justify-between px-6 py-3">
         <div></div>
@@ -81,7 +85,7 @@ export default function ControlPanel() {
             className="px-8 py-2 bg-neutral-600 hover:bg-neutral-700 text-white rounded-lg flex items-center text-lg"
             onClick={handleCloseCall}
           >
-            <i className="fa-solid fa-xmark mr-4 mt-1 fa-lg"></i>
+            <i className="fa-solid fa-xmark mr-4 fa-lg"></i>
             End Call
           </button>
         </div>

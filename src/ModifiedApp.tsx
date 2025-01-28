@@ -4,9 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import DataWrapper from "./context/DataWrapper";
 import ReduxProvider from "@/store/Providers";
 import NotFoundPage from "./pages/NotFoundPage";
-import BiBhutiUiPage from './pages/BibhutiUiPage';
 import LeavePage from "./pages/Leave";
-import HomePage from "./pages/old-HomePage";
 
 export default function App() {
   return (
