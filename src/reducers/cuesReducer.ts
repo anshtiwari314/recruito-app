@@ -24,6 +24,7 @@ type CuesDataType = {
   radio?: string;
   label?: string;
   replies?: string[];
+  answer_quality:string
 };
 
 // Define the initial state for the Cues

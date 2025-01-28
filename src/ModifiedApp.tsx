@@ -5,6 +5,7 @@ import DataWrapper from "./context/DataWrapper";
 import ReduxProvider from "@/store/Providers";
 import NotFoundPage from "./pages/NotFoundPage";
 import LeavePage from "./pages/Leave";
+import TempPage from './pages/TempPage'
 
 export default function App() {
   return (
@@ -17,7 +18,10 @@ export default function App() {
             {/* Main Page Route */}
             <Route path="/" element={<MainPage/>} />
             {/* 404 Page Route */}
+            
             <Route path="/404" element={<NotFoundPage />} />
+            
+            <Route path="/temp" element={<TempPage/>}/> 
             {/* Catch-all Route for undefined paths */}
             <Route path="/leave" element={<LeavePage />}/>
             <Route path="*" element={<NotFoundPage />} />

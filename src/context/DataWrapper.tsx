@@ -859,9 +859,10 @@ export default function DataWrapper({
       }
     }
 
-    socket2.on("receive-data", receiveData);
+   // socket2.on("receive-data", receiveData);
+   socket2.on("receive-cues", receiveData);
     return () => {
-      socket2.off("receive-data", receiveData);
+     socket2.off("receive-cues", receiveData);
     };
   }, [myId, custId, socket2, isHost]);
 

@@ -47,6 +47,7 @@ export default function MainPage() {
   const [isMobile, setIsMobile] = useState(false);
   const [toggleRmWindow, setToggleRmWindow] = useState(false);
   let tempIsHost = false;
+  
   let meetingDetails: InitialLoadData = {
     jobTitle: "EDI Developer",
     jobDescription: "https://arxiv.org/pdf/2301.12652", //pdf
