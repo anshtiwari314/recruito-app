@@ -2,11 +2,11 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { v4 as uuidv4 } from "uuid";
 
 type TranscriptionDataType = {
-  id?: string | null;
-  name?: string;
-  time_stamp?: string;
-  transcription?: string;
-  is_candidate?: boolean;
+  id?: string | null,
+  name?: string,
+  time_stamp?: string,
+  transcription?: string,
+  is_candidate?: boolean,
 };
 
 type TranscriptionState = {
