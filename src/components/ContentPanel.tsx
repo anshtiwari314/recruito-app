@@ -51,8 +51,7 @@ export default function ContentPanel({
         selectedNumber > usersArrRef.current.length - 1
       ) {
         //if user left
-        largeVideoRef.current =
-          usersArrRef.current[usersArrRef.current.length - 1];
+        largeVideoRef.current = usersArrRef.current[usersArrRef.current.length - 1];
         setLargeVideo(largeVideoRef.current);
       } else if (
         users.length > 1 &&

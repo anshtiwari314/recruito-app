@@ -69,6 +69,7 @@ export default function ControlPanel() {
               <i className="fa-solid fa-microphone-slash fa-lg"></i>
             )}
           </button>
+          {/*
           <button
             className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-600"
             onClick={shareScreen}
@@ -80,6 +81,7 @@ export default function ControlPanel() {
               <i className="fa-solid fa-laptop fa-lg"></i>
             )}
           </button>
+          */}
           <div className="h-8 w-[2px] bg-neutral-200"></div>
           <button
             className="px-8 py-2 bg-neutral-600 hover:bg-neutral-700 text-white rounded-lg flex items-center text-lg"

@@ -24,15 +24,11 @@ export interface InitialLoadData {
 export default function MainPage() {
   //@ts-ignore
   const {
-    myStream,
     setMyId,
     setName,
-    setValidUrl,
     setCustId,
     adminUrl,
     setAdminUrl,
-    videoUploadUrl,
-    setVideoUploadUrl,
   } = useData();
   const { isHost } = useAppSelector((state) => state.qpReducer);
   const dispatch = useDispatch();
@@ -59,6 +55,7 @@ export default function MainPage() {
         audiofiletimestamp: "2022-01-01T00:00:00Z",
         common_id: "1",
         similarity_query: "Ask about specific EDI protocols experience",
+        isanswered: true,
       },
       {
         content: "",
@@ -66,6 +63,7 @@ export default function MainPage() {
         audiofiletimestamp: "2022-01-01T00:00:00Z",
         common_id: "2",
         similarity_query: "Discuss experience with mapping tools",
+        isanswered: false,
       },
       {
         content: "",
@@ -73,6 +71,7 @@ export default function MainPage() {
         audiofiletimestamp: "2022-01-01T00:00:00Z",
         common_id: "3",
         similarity_query: "Probe cloud integration knowledge",
+        isanswered: false,
       },
     ],
   };
@@ -228,7 +227,7 @@ export default function MainPage() {
           {/* Main Content */}
           <main id="main-content" className="flex h-[calc(100vh-120px)]">
             {/* Content Panel */}
-            <div id="content-panel" className="grow p-6 overflow-y-auto">
+            <div id="content-panel" className="grow w-10/12 p-6 overflow-y-auto">
               <ContentPanel
                 openSideWindow={openSideWindow}
                 isMobile={isMobile}

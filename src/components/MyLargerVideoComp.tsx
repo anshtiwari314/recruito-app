@@ -34,7 +34,7 @@ export function Display({ e, isMobile }: { e: any; isMobile: boolean }) {
       e.videoStream === null ||
       e.audioStream === null ||
       e.isLoading === true ||
-      vid === null
+      !vid
     )
       return;
 
@@ -49,6 +49,11 @@ export function Display({ e, isMobile }: { e: any; isMobile: boolean }) {
     console.log("display ", vid, num);
 
     vid.addEventListener("loadedmetadata", onLoaded);
+
+    //Cleanup function
+    return () => {
+      vid.removeEventListener("loadedmetadata", onLoaded);
+    };
   }, [e.videoStream, e.audioStream]);
 
   return (
