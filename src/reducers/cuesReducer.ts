@@ -2,34 +2,35 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { v4 as uuidv4 } from "uuid";
 
 type CuesDataType = {
-  id?: string | null;
-  color?: string;
-  content?: string;
-  iconColor?: string;
-  initquery?: string;
-  match_score?: string;
-  matched_query?: string;
-  query?: string[];
-  raw_modded_query?: string;
-  sessionid?: string;
-  similarity_query?: string;
-  loading?: boolean;
-  audiourl?: string;
-  imageUrl?: string;
-  common_id?: string;
-  type?: string;
-  audiofiletimestamp?: string;
-  iconName?: string;
-  value?: string;
-  radio?: string;
-  label?: string;
-  replies?: string[];
-  answer_quality:string
+  id?: string | null,
+  color?: string,
+  content?: string,
+  iconColor?: string,
+  initquery?: string,
+  match_score?: string,
+  matched_query?: string,
+  query?: string[],
+  raw_modded_query?: string,
+  sessionid?: string,
+  similarity_query?: string,
+  loading?: boolean,
+  audiourl?: string,
+  imageUrl?: string,
+  common_id?: string,
+  type?: string,
+  audiofiletimestamp?: string,
+  iconName?: string,
+  value?: string,
+  radio?: string,
+  label?: string,
+  replies?: string[],
+  answer_quality?:string,
+  isanswered: boolean,
 };
 
 // Define the initial state for the Cues
 type CuesState = {
-  CuesList: Array<CuesDataType> | null;
+  CuesList: Array<CuesDataType> | null,
   jobDescription: string, 
   interviewGuide: string,
   jobTitle: string,
@@ -72,6 +73,8 @@ const cuesSlice = createSlice({
         radio: "",
         label: "",
         replies: [],
+        answer_quality:"",
+        isanswered: false,
       };
 
       // Add if condition to check if state.CuesList exists and append to array in that case
@@ -115,6 +118,8 @@ const cuesSlice = createSlice({
           radio: "",
           label: "",
           replies: [],
+          answer_quality:"",
+          isanswered: false,
         };
     
         state.CuesList = null;

@@ -14,7 +14,6 @@ export default function ContentPanelFooter() {
   const handleSendNotes = () => {
     setLoading(true);
     setStatus(null);
-    console.log(notes);
 
     // Simulate sending notes to an API
     setTimeout(() => {
@@ -28,7 +27,7 @@ export default function ContentPanelFooter() {
       }
 
       setLoading(false);
-    }, 2000); 
+    }, 2000);
 
     // Replace 'apiurl' with your actual API URL
     /*
@@ -74,7 +73,7 @@ export default function ContentPanelFooter() {
   }, [status]);
 
   return (
-    <div id="ai-query" className="mb-20 right-10" > 
+    <div id="ai-query" className="mb-10">
       <div className="bg-white rounded-lg shadow-lg p-4 border border-neutral-200">
         <div className="flex items-center space-x-3">
           <textarea
@@ -102,12 +101,10 @@ export default function ContentPanelFooter() {
           </button>
           {/* Status Messages */}
           {status === "success" && (
-            <p className="mt-2 text-green-600">Notes sent successfully!</p>
+            <p className="mt-2 text-green-600 whitespace-normal max-w-24">Notes sent successfully!</p>
           )}
           {status === "error" && (
-            <p className="mt-2 text-red-600">
-              Failed to send notes. Try again.
-            </p>
+            <p className="mt-2 text-red-600 whitespace-normal max-w-24">Failed to send notes. Try again</p>
           )}
         </div>
       </div>

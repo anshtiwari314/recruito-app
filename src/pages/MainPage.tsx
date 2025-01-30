@@ -24,15 +24,11 @@ export interface InitialLoadData {
 export default function MainPage() {
   //@ts-ignore
   const {
-    myStream,
     setMyId,
     setName,
-    setValidUrl,
     setCustId,
     adminUrl,
     setAdminUrl,
-    videoUploadUrl,
-    setVideoUploadUrl,
   } = useData();
   const { isHost } = useAppSelector((state) => state.qpReducer);
   const dispatch = useDispatch();
@@ -40,12 +36,10 @@ export default function MainPage() {
 
   const { link } = useParams();
   // const [searchParams,setSearchParams] = useSearchParams()
-  const [openSideWindow, setOpenSideWindow] = useState<boolean>(false);
   const [messagingOn, setMessagingOn] = useState<boolean>(true);
   const [toggleVideo, setToggleVideo] = useState(true);
   const [toggleAudio, setToggleAudio] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-  const [toggleRmWindow, setToggleRmWindow] = useState(false);
   let tempIsHost = false;
   
   let meetingDetails: InitialLoadData = {
@@ -59,6 +53,7 @@ export default function MainPage() {
         audiofiletimestamp: "2022-01-01T00:00:00Z",
         common_id: "1",
         similarity_query: "Ask about specific EDI protocols experience",
+        isanswered: true,
       },
       {
         content: "",
@@ -66,6 +61,7 @@ export default function MainPage() {
         audiofiletimestamp: "2022-01-01T00:00:00Z",
         common_id: "2",
         similarity_query: "Discuss experience with mapping tools",
+        isanswered: false,
       },
       {
         content: "",
@@ -73,6 +69,7 @@ export default function MainPage() {
         audiofiletimestamp: "2022-01-01T00:00:00Z",
         common_id: "3",
         similarity_query: "Probe cloud integration knowledge",
+        isanswered: false,
       },
     ],
   };
@@ -195,7 +192,12 @@ export default function MainPage() {
                 className="h-8"
                 alt="Logo"
               />
-              <div className="text-md text-neutral-500">Recruiter Copilot</div>
+              {meetingDetails.jobTitle ? (
+                <div className="text-md text-neutral-500">Interview: {meetingDetails.jobTitle}</div>
+              ) : (
+                <div className="text-md text-neutral-500">Recruiter Copilot</div>
+              )}
+              {/*<div className="text-md text-neutral-500">Recruiter Copilot</div>*/}
             </div>
 
             {isHost && (
@@ -214,26 +216,12 @@ export default function MainPage() {
             )}
           </header>
 
-          {/* Text bar for loading backend api url */}
-          <div className="flex justify-around place-items-center mt-2 bg-white border-b border-neutral-200 shadow-sm">
-            <input
-              type="text"
-              value={adminUrl}
-              onChange={(e) => setAdminUrl(e.target.value)}
-              placeholder="enter an ngrok url"
-              className="p-4 px-12 mx-auto w-1/2 rounded-lg border-2"
-            />
-          </div>
-
           {/* Main Content */}
           <main id="main-content" className="flex h-[calc(100vh-120px)]">
             {/* Content Panel */}
-            <div id="content-panel" className="grow p-6 overflow-y-auto">
+            <div id="content-panel" className="grow w-10/12 p-6 overflow-y-auto">
               <ContentPanel
-                openSideWindow={openSideWindow}
                 isMobile={isMobile}
-                toggleRmWindow={toggleRmWindow}
-                meetingDetails={meetingDetails}
               />
 
               {/**/}
@@ -242,28 +230,7 @@ export default function MainPage() {
             {/* Right Panel */}
             <RightPanel />
 
-            {/*
-          
-          <SideWindow
-            openSideWindow={openSideWindow}
-            setOpenSideWindow={setOpenSideWindow}
-            messagingOn={messagingOn}
-            setMessagingOn={setMessagingOn}
-            isMobile={isMobile}
-          />
-        */}
-            {/*
-          <Tray
-            openSideWindow={openSideWindow}
-            setOpenSideWindow={setOpenSideWindow}
-            messagingOn={messagingOn}
-            setMessagingOn={setMessagingOn}
-            isMobile={isMobile}
-            toggleRmWindow={toggleRmWindow}
-            setToggleRmWindow={setToggleRmWindow}
-            link={link}
-          />
-          */}
+            
           </main>
           <footer
             id="footer"

@@ -1,6 +1,6 @@
 import React,{useRef,useEffect} from "react"
 
-export function RightPanelVideo({e,muted}){
+export function RightPanelVideo({e,muted}:{e:any,muted:boolean}) {
     console.log(e)
 
     const vidRef = useRef<any>(null)
@@ -40,7 +40,7 @@ export function RightPanelVideo({e,muted}){
           audio.srcObject = e.audioStream;
           
           audio.muted = muted
-          audio.addEventListener("canplaythrough", (event) => {
+          audio.addEventListener("canplaythrough", () => {
             /* the audio is now playable; play it if permissions allow */
             audio.play()
           });
