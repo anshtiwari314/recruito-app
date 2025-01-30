@@ -11,9 +11,11 @@ import { v4 as uuidv4 } from "uuid";
 import Peer from "peerjs";
 import WavToMp3 from "../functions/wavToMp3";
 import type { CuesDataType } from "@/reducers/cuesReducer";
-import { setCues, addCues } from "@/reducers/cuesReducer";
+import { setCues, addCues, initialCuesObj } from "@/reducers/cuesReducer";
 import { useAppSelector } from "@/store/store";
 import { useDispatch } from "react-redux";
+import {TranscriptionDataType,addTranscription, initialTranscriptionObj } from '@/reducers/transcriptionReducer'
+ 
 
 const Context = createContext("");
 
@@ -872,10 +874,45 @@ export default function DataWrapper({
       }
     }
 
-    // socket2.on("receive-data", receiveData);
-    socket2.on("receive-cues", receiveData);
+    function handleLiveQna(data:CuesDataType){
+      let tempArr:Array<CuesDataType> = []
+
+      let obj:CuesDataType = {...initialCuesObj}
+      obj.content = data.content
+      obj.sessionid = data.sessionid
+      obj.audiofiletimestamp = data.audiofiletimestamp
+      obj.common_id = data.common_id
+      obj.similarity_query =data.similarity_query
+      obj.isanswered =data.isanswered
+      obj.type= data.type
+
+      dispatch(addCues(tempArr))
+    }
+
+    function handleLiveTranscriptions(data:TranscriptionDataType){
+      
+      let tempArr:Array<TranscriptionDataType> = []
+      
+      let obj:TranscriptionDataType = {...initialTranscriptionObj}
+        obj.id  = data.id
+        obj.speaker = data.speaker
+        obj.timeStamp = data.timeStamp 
+        obj.transcription = data.transcription
+        obj.isCandidate = data.isCandidate
+        
+        
+      tempArr.push(obj) 
+
+      dispatch(addTranscription(tempArr))
+    }
+
+    
+    socket2.on("recruito_live_qna",handleLiveQna);
+    
+    socket2.on('recruito_live_transcriptions',handleLiveTranscriptions)
     return () => {
-      socket2.off("receive-cues", receiveData);
+      socket2.off("recruito_live_qna",handleLiveQna);
+      socket2.off('recruito_live_transcriptions',handleLiveTranscriptions)
     };
   }, [myId, custId, socket2, isHost]);
 

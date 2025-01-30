@@ -3,6 +3,7 @@ import { useAppSelector } from "@/store/store";
 import { v4 as uuidv4 } from "uuid";
 import type { CuesDataType } from "@/reducers/cuesReducer";
 import { useState } from "react";
+import type { TranscriptionDataType } from "@/reducers/transcriptionReducer";
 
 export function SingleCue({
   question,
@@ -70,8 +71,34 @@ export function SingleCue({
   );
 }
 
+export function SingleTranscription({data}:{data:TranscriptionDataType}){
+  return (
+    <div className="flex space-x-3">
+            <img
+              src={data.isCandidate ?
+                "https://api.dicebear.com/7.x/notionists/svg?scale=200&amp;seed=VA":
+                "https://api.dicebear.com/7.x/notionists/svg?scale=200&amp;seed=INT"}
+              className="w-8 h-8 rounded-full"
+            />
+            <div>
+              <div className="flex items-center">
+                <span className="text-base font-bold text-neutral-900">
+                  {data?.speaker}
+                </span>
+                <span className="text-sm text-neutral-500 ml-2">{data?.timeStamp}</span>
+              </div>
+              <p className="text-neutral-700 text-sm">
+                {data?.transcription}
+              </p>
+            </div>
+          </div>
+  )
+}
+
 export default function ContentPanelMain() {
-  const currentCues = useAppSelector((state) => state.cuesReducer.CuesList);
+  const [currentCues,transcriptions] = 
+  useAppSelector((state) => [state.cuesReducer.CuesList,state.trcpReducer.TranscriptionList]);
+  
   return (
     <div className="flex justify-between">
       <div
@@ -90,25 +117,11 @@ export default function ContentPanelMain() {
 
         {/* Details of transcripts to be fetched from API server ; for loop */}
         <div className="space-y-4">
-          <div className="flex space-x-3">
-            <img
-              src="https://api.dicebear.com/7.x/notionists/svg?scale=200&amp;seed=INT"
-              className="w-8 h-8 rounded-full"
-            />
-            <div>
-              <div className="flex items-center">
-                <span className="text-base font-bold text-neutral-900">
-                  Interviewer
-                </span>
-                <span className="text-sm text-neutral-500 ml-2">08:31 PM</span>
-              </div>
-              <p className="text-neutral-700 text-sm">
-                Can you explain your experience with EDI integration projects?
-              </p>
-            </div>
-          </div>
 
-          <div className="flex space-x-3">
+          {transcriptions.map((transcription,i)=><SingleTranscription data={transcription} key={i}/>)}
+          
+
+          {/* <div className="flex space-x-3">
             <img
               src="https://api.dicebear.com/7.x/notionists/svg?scale=200&amp;seed=VA"
               className="w-8 h-8 rounded-full"
@@ -123,7 +136,9 @@ export default function ContentPanelMain() {
                 standards...
               </p>
             </div>
-          </div>
+          </div> */}
+
+          
         </div>
       </div>
 

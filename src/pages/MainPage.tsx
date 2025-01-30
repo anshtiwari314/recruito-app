@@ -157,6 +157,8 @@ export default function MainPage() {
     }
   }, [meetingIsLegit]);
 
+  
+
   useEffect(() => {
     if (tempIsHost && meetingIsLegit) {
       // Code block for calling API to fetch interview details like JD, candidate profile, job details, etc.

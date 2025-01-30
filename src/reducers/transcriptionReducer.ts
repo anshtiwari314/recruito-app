@@ -3,18 +3,51 @@ import { v4 as uuidv4 } from "uuid";
 
 type TranscriptionDataType = {
   id?: string | null,
-  name?: string,
-  time_stamp?: string,
+  speaker?:string,
   transcription?: string,
-  is_candidate?: boolean,
+  timeStamp?:string,
+  isCandidate:boolean
 };
 
 type TranscriptionState = {
   TranscriptionList: Array<TranscriptionDataType>;
 };
 
+const initialTranscriptionObj:TranscriptionDataType = {
+  id:'',
+  speaker:'',
+  transcription:'',
+  timeStamp:'',
+  isCandidate:false
+};
+
+
+const initialTranscriptionLoadState = [
+  {
+    id: 'abcde',
+  speaker:'anuj',
+  transcription: 'It is a long established fact that a reader will be distracted',
+  timeStamp:'08:35pm',
+  isCandidate:true
+},
+  {
+    id: 'abcde',
+  speaker:'anuj',
+  transcription: 'It is a long established fact that a reader will be distracted',
+  timeStamp:'08:35pm',
+  isCandidate:false
+},
+  {
+    id: 'abcde',
+  speaker:'anuj',
+  transcription: 'It is a long established fact that a reader will be distracted',
+  timeStamp:'08:35pm',
+  isCandidate:false
+}
+]
+
 const initialTranscriptionState = {
-  TranscriptionList: [],
+  TranscriptionList: [...initialTranscriptionLoadState],
 } as TranscriptionState;
 
 // Create a slice for "transcription"
@@ -49,6 +82,8 @@ const trcpSlice = createSlice({
 export type { TranscriptionDataType };
 // Export actions so they can be dispatched from components
 export const { addTranscription, resetTranscription } = trcpSlice.actions;
+
+export {initialTranscriptionObj }
 
 // Export the reducer to be included in the store
 export default {

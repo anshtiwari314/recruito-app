@@ -28,6 +28,33 @@ type CuesDataType = {
   isanswered: boolean,
 };
 
+let initialCuesObj: CuesDataType = {
+  id: null,
+  color: "#7D11E9",
+  content: "",
+  iconColor: "blue",
+  initquery: " ",
+  match_score: "0",
+  matched_query: " ",
+  query: [" "],
+  raw_modded_query: " ",
+  sessionid: "xyz",
+  similarity_query: " ",
+  loading: false,
+  audiourl: "",
+  imageUrl: "",
+  common_id: "",
+  type: "TextMsg",
+  audiofiletimestamp: "",
+  iconName: "",
+  value: "",
+  radio: "",
+  label: "",
+  replies: [],
+  answer_quality:"",
+  isanswered: false,
+};
+
 // Define the initial state for the Cues
 type CuesState = {
   CuesList: Array<CuesDataType> | null,
@@ -50,32 +77,7 @@ const cuesSlice = createSlice({
   reducers: {
     addCues: (state, action: PayloadAction<CuesDataType[]>) => {
       // Declare default value for state.CuesList
-      let data: CuesDataType = {
-        id: null,
-        color: "#7D11E9",
-        content: "",
-        iconColor: "blue",
-        initquery: " ",
-        match_score: "0",
-        matched_query: " ",
-        query: [" "],
-        raw_modded_query: " ",
-        sessionid: "xyz",
-        similarity_query: " ",
-        loading: false,
-        audiourl: "",
-        imageUrl: "",
-        common_id: "",
-        type: "TextMsg",
-        audiofiletimestamp: "",
-        iconName: "",
-        value: "",
-        radio: "",
-        label: "",
-        replies: [],
-        answer_quality:"",
-        isanswered: false,
-      };
+      let data: CuesDataType = {...initialCuesObj};
 
       // Add if condition to check if state.CuesList exists and append to array in that case
       if (action.payload) {
@@ -142,6 +144,8 @@ const cuesSlice = createSlice({
 export type { CuesState, CuesDataType };
 // Export actions so they can be dispatched from components
 export const { addCues, resetCue, setCues } = cuesSlice.actions;
+
+export {initialCuesObj}
 
 // Export the reducer to be included in the store
 export default {
