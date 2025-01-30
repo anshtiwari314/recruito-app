@@ -15,9 +15,7 @@ export function SingleCue({
   const [toggleDetails, setToggleDetails] = useState(true);
 
   return (
-    <div
-      className="p-3 bg-neutral-50 rounded-lg border border-neutral-200"
-    >
+    <div className="p-3 bg-neutral-50 rounded-lg border border-neutral-200">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-3">
           {isAnswered ? (
@@ -57,11 +55,7 @@ export function SingleCue({
           <div>
             {toggleDetails && (
               <p className="mt-2 pl-2 pr-2">
-                It is a long established fact that a reader will be distracted
-                by the readable content of a page when looking at its layout.
-                The point of using Lorem Ipsum is that it has a more-or-less
-                normal distribution of letters, as opposed to using 'Content
-                here, content here', making it look like readable English.
+                It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English.
               </p>
             )}
           </div>
@@ -71,55 +65,68 @@ export function SingleCue({
   );
 }
 
-export function SingleTranscription({data}:{data:TranscriptionDataType}){
+export function SingleTranscription({ data }: { data: TranscriptionDataType }) {
   return (
-    <div className="flex space-x-3">
-            <img
-              src={data.isCandidate ?
-                "https://api.dicebear.com/7.x/notionists/svg?scale=200&amp;seed=VA":
-                "https://api.dicebear.com/7.x/notionists/svg?scale=200&amp;seed=INT"}
-              className="w-8 h-8 rounded-full"
-            />
-            <div>
-              <div className="flex items-center">
-                <span className="text-base font-bold text-neutral-900">
-                  {data?.speaker}
-                </span>
-                <span className="text-sm text-neutral-500 ml-2">{data?.timeStamp}</span>
-              </div>
-              <p className="text-neutral-700 text-sm">
-                {data?.transcription}
-              </p>
-            </div>
-          </div>
-  )
+    <div className="flex w-full flex-shrink-0">
+      <img
+        src={
+          data.isCandidate
+            ? "https://api.dicebear.com/7.x/notionists/svg?scale=200&amp;seed=VA"
+            : "https://api.dicebear.com/7.x/notionists/svg?scale=200&amp;seed=INT"
+        }
+        className="w-8 h-8 rounded-full mr-3"
+      />
+      <div className="w-full flex flex-col">
+        <div className="flex flex-wrap justify-between items-center break-all">
+          <span className="text-neutral-950 break-all">
+            {data?.speaker}
+          </span>
+          <span className="text-sm text-neutral-500">
+            {data?.timeStamp}
+          </span>
+        </div>
+        <p className="text-neutral-700 text-sm">{data?.transcription}</p>
+      </div>
+    </div>
+  );
 }
 
 export default function ContentPanelMain() {
-  const [currentCues,transcriptions] = 
-  useAppSelector((state) => [state.cuesReducer.CuesList,state.trcpReducer.TranscriptionList]);
-  
+  const [currentCues, transcriptions] = useAppSelector((state) => [
+    state.cuesReducer.CuesList,
+    state.trcpReducer.TranscriptionList,
+  ]);
+
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
+
   return (
-    <div className="flex justify-between">
+    <div className={`${!isExpanded ? "flex justify-between" : "flex flex-col"}`}>
       <div
         id="transcription"
-        className="mb-6 mr-2 bg-white md:min-w-80 rounded-lg p-4 shadow-sm border border-neutral-200"
+        className={`${!isExpanded ? "flex-grow-0 flex-shrink-0 w-1/4 max-h-lvh mr-6" : "max-h-96 w-full"} mb-6 bg-white rounded-lg p-4 shadow-sm border-2 border-zinc-500 overflow-y-auto`}
       >
         {/* Header of transcription section */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-neutral-900">
             Live Transcription
           </h2>
-          <button className="text-sm text-neutral-600 hover:text-neutral-700">
-            <i className="fa-solid fa-expand mr-1"></i> Expand
+          <button 
+            className="text-sm text-neutral-600 hover:text-neutral-700"
+            onClick={toggleExpand}
+          >
+            <i className={`fa-solid fa-${isExpanded ? "compress" : "expand"} mr-1`}></i>{isExpanded ? "Collapse" : "Expand"}
           </button>
         </div>
 
         {/* Details of transcripts to be fetched from API server ; for loop */}
-        <div className="space-y-4">
-
-          {transcriptions.map((transcription,i)=><SingleTranscription data={transcription} key={i}/>)}
-          
+        <div className="space-y-8 flex-1  overflow-y-auto">
+          {transcriptions.map((transcription, i) => (
+            <SingleTranscription data={transcription} key={i} />
+          ))}
 
           {/* <div className="flex space-x-3">
             <img
@@ -137,15 +144,13 @@ export default function ContentPanelMain() {
               </p>
             </div>
           </div> */}
-
-          
         </div>
       </div>
 
       {/* AI Suggestions section */}
       <div
         id="ai-suggestions"
-        className="mb-6 bg-white rounded-lg p-4 shadow-sm border border-neutral-200"
+        className={`${!isExpanded ? "flex-grow-0 w-3/4 max-h-lvh" : "w-full max-h-96"} mb-6 bg-white rounded-lg p-4 shadow-sm border-2 border-zinc-500 overflow-y-auto`}
       >
         {/* AI Suggestions section header */}
         <h3 className="text-lg font-semibold mb-4 text-neutral-900">

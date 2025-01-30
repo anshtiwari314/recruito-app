@@ -71,6 +71,46 @@ export default function MainPage() {
         similarity_query: "Probe cloud integration knowledge",
         isanswered: false,
       },
+      {
+        content: "",
+        sessionid: "1",
+        audiofiletimestamp: "2022-01-01T00:00:00Z",
+        common_id: "3",
+        similarity_query: "Probe cloud integration knowledge",
+        isanswered: false,
+      },
+      {
+        content: "",
+        sessionid: "1",
+        audiofiletimestamp: "2022-01-01T00:00:00Z",
+        common_id: "3",
+        similarity_query: "Probe cloud integration knowledge",
+        isanswered: false,
+      },
+      {
+        content: "",
+        sessionid: "1",
+        audiofiletimestamp: "2022-01-01T00:00:00Z",
+        common_id: "3",
+        similarity_query: "Probe cloud integration knowledge",
+        isanswered: false,
+      },
+      {
+        content: "",
+        sessionid: "1",
+        audiofiletimestamp: "2022-01-01T00:00:00Z",
+        common_id: "3",
+        similarity_query: "Probe cloud integration knowledge",
+        isanswered: false,
+      },
+      {
+        content: "",
+        sessionid: "1",
+        audiofiletimestamp: "2022-01-01T00:00:00Z",
+        common_id: "3",
+        similarity_query: "Probe cloud integration knowledge",
+        isanswered: false,
+      },
     ],
   };
 
@@ -221,7 +261,7 @@ export default function MainPage() {
           {/* Main Content */}
           <main id="main-content" className="flex h-[calc(100vh-120px)]">
             {/* Content Panel */}
-            <div id="content-panel" className="grow w-10/12 p-6 overflow-y-auto">
+            <div id="content-panel" className="relative grow w-10/12 p-6 overflow-y-auto">
               <ContentPanel
                 isMobile={isMobile}
               />

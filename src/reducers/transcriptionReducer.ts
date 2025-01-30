@@ -2,49 +2,94 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { v4 as uuidv4 } from "uuid";
 
 type TranscriptionDataType = {
-  id?: string | null,
-  speaker?:string,
-  transcription?: string,
-  timeStamp?:string,
-  isCandidate:boolean
+  id?: string | null;
+  speaker?: string;
+  transcription?: string;
+  timeStamp?: string;
+  isCandidate: boolean;
 };
 
 type TranscriptionState = {
   TranscriptionList: Array<TranscriptionDataType>;
 };
 
-const initialTranscriptionObj:TranscriptionDataType = {
-  id:'',
-  speaker:'',
-  transcription:'',
-  timeStamp:'',
-  isCandidate:false
+const initialTranscriptionObj: TranscriptionDataType = {
+  id: "",
+  speaker: "",
+  transcription: "",
+  timeStamp: "",
+  isCandidate: false,
 };
-
 
 const initialTranscriptionLoadState = [
   {
-    id: 'abcde',
-  speaker:'anuj',
-  transcription: 'It is a long established fact that a reader will be distracted',
-  timeStamp:'08:35pm',
-  isCandidate:true
-},
+    id: "abcde",
+    speaker: "anuj",
+    transcription:
+      "It is a long established fact that a reader will be distracted",
+    timeStamp: "08:35pm",
+    isCandidate: true,
+  },
   {
-    id: 'abcde',
-  speaker:'anuj',
-  transcription: 'It is a long established fact that a reader will be distracted',
-  timeStamp:'08:35pm',
-  isCandidate:false
-},
+    id: "abcde",
+    speaker: "anuj",
+    transcription:
+      "It is a long established fact that a reader will be distracted",
+    timeStamp: "08:35pm",
+    isCandidate: false,
+  },
   {
-    id: 'abcde',
-  speaker:'anuj',
-  transcription: 'It is a long established fact that a reader will be distracted',
-  timeStamp:'08:35pm',
-  isCandidate:false
-}
-]
+    id: "abcde",
+    speaker: "saurabhahlawat2014eeeoeo@gmail.com",
+    transcription:
+      "It is a long established fact that a reader will be distracted",
+    timeStamp: "08:35pm",
+    isCandidate: false,
+  },
+  {
+    id: "abcde",
+    speaker: "saurabhahlawat2014eeeoeo@gmail.com",
+    transcription:
+      "It is a long established fact that a reader will be distracted",
+    timeStamp: "08:35pm",
+    isCandidate: false,
+  },{
+    id: "abcde",
+    speaker: "saurabhahlawat2014eeeoeo@gmail.com",
+    transcription:
+      "It is a long established fact that a reader will be distracted",
+    timeStamp: "08:35pm",
+    isCandidate: false,
+  },{
+    id: "abcde",
+    speaker: "saurabhahlawat2014eeeoeo@gmail.com",
+    transcription:
+      "It is a long established fact that a reader will be distracted",
+    timeStamp: "08:35pm",
+    isCandidate: false,
+  },{
+    id: "abcde",
+    speaker: "saurabhahlawat2014eeeoeo@gmail.com",
+    transcription:
+      "It is a long established fact that a reader will be distracted",
+    timeStamp: "08:35pm",
+    isCandidate: false,
+  },{
+    id: "abcde",
+    speaker: "saurabhahlawat2014eeeoeo@gmail.com",
+    transcription:
+      "It is a long established fact that a reader will be distracted",
+    timeStamp: "08:35pm",
+    isCandidate: false,
+  },{
+    id: "abcde",
+    speaker: "saurabhahlawat2014eeeoeo@gmail.com",
+    transcription:
+      "It is a long established fact that a reader will be distracted",
+    timeStamp: "08:35pm",
+    isCandidate: false,
+  },
+];
 
 const initialTranscriptionState = {
   TranscriptionList: [...initialTranscriptionLoadState],
@@ -83,7 +128,7 @@ export type { TranscriptionDataType };
 // Export actions so they can be dispatched from components
 export const { addTranscription, resetTranscription } = trcpSlice.actions;
 
-export {initialTranscriptionObj }
+export { initialTranscriptionObj };
 
 // Export the reducer to be included in the store
 export default {
