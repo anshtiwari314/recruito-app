@@ -853,7 +853,7 @@ export default function DataWrapper({
       );
       console.log(data);
 
-      if (data.sessionid === custId && isHost === true) {
+      if (isHost === true) {
         let d = new Date();
         console.log(
           `%c just after filter data ${
