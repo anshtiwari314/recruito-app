@@ -10,7 +10,7 @@ export const store = configureStore({
   reducer: {
     cuesReducer: cuesReducer.cuesReducer,
     qpReducer: queryparamReducer.qpReducer,
-    trcpReducer:transcriptionReducer.transcriptionReducer
+    //trcpReducer:transcriptionReducer.transcriptionReducer
   },
 });
 

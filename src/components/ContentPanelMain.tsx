@@ -11,7 +11,7 @@ export function SingleCue({question,isAnswered}:{question:CuesDataType,isAnswere
   const [answered,setAnswered] = useState(isAnswered)
 
   return (
-            <div className="p-3 bg-neutral-50 rounded-lg border border-neutral-200" style={{border:'0.1rem solid red'}}>
+            <div className="p-3 bg-neutral-50 rounded-lg border border-neutral-200" style={{border:'0.1rem solid white'}}>
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-3">
                   {answered?
@@ -44,7 +44,7 @@ export function SingleCue({question,isAnswered}:{question:CuesDataType,isAnswere
                   </button> 
                   <div>
                     {toggleDetails ? 
-                  <p className="mt-2 pl-2" style={{width:'50%'}}>It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English.</p>
+                  <p className="mt-2 pl-2" style={{width:'100%'}}>It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English.</p>
                   : null  
                   }
                     
