@@ -16,7 +16,6 @@ export function SingleCue({
   return (
     <div
       className="p-3 bg-neutral-50 rounded-lg border border-neutral-200"
-      style={{ border: "0.1rem solid red" }}
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-3">
@@ -74,10 +73,10 @@ export function SingleCue({
 export default function ContentPanelMain() {
   const currentCues = useAppSelector((state) => state.cuesReducer.CuesList);
   return (
-    <>
+    <div className="flex justify-between">
       <div
         id="transcription"
-        className="mb-6 bg-white rounded-lg p-4 shadow-sm border border-neutral-200"
+        className="mb-6 mr-2 bg-white md:min-w-80 rounded-lg p-4 shadow-sm border border-neutral-200"
       >
         {/* Header of transcription section */}
         <div className="flex items-center justify-between mb-4">
@@ -98,12 +97,12 @@ export default function ContentPanelMain() {
             />
             <div>
               <div className="flex items-center">
-                <span className="font-medium text-neutral-900">
+                <span className="text-base font-bold text-neutral-900">
                   Interviewer
                 </span>
                 <span className="text-sm text-neutral-500 ml-2">08:31 PM</span>
               </div>
-              <p className="text-neutral-700">
+              <p className="text-neutral-700 text-sm">
                 Can you explain your experience with EDI integration projects?
               </p>
             </div>
@@ -116,10 +115,10 @@ export default function ContentPanelMain() {
             />
             <div>
               <div className="flex items-center">
-                <span className="font-medium text-neutral-900">Varun</span>
+                <span className="text-base font-bold text-neutral-900">Varun</span>
                 <span className="text-sm text-neutral-500 ml-2">08:32 PM</span>
               </div>
-              <p className="text-neutral-700">
+              <p className="text-neutral-700 text-sm">
                 I have worked on multiple EDI projects involving X12 and EDIFACT
                 standards...
               </p>
@@ -149,7 +148,7 @@ export default function ContentPanelMain() {
             ))}
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

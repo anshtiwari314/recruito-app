@@ -1,22 +1,15 @@
 import { useEffect, useState } from "react";
 import { useData } from "@/context/DataWrapper";
 import MyLargerVideoComp from "@/components/MyLargerVideoComp";
-import ContentPanelHeader from "./ContentPanelHeader";
 import { InitialLoadData } from "@/pages/MainPage";
 import ContentPanelMain from "./ContentPanelMain";
 import ContentPanelFooter from "./ContentPanelFooter";
 import { useAppSelector } from "@/store/store";
 
 export default function ContentPanel({
-  openSideWindow,
   isMobile,
-  toggleRmWindow,
-  meetingDetails,
 }: {
-  openSideWindow: boolean;
   isMobile: boolean;
-  toggleRmWindow: boolean;
-  meetingDetails: InitialLoadData;
 }) {
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
   const { isHost } = useAppSelector((state) => state.qpReducer);
@@ -69,11 +62,6 @@ export default function ContentPanel({
     <>
       {isHost ? (
         <>
-          {meetingDetails.jobTitle ? (
-            <ContentPanelHeader jobTitle={meetingDetails.jobTitle} />
-          ) : (
-            <ContentPanelHeader jobTitle="" />
-          )}
           <ContentPanelMain />
           <ContentPanelFooter />
         </>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useData } from "@/context/DataWrapper";
 import { useNavigate } from "react-router-dom";
+import ControlPanelTimer from "@/components/ControlPanelTimer";
 
 export default function ControlPanel() {
   const [isAudioMuted, setIsAudioMuted] = useState(false);
@@ -46,7 +47,7 @@ export default function ControlPanel() {
       className="w-full bg-white border-t border-neutral-200 shadow-lg"
     >
       <div className="flex items-center justify-between px-6 py-3">
-        <div></div>
+        <ControlPanelTimer />
         <div className="flex items-center space-x-4">
           <button
             className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
