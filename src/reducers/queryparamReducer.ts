@@ -5,6 +5,7 @@ type QPState = {
   jobId: string,
   custEmailId: string,
   agentId: string,
+  name:string
   isHost: boolean,
 };
 
@@ -13,6 +14,7 @@ const initialQPState = {
   jobId: "",
   custEmailId: "",
   agentId: "",
+  name:"",
   isHost: false,
 } as QPState;
 

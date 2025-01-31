@@ -95,7 +95,7 @@ export default function DataWrapper({
   const { CuesList, jobDescription, interviewGuide, jobTitle } = useAppSelector(
     (state) => state.cuesReducer
   );
-  const { roomId, custEmailId, agentId, isHost } = useAppSelector(
+  const { jobId,roomId, custEmailId, agentId, isHost } = useAppSelector(
     (state) => state.qpReducer
   );
 
@@ -147,7 +147,7 @@ export default function DataWrapper({
   const msgArrRef = useRef([]);
 
   const [name, setName] = useState("");
-  const [cameraToggle, setCameraToggle] = useState(true);
+  const [cameraToggle, setCameraToggle] = useState(false);
   const cameraTogglerRef = useRef(true);
   const [microphoneToggle, setMicroPhoneToggle] = useState(true);
   const microphoneToggleRef = useRef(true);
@@ -206,28 +206,43 @@ export default function DataWrapper({
 
       let date = new Date();
       setCueLoading(true);
-      fetch(url, {
-        method: "POST",
-        headers: {
-          Accept: "application.json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          uid: data.id,
-          sessionid: data.id,
-          roomid: data.roomId,
-          isadmin: data.isAdmin,
-          custemailid: data.custEmailId,
-          agentId: data.agentId,
-          init: data.init,
-          //@ts-ignore
-          audiomessage: base64data.split(",")[1],
-          timeStamp: `${date.toLocaleDateString()} ${date.toLocaleTimeString()}:${date.getMilliseconds()}`,
-        }),
-        cache: "default",
-      }).then((res) => {
-        console.log("res from audio server", res);
-      });
+
+      data = {
+        // uid: data.id,
+        //   sessionid: data.id,
+        //   roomid: data.roomId,
+        //   isadmin: data.isAdmin,
+        //   custemailid: data.custEmailId,
+        //   agentId: data.agentId,
+        //   init: data.init,
+
+        // jobid:jobId , 
+        // roomid: roomId
+        //agentid: agentId, 
+        roomid: 'abc-123-fgh-456',
+        jobid: '1', 
+        agentid:'1234',
+        custemailid: custEmailId,
+        isHost: isHost,
+        name:name,
+        init:data.init,
+        audiomessage: base64data?.split(",")[1],
+        timeStamp: `${date.toLocaleDateString()} ${date.toLocaleTimeString()}:${date.getMilliseconds()}`
+      }
+      console.log('from inside send to server',data)
+      socket2.emit('ai_suggestion_req',data)
+      //   fetch(url, {
+      //   method: "POST",
+      //   headers: {
+      //     Accept: "application.json",
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify(data),
+      //   cache: "default",
+      // }).then((res) => {
+      //   console.log("res from audio server", res);
+      // });
+
     };
     reader.readAsDataURL(blob);
   }
@@ -820,9 +835,9 @@ export default function DataWrapper({
 
     //This is a socket connection with backend server to handle cues specific requests or other api requests
     let tempSocket2 = io(
-      "https://vitt-ai-request-broadcaster-production.up.railway.app"
+      "http://localhost:5000"
     );
-
+   // https://vitt-ai-request-broadcaster-production.up.railway.app
     let tempPeer = new Peer(uuidv4());
     let tempAudioPeer = new Peer(uuidv4());
 
@@ -846,6 +861,7 @@ export default function DataWrapper({
     if (socket2 === null || myId === "" || custId === "") return;
 
     function handleLiveQna(data:CuesDataType) {
+      console.log('handle live qna ',data)
       if (data?.type === "cues-update") {
         let filteredCues = CuesList?.map((e) => {
           if (e.common_id === data?.common_id) {
@@ -890,7 +906,7 @@ export default function DataWrapper({
     }
 
     function handleLiveTranscriptions(data:TranscriptionDataType){
-      
+      console.log('handle live transcriptions',data)
       let tempArr:Array<TranscriptionDataType> = []
       
       let obj:TranscriptionDataType = {...initialTranscriptionObj}
@@ -906,13 +922,17 @@ export default function DataWrapper({
       dispatch(addTranscription(tempArr))
     }
 
+    function handleJobDetails(data){
+      console.log('handle job details',data)
+    }
+    socket2.on("ai_suggestion_res",handleLiveQna);
     
-    socket2.on("recruito_live_qna",handleLiveQna);
-    
-    socket2.on('recruito_live_transcriptions',handleLiveTranscriptions)
+    socket2.on('live_transcriptions_res',handleLiveTranscriptions)
+    socket2.on('questions_loader_res',handleJobDetails)
     return () => {
-      socket2.off("recruito_live_qna",handleLiveQna);
-      socket2.off('recruito_live_transcriptions',handleLiveTranscriptions)
+      socket2.off("ai_suggestion_res",handleLiveQna);
+      socket2.off('live_transcriptions_res',handleLiveTranscriptions)
+      socket2.off('questions_loader_res',handleJobDetails)
     };
   }, [myId, custId, socket2, isHost]);
 
@@ -1365,11 +1385,37 @@ export default function DataWrapper({
   /* ========================================================================= */
   /* 7.3. Handling of events from socket2 server i.e. API server - for connection, and disconnection */
   useEffect(() => {
-    if (socket2 === null || myStream === null || myId === "") return;
+    if (socket2 === null || myStream === null || myId === "" || name==="") return;
 
     function connected() {
       //socket2.emit("connected socket2", myId);
-      console.log("socket2 connect triggered");
+
+      let questionsApiReqPayload = {
+        // jobid:jobId,
+        // roomid : roomId,
+        //agentid:agentId,
+        roomid: 'abc-123-fgh-456',
+        jobid: '1',
+        agentid:'1234',
+        custemailid :custEmailId,
+        name:name 
+      }
+      // let liveQnaReqPayload= {
+      //   jobid:jobId,
+      //   roomid : roomId,
+      //   agentid:agentId,
+      //   custemailid :custEmailId,
+      //   name:name ,
+      //   ishost:isHost,
+      //   audiomessage:"base64",
+      //   timestamp:"8:30pm"
+      // }
+
+      console.log("socket2 connect triggered",questionsApiReqPayload);
+      socket2.emit('questions_loader_req',questionsApiReqPayload)
+
+
+      
     }
 
     function disconnect() {
@@ -1384,7 +1430,7 @@ export default function DataWrapper({
       socket2.off("connect", connected);
       socket2.off("disconnect", disconnect);
     };
-  }, [socket2, myStream, myId]);
+  }, [socket2, myStream, myId,name]);
 
   
   /* ========================================================================= */
@@ -2045,6 +2091,8 @@ export default function DataWrapper({
         `%c just after wav to mp3 ${new Date().toLocaleTimeString()}`,
         "background-color:teal;color:white"
       );
+
+
       sendToServer(mp3Blob, url, { ...usersArrRef.current[0], init: false });
       arrayofChunks = [];
     };
@@ -2121,8 +2169,11 @@ export default function DataWrapper({
 
       //send this only once
 
+          
+
       sendToServer(new Blob([]), adminUrl, {
         ...usersArrRef.current[0],
+
         init: true,
       });
 
