@@ -845,48 +845,48 @@ export default function DataWrapper({
   useEffect(() => {
     if (socket2 === null || myId === "" || custId === "") return;
 
-    function receiveData(data: any) {
-      let date = new Date();
-      console.log(
-        `%c just after data received ${
-          date.toLocaleTimeString() + ":" + date.getMilliseconds()
-        }`,
-        "background-color:teal;color:white"
-      );
-      console.log(data);
-
-      if (isHost === true) {
-        let d = new Date();
-        console.log(
-          `%c just after filter data ${
-            d.toLocaleTimeString() + ":" + d.getMilliseconds()
-          }`,
-          "background-color:teal;color:white"
-        );
-        console.log(data);
-
-        //console.log(data)
-        if (data?.type === "cues-update") {
-          updateCues(data);
-        } else {
-          handleData(data);
+    function handleLiveQna(data:CuesDataType) {
+      if (data?.type === "cues-update") {
+        let filteredCues = CuesList?.map((e) => {
+          if (e.common_id === data?.common_id) {
+            return {
+              ...e,
+              content: e.content + " " + (data.content ?? ""),
+            };
+          }
+          return e;
+        });
+    
+        if (!filteredCues) {
+          return;
         }
+    
+        dispatch(
+          setCues({
+            CuesList: filteredCues,
+            jobDescription: jobDescription,
+            interviewGuide: interviewGuide,
+            jobTitle: jobTitle,
+          })
+        );
+      
+      } else {
+        let tempArr:Array<CuesDataType> = []
+
+        let obj:CuesDataType = {...initialCuesObj}
+        obj.content = data.content
+        obj.sessionid = data.sessionid
+        obj.audiofiletimestamp = data.audiofiletimestamp
+        obj.common_id = data.common_id
+        obj.similarity_query =data.similarity_query
+        obj.isanswered =data.isanswered
+        obj.type= data.type
+
+        tempArr.push(obj)
+
+        dispatch(addCues(tempArr))
+    
       }
-    }
-
-    function handleLiveQna(data:CuesDataType){
-      let tempArr:Array<CuesDataType> = []
-
-      let obj:CuesDataType = {...initialCuesObj}
-      obj.content = data.content
-      obj.sessionid = data.sessionid
-      obj.audiofiletimestamp = data.audiofiletimestamp
-      obj.common_id = data.common_id
-      obj.similarity_query =data.similarity_query
-      obj.isanswered =data.isanswered
-      obj.type= data.type
-
-      dispatch(addCues(tempArr))
     }
 
     function handleLiveTranscriptions(data:TranscriptionDataType){
@@ -943,7 +943,7 @@ export default function DataWrapper({
 
   /* ========================================================================= */
   /* ========================================================================= */
-  /* 3.2. Set users and usersarrref consts here */
+  /* 3.2. Set users and usersarrref consts here (from the perspective of this user, put first user in usersarrref) */
   useEffect(() => {
     if (
       myId === "" ||
