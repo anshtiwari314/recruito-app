@@ -189,7 +189,7 @@ export default function DataWrapper({
   /* ========================================================================= */
   /* ========================================================================= */
   /* Function to send live audio packet along with payload to backend after every VAD hit */
-  function sendToServer(blob, data) {
+  function sendToServer(blob, url, data) {
     let date = new Date();
     console.log(
       `%c just before sending the data ${
@@ -1708,7 +1708,7 @@ export default function DataWrapper({
     function chatsReceiver(data: any) {
       //@ts-ignore
       msgArrRef.current = [...data.chats, ...msgArrRef.current];
-      setMsg([...msgArrRef.current]);
+      setMsg((prev) => [...msgArrRef.current]);
       socket.off("user-chat-receiver", chatsReceiver);
     }
 
