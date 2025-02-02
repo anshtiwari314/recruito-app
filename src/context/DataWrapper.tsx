@@ -64,7 +64,7 @@ export default function DataWrapper({
     audioStream: null,
     isCameraAvailable: false,
     isMicrophoneAvailable: false,
-    cameraStatus: true,
+    cameraStatus: false,
     microphoneStatus: true,
 
     isAdmin: false,
@@ -111,9 +111,7 @@ export default function DataWrapper({
   const [users, setUsers] = useState<users[]>([]);
 
   const [myStream, setMyStream] = useState<MediaStream | null | boolean>(null);
-  const [myAudioStream, setMyAudioStream] = useState<
-    MediaStream | null | boolean
-  >(null);
+  const [myAudioStream, setMyAudioStream] = useState<MediaStream | null | boolean>(null);
 
   const peersObjRef = useRef<any>({});
   const peersArrRef = useRef<string[]>([]);
@@ -148,7 +146,6 @@ export default function DataWrapper({
 
   const [name, setName] = useState("");
   const [cameraToggle, setCameraToggle] = useState(false);
-  const cameraTogglerRef = useRef(true);
   const [microphoneToggle, setMicroPhoneToggle] = useState(true);
   const microphoneToggleRef = useRef(true);
   const [screenSharing, setScreenSharing] = useState(false);
@@ -188,7 +185,11 @@ export default function DataWrapper({
   );
 
   //@ts-ignore
-  function sendToServer(blob, url, data) {
+  
+  /* ========================================================================= */
+  /* ========================================================================= */
+  /* Function to send live audio packet along with payload to backend after every VAD hit */
+  function sendToServer(blob, data) {
     let date = new Date();
     console.log(
       `%c just before sending the data ${
@@ -231,22 +232,14 @@ export default function DataWrapper({
       }
       console.log('from inside send to server',data)
       socket2.emit('ai_suggestion_req',data)
-      //   fetch(url, {
-      //   method: "POST",
-      //   headers: {
-      //     Accept: "application.json",
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify(data),
-      //   cache: "default",
-      // }).then((res) => {
-      //   console.log("res from audio server", res);
-      // });
 
     };
     reader.readAsDataURL(blob);
   }
 
+  /* ========================================================================= */
+  /* ========================================================================= */
+  /* Functions for utilizing live audio streams and converting from raw wav buffers to mp3 */
   function bufferToWav(abuffer: ArrayBuffer, len: number) {
     //console.log("abuffer", abuffer, len);
 
@@ -439,6 +432,9 @@ export default function DataWrapper({
     return dataBuffer;
   }
 
+  /* ========================================================================= */
+  /* ========================================================================= */
+  /* Function to create video streams/audio streams/screen sharing streams for new users */
   async function gettingVideoStream() {
     return navigator.mediaDevices.getUserMedia({
       video: {
@@ -465,6 +461,9 @@ export default function DataWrapper({
     });
   }
 
+  /* ========================================================================= */
+  /* ========================================================================= */
+  /* function used for creating a cues box based on response from socket2 server - not in use at the moment */
   function handleData(data: CuesDataType = {} as CuesDataType) {
     let date = new Date();
     console.log(
@@ -581,6 +580,9 @@ export default function DataWrapper({
     dispatch(addCues(arr));
   }
 
+  /* ========================================================================= */
+  /* ========================================================================= */
+  /* function used for updating cues box based on response from socket2 server - not in use at the moment */
   function updateCues(data: CuesDataType = {} as CuesDataType) {
     let date = new Date();
     console.log(
@@ -614,6 +616,9 @@ export default function DataWrapper({
     );
   }
 
+  /* ========================================================================= */
+  /* ========================================================================= */
+  /* Function for uploading file chunk by chunk using ajax/xhr */
   function uploadFile(uploadFileparam: Blob) {
     let uid = uuidv4();
     const chunkSize = 1 * 1024 * 1024;
@@ -717,6 +722,8 @@ export default function DataWrapper({
     uploadChunk(0);
   }
 
+  /* ========================================================================= */
+  /* ========================================================================= */
   /* Media Recorder functionality that uploads recordings to backend server - not in use at the moment*/
   function handleRecordings(stream: MediaStream) {
     //let url = 'https://qhpv9mvz1h.execute-api.ap-south-1.amazonaws.com/prod/postfacto-upload-test'
@@ -922,8 +929,22 @@ export default function DataWrapper({
       dispatch(addTranscription(tempArr))
     }
 
-    function handleJobDetails(data){
+    function handleJobDetails(data: any){
       console.log('handle job details',data)
+      let filteredCues = data?.preloadedQuestions
+      if (!filteredCues) {
+        filteredCues = []
+      }
+
+      dispatch(
+        setCues({
+          CuesList: filteredCues,
+          jobDescription: data?.jobDescription,
+          interviewGuide: data?.interviewGuide,
+          jobTitle: data?.jobTitle,
+        })
+      );
+
     }
     socket2.on("ai_suggestion_res",handleLiveQna);
     
@@ -951,7 +972,7 @@ export default function DataWrapper({
       if (usersFlag.current > 0) {
         console.log(usersArrRef.current, peersArrRef, peersObjRef);
         setUsers((prev) => [...usersArrRef.current]);
-        // setUsers([...usersArrRef.current]);
+        // setUsers((prev) => [...usersArrRef.current]);
         usersFlag.current--;
       }
     }, 5000);
@@ -1023,7 +1044,7 @@ export default function DataWrapper({
     let d = new Date();
     console.log("after setting usersArrRef", d.toLocaleTimeString());
 
-    setUsers([...usersArrRef.current]);
+    setUsers((prev) => [...usersArrRef.current]);
   }, [myId, roomId, isHost, custEmailId, agentId, name, audioPeer]);
 
 
@@ -1055,7 +1076,7 @@ export default function DataWrapper({
       id: usersArrRef.current[0].id,
     });
 
-    setUsers([...usersArrRef.current]);
+    setUsers((prev) => [...usersArrRef.current]);
 
     console.log("myData modified", usersArrRef.current, cameraToggle);
   }, [socket, myStream, cameraToggle]);
@@ -1085,7 +1106,7 @@ export default function DataWrapper({
       microphoneStatus: microphoneToggle,
       id: usersArrRef.current[0].id,
     });
-    setUsers([...usersArrRef.current]);
+    setUsers((prev) => [...usersArrRef.current]);
   }, [socket, myAudioStream, microphoneToggle]);
 
 
@@ -1221,7 +1242,7 @@ export default function DataWrapper({
           let [first, ...restData] = usersArrRef.current;
           usersArrRef.current = [first, tempUser, ...restData];
 
-          setUsers([...usersArrRef.current]);
+          setUsers((prev) => [...usersArrRef.current]);
 
           //send this tempUsr info to every joined peer
 
@@ -1242,7 +1263,7 @@ export default function DataWrapper({
   /* ========================================================================= */
   /* ========================================================================= */
   /* 5.1. this code is responsible for initializing Peer variable - potentially move this declaration to 1.1. */
-  /* Potentially put here after timeout because socket connection is given some time to connect. */
+  /* Potentially put here after timeout because the socket connection might change i.e. new socket connection might be established */
   useEffect(() => {
     if (socket === null || myId === "") return;
 
@@ -1323,7 +1344,7 @@ export default function DataWrapper({
     usersArrRef.current = usersArrRef.current.filter(
       (e, i) => e.peer2Id !== peer2Id
     );
-    setUsers([...usersArrRef.current]);
+    setUsers((prev) => [...usersArrRef.current]);
     console.log("users changed due to user left", userId, peer2Id, usersArrRef);
   }
 
@@ -1353,12 +1374,12 @@ export default function DataWrapper({
 
     socket.on("disconnect", disconnect);
 
-    socket.on("user-disconnected", userDisconnect);
+    socket.on("user-disconnected", userDisconnect); // Event when another user disconnects from the call.
 
     return () => {
       socket.off("connect", connected);
       socket.off("disconnect", disconnect);
-      socket.off("user-disconnected", userDisconnect);
+      socket.off("user-disconnected", userDisconnect); // Event when another user disconnects from the call.
     };
   }, [socket, myStream, myId]);
 
@@ -1414,8 +1435,6 @@ export default function DataWrapper({
       console.log("socket2 connect triggered",questionsApiReqPayload);
       socket2.emit('questions_loader_req',questionsApiReqPayload)
 
-
-      
     }
 
     function disconnect() {
@@ -1435,7 +1454,7 @@ export default function DataWrapper({
   
   /* ========================================================================= */
   /* ========================================================================= */
-  /* 8. Helper function for console.logging whether peers are available or not */
+  /* 8. Helper function for console.logging whether peers are available or not - used only for console.logging purpose */
   function isUserAvailable(userId: string) {
     let flag = false;
     for (let i = 0; i < peersArrRef.current.length; i++) {
@@ -1450,7 +1469,7 @@ export default function DataWrapper({
   /* ========================================================================= */
   /* ========================================================================= */
   /* 9.1. Helper function for video sharing - shares video stream with any new peers received on */
-  /* socket.on(""receive-connected-user-data") event */
+  /* socket.on(""receive-connected-user-data") event by creating a call */
   async function sendVideoToNewUser(stream: MediaStream, newUserId: string) {
     console.log(socket, stream, usersArrRef.current);
 
@@ -1495,7 +1514,7 @@ export default function DataWrapper({
   /* ========================================================================= */
   /* ========================================================================= */
   /* 9.2. Helper function for audio sharing - shares audio stream with any new peers received on */
-  /* socket.on(""receive-connected-user-data") event */
+  /* socket.on(""receive-connected-user-data") event by creating a call */
   async function sendAudioToNewUser(stream: MediaStream, newUserId: string) {
     console.log("send audio to new user", socket, stream, usersArrRef.current);
 
@@ -1549,7 +1568,7 @@ export default function DataWrapper({
     )
       return;
 
-    /* 10.1.1. socket.on("user-connected") event handler */  
+    /* 10.1.1. socket.on("user-connected") event handler i.e. new user has connected as a peer on the call */  
     function newUser(userId: string) {
       console.log("new user triggered");
       if (peersArrRef.current.includes(userId) === true) return;
@@ -1581,21 +1600,20 @@ export default function DataWrapper({
       removeUserFromMainPage(userId);
     }
 
-    /* 10.1.4.  */
+    /* 10.1.4. socket.on("receive-connected-user-data") event handler */
     function sendUserData(data: any) {
       console.log("send user triggered", data);
       if (data.count !== 0) {
-        //new user data
+        //new user data, make rtc connection here.
         console.log(data, data.count !== 0);
-        //@ts-ignore
         socket.emit("connected-user-data", {
           ...usersArrRef.current[0],
           stream: null,
           videoStream: null,
           audioStream: null,
           toPeer: data.id,
-          peer2Id: peer2.id,
-          audioPeerId: audioPeer.id,
+          peer2Id: peer2?.id,
+          audioPeerId: audioPeer?.id,
           isLoading: true,
           count: --data.count,
         });
@@ -1605,6 +1623,8 @@ export default function DataWrapper({
 
           sendVideoToNewUser(myStream, data.id);
           console.log("before exec send audio", myAudioStream);
+
+          //@ts-ignore
           sendAudioToNewUser(myAudioStream, data.audioPeerId);
           clearTimeout(timeoutId);
         }, 2500);
@@ -1614,11 +1634,12 @@ export default function DataWrapper({
         socket.emit("user-chat-transmitter", {
           chats: msgArrRef.current,
           toPeer: data.id,
-          from: id,
+          from: myId,
         });
         //@ts-ignore
         sendVideoToNewUser(myStream, data.id);
         console.log("before exec send audio", myAudioStream);
+        //@ts-ignore
         sendAudioToNewUser(myAudioStream, data.audioPeerId);
         //share screen if enabled
         if (usersArrRef.current[0].isScreenSharingEnabled === true) {
@@ -1651,10 +1672,10 @@ export default function DataWrapper({
       setUsers((prev) => [...prev, data]);
     }
 
-    /* 10.1.5.  */
+    /* 10.1.5. executes beforeunload */
     function executeBeforeTabClose(e: Event) {}
 
-    /* 10.1.6.  */
+    /* 10.1.6. socket.on("camera-toggle-receiver") event handler */
     function cameraToggle(data: any) {
       console.log("camera toggle", data);
 
@@ -1668,7 +1689,7 @@ export default function DataWrapper({
       console.log("new data", usersArrRef.current);
     }
 
-    /* 10.1.7.  */
+    /* 10.1.7. socket.on("microphone-toggle-receiver") event handler */
     function microphoneToggle(data: any) {
       console.log("microphone toggle", data);
 
@@ -1683,17 +1704,15 @@ export default function DataWrapper({
       console.log("new data", usersArrRef.current);
     }
 
-    /* 10.1.8.  */
+    /* 10.1.8. socket.on("user-chat-receiver") event handler */
     function chatsReceiver(data: any) {
-      //console.log("chats receiver",data)
-
       //@ts-ignore
       msgArrRef.current = [...data.chats, ...msgArrRef.current];
-      setMsg((prev) => [...msgArrRef.current]);
+      setMsg([...msgArrRef.current]);
       socket.off("user-chat-receiver", chatsReceiver);
     }
 
-    /* 10.1.9.  */
+    /* 10.1.9. socket.on("screen-share-receiver") event handler */
     function screenShareDataReceiver(data: any) {
       console.log("screen share data receiver", data);
 
@@ -1703,7 +1722,7 @@ export default function DataWrapper({
       setUsers((prev) => [...usersArrRef.current]);
     }
 
-    /* 10.1.10.  */
+    /* 10.1.10. socket.on("screen-share-end-receiver") event handler */
     function stopScreenReceiving(data: any) {
       //remove screen sharing user
       // removeUserFromPeers2Arr(id)
@@ -1732,7 +1751,7 @@ export default function DataWrapper({
       setUsers((prev) => [...usersArrRef.current]);
     }
 
-    /* 10.1.11.  */
+    /* 10.1.11. socket.on("receive-msg") event handler */
     function singleMsgReceiver(data: any) {
       console.log("msg receiver", data);
       //@ts-ignore
@@ -1740,7 +1759,7 @@ export default function DataWrapper({
       setMsg((prev) => [...msgArrRef.current]);
     }
 
-    /* 10.1.12.  */
+    /* 10.1.12. socket.on("cue-loading-receiver") event handler */
     function cueLoadingReceiver(data: any) {
       setCueLoading(data.toggle);
     }
@@ -1781,7 +1800,9 @@ export default function DataWrapper({
 
 
 
-
+  /* ========================================================================= */
+  /* ========================================================================= */
+  /* Obtaining videostreams/audiostreams of peer connections and updating usersArrRef to be used in components */
   useEffect(() => {
     if (
       peer === null ||
@@ -1799,10 +1820,8 @@ export default function DataWrapper({
 
     function screenSharingReply(call: any) {
       console.log("screen sharing replying trigerred");
-      // socket.emit('connected-user-data',{...usersArrRef.current[0],toPeer:call.peer,isLoading:true})
       let intervalId: number;
       call.answer();
-      // console.log('after-a-call-answered 2',call,myStream)
 
       call.on("stream", (userVideoStream: MediaStream) => {
         //@ts-ignore
@@ -1859,22 +1878,21 @@ export default function DataWrapper({
         // delete peers2ObjRef.current[call.peer]
       });
     }
+    
     function videoReply(call: any) {
       console.log("video replying trigerred");
-      // socket.emit('connected-user-data',{...usersArrRef.current[0],toPeer:call.peer,isLoading:true})
+    
       let intervalId: number;
       call.answer();
-      // console.log('after-a-call-answered',call,myStream)
 
       call.on("stream", (userVideoStream: MediaStream) => {
         //@ts-ignore
 
         console.log("2nd getting video stream", userVideoStream, call.peer);
 
-        //if data is present at peersArrRef then is normal video or audio stream
+        //if data is present at peersArrRef then is normal video or audio stream, if data is present at peers2ArrRef then it is screen sharing connection
         peersObjRef.current[call.peer] = { call: call };
 
-        //if data is present at peers2ArrRef then it is screen sharing connection
 
         for (let i = 0; i < usersArrRef.current.length; i++) {
           if (usersArrRef.current[i].id === call.peer) {
@@ -1918,21 +1936,18 @@ export default function DataWrapper({
         if (intervalId) clearInterval(intervalId);
       });
     }
+
     function audioReply(call: any) {
-      console.log("audio replying trigerred");
       let intervalId: number;
       call.answer();
-      // console.log('after-a-call-answered',call,myStream)
 
       call.on("stream", (userAudioStream: MediaStream) => {
         //@ts-ignore
 
         console.log("2nd getting audio stream", userAudioStream, call.peer);
 
-        //if data is present at peersArrRef then is normal video or audio stream
-        audioPeersObjRef.current[call.peer] = { call: call };
-
-        //if data is present at peers2ArrRef then it is screen sharing connection
+        //if data is present at peersArrRef then is normal video or audio stream, if data is present at peers2ArrRef then it is screen sharing connection
+        audioPeersObjRef.current[call.peer] = { call: call };        
 
         for (let i = 0; i < usersArrRef.current.length; i++) {
           if (usersArrRef.current[i].audioPeerId === call.peer) {
@@ -1962,13 +1977,9 @@ export default function DataWrapper({
         if (intervalId) clearInterval(intervalId);
       });
     }
-    console.log("peer open useEffect");
+
     function onOpen() {
       console.log("peer open triggered");
-      // setTimeout(()=>{
-      //     firstTimeConnectRef.current = false;
-      //     socket.emit('join-room',roomId,myId);
-      // },5000)
     }
 
     function onConnection(conn: any) {
@@ -1981,9 +1992,6 @@ export default function DataWrapper({
     peer.on("open", onOpen);
     peer.on("connection", onConnection);
 
-    // setTimeout(()=>{
-
-    // },5000)
     return () => {
       peer.off("call", videoReply);
       peer2.off("call", screenSharingReply);
