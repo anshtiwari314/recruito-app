@@ -70,10 +70,83 @@ const initialCuesState = {
   jobTitle: "",
 } as CuesState;
 
+let initialCuesLoadState: CuesState = {
+  jobTitle: "EDI Developer",
+  jobDescription: "https://arxiv.org/pdf/2301.12652", //pdf
+  interviewGuide: "https://arxiv.org/pdf/2410.08174", //pdf
+  CuesList: [
+    {
+      content: "",
+      sessionid: "1",
+      audiofiletimestamp: "2022-01-01T00:00:00Z",
+      common_id: "1",
+      similarity_query: "Ask about specific EDI protocols experience",
+      isanswered: true,
+    },
+    {
+      content: "",
+      sessionid: "1",
+      audiofiletimestamp: "2022-01-01T00:00:00Z",
+      common_id: "2",
+      similarity_query: "Discuss experience with mapping tools",
+      isanswered: false,
+    },
+    {
+      content: "",
+      sessionid: "1",
+      audiofiletimestamp: "2022-01-01T00:00:00Z",
+      common_id: "3",
+      similarity_query: "Probe cloud integration knowledge",
+      isanswered: false,
+    },
+    {
+      content: "",
+      sessionid: "1",
+      audiofiletimestamp: "2022-01-01T00:00:00Z",
+      common_id: "3",
+      similarity_query: "Probe cloud integration knowledge",
+      isanswered: false,
+    },
+    {
+      content: "",
+      sessionid: "1",
+      audiofiletimestamp: "2022-01-01T00:00:00Z",
+      common_id: "3",
+      similarity_query: "Probe cloud integration knowledge",
+      isanswered: false,
+    },
+    {
+      content: "",
+      sessionid: "1",
+      audiofiletimestamp: "2022-01-01T00:00:00Z",
+      common_id: "3",
+      similarity_query: "Probe cloud integration knowledge",
+      isanswered: false,
+    },
+    {
+      content: "",
+      sessionid: "1",
+      audiofiletimestamp: "2022-01-01T00:00:00Z",
+      common_id: "3",
+      similarity_query: "Probe cloud integration knowledge",
+      isanswered: false,
+    },
+    {
+      content: "",
+      sessionid: "1",
+      audiofiletimestamp: "2022-01-01T00:00:00Z",
+      common_id: "3",
+      similarity_query: "Probe cloud integration knowledge",
+      isanswered: false,
+    },
+  ],
+};
+
+
 // Create a slice for "cues"
 const cuesSlice = createSlice({
   name: "cuesReducer",
-  initialState: initialCuesState,
+  initialState: {...initialCuesLoadState},
   reducers: {
     addCues: (state, action: PayloadAction<CuesDataType[]>) => {
       // Declare default value for state.CuesList

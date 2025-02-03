@@ -34,9 +34,9 @@ type UserType = {
     name: "usersReducer",
     initialState: Users,
     reducers: {
-      addNewUser:addNewUser,
-      removeUser: removeUser,
-      updateUser:updateUser,
+      addNewUser,
+      removeUser,
+      updateUser,
       
     },
   });

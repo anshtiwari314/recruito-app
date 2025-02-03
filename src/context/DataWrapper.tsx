@@ -852,6 +852,7 @@ export default function DataWrapper({
     //This is a socket connection with backend server to handle cues specific requests or other api requests
     let tempSocket2 = io(
       "ws://34.47.233.254"
+      //'http://localhost:5000'
     );
    // https://vitt-ai-request-broadcaster-production.up.railway.app
     let tempPeer = new Peer(uuidv4());
@@ -877,7 +878,7 @@ export default function DataWrapper({
     if (socket2 === null || myId === "" || custId === "") return;
 
     function handleLiveQna(data:CuesDataType) {
-      console.log('handle live qna ',data)
+      console.log('handle qna',data)
       if (data?.type === "cues-update") {
         let filteredCues = CuesList?.map((e) => {
           if (e.common_id === data?.common_id) {
@@ -912,8 +913,8 @@ export default function DataWrapper({
         obj.common_id = data.common_id
         obj.similarity_query =data.similarity_query
         obj.isanswered =data.isanswered
-        obj.type= data.type
-
+        //obj.type= data.type
+        obj.match_score =  data.match_score
         tempArr.push(obj)
 
         dispatch(addCues(tempArr))
@@ -921,16 +922,16 @@ export default function DataWrapper({
       }
     }
 
-    function handleLiveTranscriptions(data:TranscriptionDataType){
+    function handleLiveTranscriptions(data:any){
       console.log('handle live transcriptions',data)
       let tempArr:Array<TranscriptionDataType> = []
       
       let obj:TranscriptionDataType = {...initialTranscriptionObj}
-        obj.id  = data.id
+       // obj.id  = data.id
         obj.speaker = data.speaker
-        obj.timeStamp = data.timeStamp 
+        obj.timeStamp = data?.time_stamp 
         obj.transcription = data.transcription
-        obj.isCandidate = data.isCandidate
+        //obj.isCandidate = data.isCandidate
         
         
       tempArr.push(obj) 
@@ -973,7 +974,9 @@ export default function DataWrapper({
   useEffect(() => {
     let intervalId = setInterval(() => {
       //after 4 minute if no one is joined refresh
-      if (peersArrRef.current.length === 0) window.location.reload();
+      if (peersArrRef.current.length === 0) 
+        null
+        //window.location.reload();
       else clearInterval(intervalId);
     }, 1000 * 60 * 4);
 

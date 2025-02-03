@@ -206,14 +206,16 @@ export default function MainPage() {
       // Code block for calling API to fetch interview details like JD, candidate profile, job details, etc.
       // API call to fetch interview details
       // meetingDetails =
-      dispatch(
-        setCues({
-          CuesList: meetingDetails.preloadedQuestions,
-          interviewGuide: meetingDetails.interviewGuide,
-          jobDescription: meetingDetails.jobDescription,
-          jobTitle: meetingDetails.jobTitle,
-        })
-      );
+
+      // dispatch(
+      //   setCues({
+      //     CuesList: meetingDetails.preloadedQuestions,
+      //     interviewGuide: meetingDetails.interviewGuide,
+      //     jobDescription: meetingDetails.jobDescription,
+      //     jobTitle: meetingDetails.jobTitle,
+      //   })
+      // );
+      
     }
   }, [meetingIsLegit]);
 
