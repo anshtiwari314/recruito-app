@@ -15,8 +15,8 @@ import { setCues, addCues, initialCuesObj } from "@/reducers/cuesReducer";
 import { useAppSelector } from "@/store/store";
 import { useDispatch } from "react-redux";
 import {TranscriptionDataType,addTranscription, initialTranscriptionObj } from '@/reducers/transcriptionReducer';
-import * as ort from "onnxruntime-web";
-import * as vad from "@ricky0123/vad-web";
+//import * as ort from "onnxruntime-web";
+//import * as vad from "@ricky0123/vad-web";
  
 
 const Context = createContext("");
@@ -851,7 +851,7 @@ export default function DataWrapper({
 
     //This is a socket connection with backend server to handle cues specific requests or other api requests
     let tempSocket2 = io(
-      "http://localhost:5000"
+      "ws://34.47.233.254"
     );
    // https://vitt-ai-request-broadcaster-production.up.railway.app
     let tempPeer = new Peer(uuidv4());
