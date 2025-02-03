@@ -4,13 +4,15 @@ import cuesReducer from "@/reducers/cuesReducer";
 import queryparamReducer from "@/reducers/queryparamReducer";
 import { TypedUseSelectorHook, useSelector } from "react-redux";
 import transcriptionReducer from "@/reducers/transcriptionReducer";
+import usersReducer from "@/reducers/usersReducer";
 
 // Create and configure the Redux store
 export const store = configureStore({
   reducer: {
     cuesReducer: cuesReducer.cuesReducer,
     qpReducer: queryparamReducer.qpReducer,
-    trcpReducer:transcriptionReducer.transcriptionReducer
+    trcpReducer:transcriptionReducer.transcriptionReducer,
+    usersReducer:usersReducer.usersReducer
   },
 });
 

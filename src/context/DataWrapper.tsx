@@ -835,7 +835,7 @@ export default function DataWrapper({
 
     //This is a socket connection with backend server to handle cues specific requests or other api requests
     let tempSocket2 = io(
-      "http://localhost:5000"
+      "wss://0.tcp.in.ngrok.io:19890"
     );
    // https://vitt-ai-request-broadcaster-production.up.railway.app
     let tempPeer = new Peer(uuidv4());
