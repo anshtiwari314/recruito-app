@@ -31,6 +31,7 @@ export default function MainPage() {
     setAdminUrl,
   } = useData();
   const { isHost } = useAppSelector((state) => state.qpReducer);
+  const { jobTitle } = useAppSelector( (state) => state.cuesReducer);
   const dispatch = useDispatch();
   const [meetingIsLegit, setMeetingIsLegit] = useState<boolean>(true);
 
@@ -162,6 +163,7 @@ export default function MainPage() {
         custEmailId: params.get("cust_email_id") ?? "",
         agentId: params.get("agent_id") ?? "",
         isHost: tempIsHost,
+        name: sessionStorage.getItem("userName") ?? "",
       };
       // Set the query params state for this meeting
       dispatch(setQP(qParams));
@@ -234,8 +236,8 @@ export default function MainPage() {
                 className="h-8"
                 alt="Logo"
               />
-              {meetingDetails.jobTitle ? (
-                <div className="text-md text-neutral-500">Interview: {meetingDetails.jobTitle}</div>
+              {jobTitle ? (
+                <div className="text-md text-neutral-500">Interview: {jobTitle}</div>
               ) : (
                 <div className="text-md text-neutral-500">Recruiter Copilot</div>
               )}
