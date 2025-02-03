@@ -193,8 +193,6 @@ export default function WavToMp3(wavFileBlob:Blob) {
       // @ts-ignore
       const mp3Buffer = encodeMp3(buffer)
       let tempBlob = new Blob(mp3Buffer,{type:"audio/mp3"});
-      //console.log(tempBlob)
-      //blob = tempBlob;
       resolve(tempBlob)
       if(!tempBlob)
       reject(new Error("could not get an mp3 file"))

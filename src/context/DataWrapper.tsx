@@ -14,7 +14,9 @@ import type { CuesDataType } from "@/reducers/cuesReducer";
 import { setCues, addCues, initialCuesObj } from "@/reducers/cuesReducer";
 import { useAppSelector } from "@/store/store";
 import { useDispatch } from "react-redux";
-import {TranscriptionDataType,addTranscription, initialTranscriptionObj } from '@/reducers/transcriptionReducer'
+import {TranscriptionDataType,addTranscription, initialTranscriptionObj } from '@/reducers/transcriptionReducer';
+import * as ort from "onnxruntime-web";
+import * as vad from "@ricky0123/vad-web";
  
 
 const Context = createContext("");
@@ -240,6 +242,7 @@ export default function DataWrapper({
   /* ========================================================================= */
   /* ========================================================================= */
   /* Functions for utilizing live audio streams and converting from raw wav buffers to mp3 */
+  /* Helper function used to convert audio buffers to wav - redundant (present in functions/wavToMp3) */
   function bufferToWav(abuffer: ArrayBuffer, len: number) {
     //console.log("abuffer", abuffer, len);
 
@@ -316,6 +319,9 @@ export default function DataWrapper({
     }
   }
 
+  /* ========================================================================= */
+  /* ========================================================================= */
+  /* Function used to convert raw blob / array of audio chunks into wav format - redundant (present in functions/wavToMp3) */
   function downsampleToWav(file: any, callback: CallableFunction) {
     //Browser compatibility
     // https://caniuse.com/?search=AudioContext
@@ -382,6 +388,9 @@ export default function DataWrapper({
     fileReader1.readAsArrayBuffer(file);
   }
 
+  /* ========================================================================= */
+  /* ========================================================================= */
+  /* Function to convert raw wav buffers to mp3 - redundant (present in functions/wavToMp3) */
   function encodeMp3(arrayBuffer: any) {
     //@ts-ignore
     const wav = lamejs.WavHeader.readHeader(new DataView(arrayBuffer));
@@ -463,7 +472,7 @@ export default function DataWrapper({
 
   /* ========================================================================= */
   /* ========================================================================= */
-  /* function used for creating a cues box based on response from socket2 server - not in use at the moment */
+  /* function used for creating a cues box based on response from socket2 server - deprecated */
   function handleData(data: CuesDataType = {} as CuesDataType) {
     let date = new Date();
     console.log(
@@ -582,7 +591,7 @@ export default function DataWrapper({
 
   /* ========================================================================= */
   /* ========================================================================= */
-  /* function used for updating cues box based on response from socket2 server - not in use at the moment */
+  /* function used for updating cues box based on response from socket2 server - deprecated */
   function updateCues(data: CuesDataType = {} as CuesDataType) {
     let date = new Date();
     console.log(
@@ -724,7 +733,7 @@ export default function DataWrapper({
 
   /* ========================================================================= */
   /* ========================================================================= */
-  /* Media Recorder functionality that uploads recordings to backend server - not in use at the moment*/
+  /* Media Recorder functionality that uploads recordings to backend server - deprecated */
   function handleRecordings(stream: MediaStream) {
     //let url = 'https://qhpv9mvz1h.execute-api.ap-south-1.amazonaws.com/prod/postfacto-upload-test'
     let url = videoUploadUrl;
@@ -1802,7 +1811,7 @@ export default function DataWrapper({
 
   /* ========================================================================= */
   /* ========================================================================= */
-  /* Obtaining videostreams/audiostreams of peer connections and updating usersArrRef to be used in components */
+  /* 11.1 Answering Peer connections that have been initiated by peers. Event handlers on peer connections. Obtaining videostreams/audiostreams of peer connections and updating usersArrRef to be used in components */
   useEffect(() => {
     if (
       peer === null ||
@@ -2001,6 +2010,10 @@ export default function DataWrapper({
     };
   }, [peer, peer2, audioPeer, socket, roomId, myId, myStream, myAudioStream]);
 
+
+  /* ========================================================================= */
+  /* ========================================================================= */
+  /* 12.1  Old function for handling mediastream once VAD has turned on - deprecated  */
   //vad code here
   function sendVadStreamToServer(
     stream: MediaStream,
@@ -2070,6 +2083,9 @@ export default function DataWrapper({
     }
   }
 
+  /* ========================================================================= */
+  /* ========================================================================= */
+  /* 12.2  Function for handling mediastream once VAD has turned on */
   function startMediaRecorder(stream: MediaStream, time: number) {
     //let url = 'https://f6p70odi12.execute-api.ap-south-1.amazonaws.com'
     let url = adminUrl;
@@ -2085,8 +2101,6 @@ export default function DataWrapper({
     mediaRecorder.onstop = async () => {
       setCueLoading(true);
 
-      //let url = `https://asia-south1-utility-range-375005.cloudfunctions.net/save_b64_1`
-      //let url = `https://0455-182-72-76-34.ngrok.io`
       console.log(
         `%c just before wav to mp3 ${new Date().toLocaleTimeString()}`,
         "background-color:teal;color:white"
@@ -2094,7 +2108,7 @@ export default function DataWrapper({
       let mp3Blob = await WavToMp3(
         new Blob(arrayofChunks, { type: "audio/wav" })
       );
-      //console.log(mp3Blob)
+
       console.log(
         `%c just after wav to mp3 ${new Date().toLocaleTimeString()}`,
         "background-color:teal;color:white"
@@ -2104,8 +2118,6 @@ export default function DataWrapper({
       sendToServer(mp3Blob, url, { ...usersArrRef.current[0], init: false });
       arrayofChunks = [];
     };
-
-    //setTimeout(()=>mediaRecorder.stop(),time)
 
     //if recording true stop after 30 sec
     let timeOutId = setTimeout(() => {
@@ -2122,9 +2134,11 @@ export default function DataWrapper({
     mediaRecorder.start();
   }
 
+  /* ========================================================================= */
+  /* ========================================================================= */
+  /* 12.3 Useeffect that calls startMediaRecorder as soon as VAD is turned on.  */
+  /* recordingOn implies that VAD is on. If recordingOn is false then VAD is off. This useeffect gets executed every time the VAD goes on */
   useEffect(() => {
-    //recordingStatus.current = recordingOn
-
     let id: number;
     if (
       recordingOn === true &&
@@ -2136,25 +2150,28 @@ export default function DataWrapper({
         `%c vad triggered ${new Date().toLocaleTimeString()}`,
         "background-color:teal;color:white"
       );
-      //setMsg([]);
+
       navigator.mediaDevices
         .getUserMedia({
           audio: true,
         })
         .then((stream) => {
-          startMediaRecorder(stream, 20000);
+          startMediaRecorder(stream, 40000);
           //@ts-ignore
           id = setInterval(() => {
             console.log("recording is ", recordingOn);
-            startMediaRecorder(stream, 20000);
-          }, 20000);
+            startMediaRecorder(stream, 40000);
+          }, 40000);
         });
 
-      // if(recordingOn ===true)
     }
     return () => clearInterval(id);
   }, [recordingOn, microphoneToggle, users]);
 
+  
+  /* ========================================================================= */
+  /* ========================================================================= */
+  /* 13.1. Declaration of the VAD function here */
   useEffect(() => {
     if (myAudioStream === null || users.length === 0 || socket === null) return;
     // if(vadEffectRender.current>0)
@@ -2162,23 +2179,8 @@ export default function DataWrapper({
     vadEffectRender.current++;
     //@ts-ignore
     let myVad = null;
-    async function VAD(cb1: CallableFunction, cb2: CallableFunction) {
-      // return new Promise(async (resolve,reject)=>{
-      //     //@ts-ignore
-      //     const myvad = await vad.MicVAD.new({
-      //       onSpeechStart: cb1,
-      //       onSpeechEnd: cb2
-      //     })
-      //     resolve(myvad)
-      //     reject(myvad)
-      // })
 
-      //@ts-ignore
-
-      //send this only once
-
-          
-
+    async function VAD(cb1: () => void, cb2: () => void) {
       sendToServer(new Blob([]), adminUrl, {
         ...usersArrRef.current[0],
 
