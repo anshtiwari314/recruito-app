@@ -21,75 +21,7 @@ const initialTranscriptionObj: TranscriptionDataType = {
   isCandidate: false,
 };
 
-const initialTranscriptionLoadState = [
-  {
-    id: "abcde",
-    speaker: "anuj",
-    transcription:
-      "It is a long established fact that a reader will be distracted",
-    timeStamp: "08:35pm",
-    isCandidate: true,
-  },
-  {
-    id: "abcde",
-    speaker: "anuj",
-    transcription:
-      "It is a long established fact that a reader will be distracted",
-    timeStamp: "08:35pm",
-    isCandidate: false,
-  },
-  {
-    id: "abcde",
-    speaker: "saurabhahlawat2014eeeoeo@gmail.com",
-    transcription:
-      "It is a long established fact that a reader will be distracted",
-    timeStamp: "08:35pm",
-    isCandidate: false,
-  },
-  {
-    id: "abcde",
-    speaker: "saurabhahlawat2014eeeoeo@gmail.com",
-    transcription:
-      "It is a long established fact that a reader will be distracted",
-    timeStamp: "08:35pm",
-    isCandidate: false,
-  },{
-    id: "abcde",
-    speaker: "saurabhahlawat2014eeeoeo@gmail.com",
-    transcription:
-      "It is a long established fact that a reader will be distracted",
-    timeStamp: "08:35pm",
-    isCandidate: false,
-  },{
-    id: "abcde",
-    speaker: "saurabhahlawat2014eeeoeo@gmail.com",
-    transcription:
-      "It is a long established fact that a reader will be distracted",
-    timeStamp: "08:35pm",
-    isCandidate: false,
-  },{
-    id: "abcde",
-    speaker: "saurabhahlawat2014eeeoeo@gmail.com",
-    transcription:
-      "It is a long established fact that a reader will be distracted",
-    timeStamp: "08:35pm",
-    isCandidate: false,
-  },{
-    id: "abcde",
-    speaker: "saurabhahlawat2014eeeoeo@gmail.com",
-    transcription:
-      "It is a long established fact that a reader will be distracted",
-    timeStamp: "08:35pm",
-    isCandidate: false,
-  },{
-    id: "abcde",
-    speaker: "saurabhahlawat2014eeeoeo@gmail.com",
-    transcription:
-      "It is a long established fact that a reader will be distracted",
-    timeStamp: "08:35pm",
-    isCandidate: false,
-  },
-];
+const initialTranscriptionLoadState: Array<TranscriptionDataType> = [];
 
 const initialTranscriptionState = {
   TranscriptionList: [...initialTranscriptionLoadState],

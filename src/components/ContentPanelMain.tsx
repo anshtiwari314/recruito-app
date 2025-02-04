@@ -101,7 +101,7 @@ export default function ContentPanelMain() {
     <div className={`${!isExpanded ? "flex justify-between" : "flex flex-col"}`}>
       <div
         id="transcription"
-        className={`${!isExpanded ? "flex-grow-0 flex-shrink-0 w-1/4 max-h-lvh mr-6" : "max-h-96 w-full"} mb-6 bg-white rounded-lg p-4 shadow-sm border-2 border-zinc-500 overflow-y-auto`}
+        className={`${!isExpanded ? "flex-grow-0 flex-shrink-0 w-1/4 min-h-96 max-h-lvh mr-6" : "max-h-96 w-full"} mb-6 bg-white rounded-lg p-4 shadow-sm border-2 border-zinc-500 overflow-y-auto`}
       >
         {/* Header of transcription section */}
         <div className="flex items-center justify-between mb-4">
@@ -144,7 +144,7 @@ export default function ContentPanelMain() {
       {/* AI Suggestions section */}
       <div
         id="ai-suggestions"
-        className={`${!isExpanded ? "flex-grow-0 w-3/4 max-h-lvh" : "w-full max-h-96"} mb-6 bg-white rounded-lg p-4 shadow-sm border-2 border-zinc-500 overflow-y-auto`}
+        className={`${!isExpanded ? "flex-grow-0 w-3/4 min-h-96 max-h-lvh" : "w-full max-h-96"} mb-6 bg-white rounded-lg p-4 shadow-sm border-2 border-zinc-500 overflow-y-auto`}
       >
         {/* AI Suggestions section header */}
         <h3 className="text-lg font-semibold mb-4 text-neutral-900">
