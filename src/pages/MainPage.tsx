@@ -15,25 +15,16 @@ import NotFound from "./NotFoundPage";
 
 export default function MainPage() {
   //@ts-ignore
-  const {
-    setMyId,
-    setName,
-    setCustId,
-  } = useData();
+  const { setMyId, setName, setCustId } = useData();
   const { isHost, meetingIsLegit } = useAppSelector((state) => state.qpReducer);
-  const { jobTitle } = useAppSelector( (state) => state.cuesReducer);
+  const { jobTitle } = useAppSelector((state) => state.cuesReducer);
   const dispatch = useDispatch();
   const [meetingIsLegitMain, setMeetingIsLegitMain] = useState<boolean>(true);
 
   const { link } = useParams();
   // const [searchParams,setSearchParams] = useSearchParams()
-  const [messagingOn, setMessagingOn] = useState<boolean>(true);
-  const [toggleVideo, setToggleVideo] = useState(true);
-  const [toggleAudio, setToggleAudio] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-  let tempIsHost = false;
-  
-  
+  const [tempIsHost, settempIsHost] = useState<boolean | null>(null);
 
   useEffect(() => {
     function Resizing() {
@@ -58,11 +49,11 @@ export default function MainPage() {
   }, []);
 
   useEffect(() => {
-    let params = new URL(window.location.href).searchParams;
 
-    if (
-      sessionStorage.getItem("exitdone") !== null
-    ) {
+    let params = new URL(window.location.href).searchParams;
+    let isMounted = true;
+
+    if (sessionStorage.getItem("exitdone") !== null) {
       setMeetingIsLegitMain(false);
       return;
     }
@@ -75,35 +66,14 @@ export default function MainPage() {
     ) {
       setMeetingIsLegitMain(false);
     } else {
-      // Determine if the user is the host based on the is_host parameter
-      tempIsHost = params.get("is_host") === "true" ? true : false;
-      const qParams: QPState = {
-        roomId: params.get("room_id") ?? "",
-        jobId: params.get("job_id") ?? "",
-        custEmailId: params.get("cust_email_id") ?? "",
-        agentId: params.get("agent_id") ?? "",
-        isHost: tempIsHost,
-        name: sessionStorage.getItem("userName") ?? "",
-        meetingIsLegit: true,
-      };
-      // Set the query params state for this meeting
-      dispatch(setQP(qParams));
-      // Set the cust_email_id state variable
-      setCustId(params.get("cust_email_id"));
-      // Set the myId state variable to the temporary ID
-      setMyId(uuidv4());
-    }
-  }, []);
-
-  useEffect(() => {
-    if (meetingIsLegitMain) {
-      // Declare a variable to store the user's name
+      // Determine if the user is the host based on api calls by first fetching name of user and then authenticating password
       let myName: string = "";
+      myName = sessionStorage.getItem("userName") ?? "";
 
       // Check if the user's name is already stored in sessionStorage
-      if (sessionStorage.getItem("userName") !== null) {
+      if (myName.length > 2) {
         // If the name is found, set it using setName function
-        setName(sessionStorage.getItem("userName"));
+        setName(myName);
       } else {
         // If the name is not found, prompt the user to enter their name
         while (myName.length < 2) {
@@ -117,35 +87,93 @@ export default function MainPage() {
         // Store the entered name in sessionStorage
         sessionStorage.setItem("userName", myName);
       }
-    }
-  }, [meetingIsLegit]);
 
-  
+      const checkLogin = async () => {
+        // ✅ Step 1. Make a post api call here to check if user is present in server database -
+        try {
+          const response = await fetch(
+            "https://qhpv9mvz1h.execute-api.ap-south-1.amazonaws.com/prod/check-jarvis-login",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ client: "recruito", userid: myName }),
+            }
+          );
 
-  useEffect(() => {
-    if (tempIsHost && meetingIsLegit) {
-      // Code block for calling API to fetch interview details like JD, candidate profile, job details, etc.
-      // API call to fetch interview details
-      // meetingDetails =
+          const data = await response.json();
+          // ✅ Step 2: If the user exists, check the password
+          if (data.result === true) {
+            let password = prompt("Please provide the password") ?? "";
+            const passwordResponse = await fetch(
+              "https://qhpv9mvz1h.execute-api.ap-south-1.amazonaws.com/prod/check-jarvis-login",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  client: "recruito",
+                  userid: myName,
+                  password,
+                }),
+              }
+            );
 
-      // dispatch(
-      //   setCues({
-      //     CuesList: meetingDetails.preloadedQuestions,
-      //     interviewGuide: meetingDetails.interviewGuide,
-      //     jobDescription: meetingDetails.jobDescription,
-      //     jobTitle: meetingDetails.jobTitle,
-      //   })
-      // );
+            const passwordData = await passwordResponse.json();
+
+            return { isAuthenticated: passwordData.result === true };
+          } else {
+            return { isAuthenticated: false };
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          return { isAuthenticated: false };
+        }
+      };
+
+      // Call async checkLogin function here
+      const checkLoginData = async () => {
+        const loginResult = await checkLogin(); // Wait for checkLogin to complete
+        if (isMounted) {
+          settempIsHost(loginResult?.isAuthenticated ?? false);
+          const qParams: QPState = {
+            roomId: params.get("room_id") ?? "",
+            jobId: params.get("job_id") ?? "",
+            custEmailId: params.get("cust_email_id") ?? "",
+            agentId: params.get("agent_id") ?? "",
+            isHost: loginResult?.isAuthenticated ?? false,
+            name: sessionStorage.getItem("userName") ?? "",
+            meetingIsLegit: true,
+          };
+          // Set the query params state for this meeting
+          dispatch(setQP(qParams));
+          // Set the cust_email_id state variable
+          setCustId(params.get("cust_email_id"));
+          // Set the myId state variable to the temporary ID
+          setMyId(uuidv4());
+        }
+      };
+
       
+
+      checkLoginData();
     }
-  }, [meetingIsLegit]);
+
+    return () => {
+      isMounted = false; // Cleanup to prevent memory leaks
+    };
+  }, []);
 
   //http://localhost:5173/?room_id=123&cust_email_id=saurabhahlawat89@gmail.com&agent_id=43123&job_id=123&is_host=true
   //http://localhost:5173/?room_id=123&cust_email_id=saurabhahlawat89@gmail.com&agent_id=43123&job_id=123&is_host=false
 
   return (
     <>
-      {meetingIsLegitMain ? (
+      {tempIsHost === null ? (
+        "Authenticating ..."
+      ) : meetingIsLegitMain ? (
         <div className="overflow-y-auto w-screen min-h-screen relative bg-neutral-50">
           {/* App header */}
           <header
@@ -160,9 +188,13 @@ export default function MainPage() {
                 alt="Logo"
               />
               {jobTitle ? (
-                <div className="text-md text-neutral-500">Interview: {jobTitle}</div>
+                <div className="text-md text-neutral-500">
+                  Interview: {jobTitle}
+                </div>
               ) : (
-                <div className="text-md text-neutral-500">Recruiter Copilot</div>
+                <div className="text-md text-neutral-500">
+                  Recruiter Copilot
+                </div>
               )}
               {/*<div className="text-md text-neutral-500">Recruiter Copilot</div>*/}
             </div>
@@ -186,18 +218,17 @@ export default function MainPage() {
           {/* Main Content */}
           <main id="main-content" className="flex h-[calc(100vh-120px)]">
             {/* Content Panel */}
-            <div id="content-panel" className="relative grow w-10/12 p-6 overflow-y-auto">
-              <ContentPanel
-                isMobile={isMobile}
-              />
+            <div
+              id="content-panel"
+              className="relative grow w-10/12 p-6 overflow-y-auto"
+            >
+              <ContentPanel isMobile={isMobile} />
 
               {/**/}
             </div>
 
             {/* Right Panel */}
             <RightPanel />
-
-            
           </main>
           <footer
             id="footer"
