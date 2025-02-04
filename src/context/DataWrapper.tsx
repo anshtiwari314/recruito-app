@@ -239,7 +239,7 @@ export default function DataWrapper({
         timeStamp: `${date.toLocaleDateString()} ${date.toLocaleTimeString()}:${date.getMilliseconds()}`,
       };
       console.log("from inside send to server", data);
-      //socket2.emit('ai_suggestion_req',data)
+      socket2.emit('ai_suggestion_req',data)
     };
     reader.readAsDataURL(blob);
   }
@@ -851,8 +851,13 @@ export default function DataWrapper({
   useEffect(() => {
     if (myId === "" || meetingIsLegit === false) return;
 
-    //This is a socket connection to handle live messages between participants
-    let tempSocket = io("https://vitt-jarvis-node-production.up.railway.app/");
+    //This is a socket connection to handle live messages between participants\
+
+    let socket1url1 = "https://vitt-jarvis-node-production.up.railway.app/"
+    let socket1url2 = 'https://vitt-two-way-node.vercel.app/'
+    let socket1url3 = 'http://localhost:3002'
+    
+    let tempSocket = io(socket1url1);
 
     //This is a socket connection with backend server to handle cues specific requests or other api requests
     let tempSocket2 = io(
