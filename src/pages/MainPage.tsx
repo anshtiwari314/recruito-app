@@ -13,27 +13,17 @@ import ControlPanel from "@/components/ControlPanel";
 import RightPanel from "@/components/RightPanel";
 import NotFound from "./NotFoundPage";
 
-
-export interface InitialLoadData {
-  jobTitle: string;
-  jobDescription: string;
-  interviewGuide: string;
-  preloadedQuestions: CuesDataType[];
-}
-
 export default function MainPage() {
   //@ts-ignore
   const {
     setMyId,
     setName,
     setCustId,
-    adminUrl,
-    setAdminUrl,
   } = useData();
-  const { isHost } = useAppSelector((state) => state.qpReducer);
+  const { isHost, meetingIsLegit } = useAppSelector((state) => state.qpReducer);
   const { jobTitle } = useAppSelector( (state) => state.cuesReducer);
   const dispatch = useDispatch();
-  const [meetingIsLegit, setMeetingIsLegit] = useState<boolean>(true);
+  const [meetingIsLegitMain, setMeetingIsLegitMain] = useState<boolean>(true);
 
   const { link } = useParams();
   // const [searchParams,setSearchParams] = useSearchParams()
@@ -43,77 +33,7 @@ export default function MainPage() {
   const [isMobile, setIsMobile] = useState(false);
   let tempIsHost = false;
   
-  let meetingDetails: InitialLoadData = {
-    jobTitle: "EDI Developer",
-    jobDescription: "https://arxiv.org/pdf/2301.12652", //pdf
-    interviewGuide: "https://arxiv.org/pdf/2410.08174", //pdf
-    preloadedQuestions: [
-      {
-        content: "",
-        sessionid: "1",
-        audiofiletimestamp: "2022-01-01T00:00:00Z",
-        common_id: "1",
-        similarity_query: "Ask about specific EDI protocols experience",
-        isanswered: true,
-      },
-      {
-        content: "",
-        sessionid: "1",
-        audiofiletimestamp: "2022-01-01T00:00:00Z",
-        common_id: "2",
-        similarity_query: "Discuss experience with mapping tools",
-        isanswered: false,
-      },
-      {
-        content: "",
-        sessionid: "1",
-        audiofiletimestamp: "2022-01-01T00:00:00Z",
-        common_id: "3",
-        similarity_query: "Probe cloud integration knowledge",
-        isanswered: false,
-      },
-      {
-        content: "",
-        sessionid: "1",
-        audiofiletimestamp: "2022-01-01T00:00:00Z",
-        common_id: "3",
-        similarity_query: "Probe cloud integration knowledge",
-        isanswered: false,
-      },
-      {
-        content: "",
-        sessionid: "1",
-        audiofiletimestamp: "2022-01-01T00:00:00Z",
-        common_id: "3",
-        similarity_query: "Probe cloud integration knowledge",
-        isanswered: false,
-      },
-      {
-        content: "",
-        sessionid: "1",
-        audiofiletimestamp: "2022-01-01T00:00:00Z",
-        common_id: "3",
-        similarity_query: "Probe cloud integration knowledge",
-        isanswered: false,
-      },
-      {
-        content: "",
-        sessionid: "1",
-        audiofiletimestamp: "2022-01-01T00:00:00Z",
-        common_id: "3",
-        similarity_query: "Probe cloud integration knowledge",
-        isanswered: false,
-      },
-      {
-        content: "",
-        sessionid: "1",
-        audiofiletimestamp: "2022-01-01T00:00:00Z",
-        common_id: "3",
-        similarity_query: "Probe cloud integration knowledge",
-        isanswered: false,
-      },
-    ],
-  };
+  
 
   useEffect(() => {
     function Resizing() {
@@ -143,7 +63,7 @@ export default function MainPage() {
     if (
       sessionStorage.getItem("exitdone") !== null
     ) {
-      setMeetingIsLegit(false);
+      setMeetingIsLegitMain(false);
       return;
     }
 
@@ -153,7 +73,7 @@ export default function MainPage() {
       !params.get("agent_id")?.trim() ||
       !params.get("job_id")?.trim()
     ) {
-      setMeetingIsLegit(false);
+      setMeetingIsLegitMain(false);
     } else {
       // Determine if the user is the host based on the is_host parameter
       tempIsHost = params.get("is_host") === "true" ? true : false;
@@ -164,6 +84,7 @@ export default function MainPage() {
         agentId: params.get("agent_id") ?? "",
         isHost: tempIsHost,
         name: sessionStorage.getItem("userName") ?? "",
+        meetingIsLegit: true,
       };
       // Set the query params state for this meeting
       dispatch(setQP(qParams));
@@ -175,7 +96,7 @@ export default function MainPage() {
   }, []);
 
   useEffect(() => {
-    if (meetingIsLegit) {
+    if (meetingIsLegitMain) {
       // Declare a variable to store the user's name
       let myName: string = "";
 
@@ -224,7 +145,7 @@ export default function MainPage() {
 
   return (
     <>
-      {meetingIsLegit ? (
+      {meetingIsLegitMain ? (
         <div className="overflow-y-auto w-screen min-h-screen relative bg-neutral-50">
           {/* App header */}
           <header

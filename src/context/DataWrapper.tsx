@@ -14,10 +14,13 @@ import type { CuesDataType } from "@/reducers/cuesReducer";
 import { setCues, addCues, initialCuesObj } from "@/reducers/cuesReducer";
 import { useAppSelector } from "@/store/store";
 import { useDispatch } from "react-redux";
-import {TranscriptionDataType,addTranscription, initialTranscriptionObj } from '@/reducers/transcriptionReducer';
+import {
+  TranscriptionDataType,
+  addTranscription,
+  initialTranscriptionObj,
+} from "@/reducers/transcriptionReducer";
 //import * as ort from "onnxruntime-web";
 //import * as vad from "@ricky0123/vad-web";
- 
 
 const Context = createContext("");
 
@@ -97,9 +100,8 @@ export default function DataWrapper({
   const { CuesList, jobDescription, interviewGuide, jobTitle } = useAppSelector(
     (state) => state.cuesReducer
   );
-  const { jobId,roomId, custEmailId, agentId, isHost } = useAppSelector(
-    (state) => state.qpReducer
-  );
+  const { jobId, roomId, custEmailId, agentId, isHost, meetingIsLegit } =
+    useAppSelector((state) => state.qpReducer);
 
   const [socket, setSocket] = useState<any>(null);
   const [socket2, setSocket2] = useState<any>(null);
@@ -113,7 +115,9 @@ export default function DataWrapper({
   const [users, setUsers] = useState<users[]>([]);
 
   const [myStream, setMyStream] = useState<MediaStream | null | boolean>(null);
-  const [myAudioStream, setMyAudioStream] = useState<MediaStream | null | boolean>(null);
+  const [myAudioStream, setMyAudioStream] = useState<
+    MediaStream | null | boolean
+  >(null);
 
   const peersObjRef = useRef<any>({});
   const peersArrRef = useRef<string[]>([]);
@@ -187,11 +191,13 @@ export default function DataWrapper({
   );
 
   //@ts-ignore
-  
+
   /* ========================================================================= */
   /* ========================================================================= */
   /* Function to send live audio packet along with payload to backend after every VAD hit */
   function sendToServer(blob, url, data) {
+    if (usersArrRef.current.length <= 1) return; //inserted here to ensure that the audio is not processed if there's only one person in the meeting.
+    
     let date = new Date();
     console.log(
       `%c just before sending the data ${
@@ -219,22 +225,21 @@ export default function DataWrapper({
         //   agentId: data.agentId,
         //   init: data.init,
 
-        // jobid:jobId , 
+        // jobid:jobId ,
         // roomid: roomId
-        //agentid: agentId, 
-        roomid: 'abc-123-fgh-456',
-        jobid: '1', 
-        agentid:'1234',
+        //agentid: agentId,
+        roomid: "abc-123-fgh-456",
+        jobid: "1",
+        agentid: "1234",
         custemailid: custEmailId,
         isHost: isHost,
-        name:name,
-        init:data.init,
+        name: name,
+        init: data.init,
         audiomessage: base64data?.split(",")[1],
-        timeStamp: `${date.toLocaleDateString()} ${date.toLocaleTimeString()}:${date.getMilliseconds()}`
-      }
-      console.log('from inside send to server',data)
-      socket2.emit('ai_suggestion_req',data)
-
+        timeStamp: `${date.toLocaleDateString()} ${date.toLocaleTimeString()}:${date.getMilliseconds()}`,
+      };
+      console.log("from inside send to server", data);
+      //socket2.emit('ai_suggestion_req',data)
     };
     reader.readAsDataURL(blob);
   }
@@ -844,7 +849,7 @@ export default function DataWrapper({
   /* ========================================================================= */
   /* 1.1. Main functionality starts here - Set socket connections with server here */
   useEffect(() => {
-    if (myId === "") return;
+    if (myId === "" || meetingIsLegit === false) return;
 
     //This is a socket connection to handle live messages between participants
     let tempSocket = io("https://vitt-jarvis-node-production.up.railway.app/");
@@ -854,7 +859,7 @@ export default function DataWrapper({
       "ws://34.47.233.254"
       //'http://localhost:5000'
     );
-   // https://vitt-ai-request-broadcaster-production.up.railway.app
+    // https://vitt-ai-request-broadcaster-production.up.railway.app
     let tempPeer = new Peer(uuidv4());
     let tempAudioPeer = new Peer(uuidv4());
 
@@ -864,21 +869,31 @@ export default function DataWrapper({
     setAudioPeer(tempAudioPeer);
 
     return () => {
-      // setSocket(null)
-      // setSocket2(null)
-      // setPeer(null)
-      // setPeer(null)
+      if (socket) {
+        socket.disconnect();
+        console.log("Socket disconnected");
+      }
+      if (socket2) {
+        socket2.disconnect();
+        console.log("Socket2 disconnected");
+      }
     };
-  }, [myId]);
+  }, [myId, meetingIsLegit]);
 
   /* ========================================================================= */
   /* ========================================================================= */
   /* 2.1. Handle cues specific requests coming in from server via socket */
   useEffect(() => {
-    if (socket2 === null || myId === "" || custId === "") return;
+    if (
+      socket2 === null ||
+      myId === "" ||
+      custId === "" ||
+      meetingIsLegit === false
+    )
+      return;
 
-    function handleLiveQna(data:CuesDataType) {
-      console.log('handle qna',data)
+    function handleLiveQna(data: CuesDataType) {
+      console.log("handle qna", data);
       if (data?.type === "cues-update") {
         let filteredCues = CuesList?.map((e) => {
           if (e.common_id === data?.common_id) {
@@ -889,11 +904,11 @@ export default function DataWrapper({
           }
           return e;
         });
-    
+
         if (!filteredCues) {
           return;
         }
-    
+
         dispatch(
           setCues({
             CuesList: filteredCues,
@@ -902,48 +917,45 @@ export default function DataWrapper({
             jobTitle: jobTitle,
           })
         );
-      
       } else {
-        let tempArr:Array<CuesDataType> = []
+        let tempArr: Array<CuesDataType> = [];
 
-        let obj:CuesDataType = {...initialCuesObj}
-        obj.content = data.content
-        obj.sessionid = data.sessionid
-        obj.audiofiletimestamp = data.audiofiletimestamp
-        obj.common_id = data.common_id
-        obj.similarity_query =data.similarity_query
-        obj.isanswered =data.isanswered
+        let obj: CuesDataType = { ...initialCuesObj };
+        obj.content = data.content;
+        obj.sessionid = data.sessionid;
+        obj.audiofiletimestamp = data.audiofiletimestamp;
+        obj.common_id = data.common_id;
+        obj.similarity_query = data.similarity_query;
+        obj.isanswered = data.isanswered;
         //obj.type= data.type
-        obj.match_score =  data.match_score
-        tempArr.push(obj)
+        obj.match_score = data.match_score;
+        tempArr.push(obj);
 
-        dispatch(addCues(tempArr))
-    
+        dispatch(addCues(tempArr));
       }
     }
 
-    function handleLiveTranscriptions(data:any){
-      console.log('handle live transcriptions',data)
-      let tempArr:Array<TranscriptionDataType> = []
-      
-      let obj:TranscriptionDataType = {...initialTranscriptionObj}
-       // obj.id  = data.id
-        obj.speaker = data.speaker
-        obj.timeStamp = data?.time_stamp 
-        obj.transcription = data.transcription
-        //obj.isCandidate = data.isCandidate
-        
-        
-      tempArr.push(obj) 
+    function handleLiveTranscriptions(data: any) {
+      console.log("handle live transcriptions", data);
+      let tempArr: Array<TranscriptionDataType> = [];
 
-      dispatch(addTranscription(tempArr))
+      let obj: TranscriptionDataType = { ...initialTranscriptionObj };
+      // obj.id  = data.id
+      obj.speaker = data.speaker;
+      obj.timeStamp = data?.time_stamp;
+      obj.transcription = data.transcription;
+      //obj.isCandidate = data.isCandidate
+
+      tempArr.push(obj);
+
+      dispatch(addTranscription(tempArr));
     }
 
-    function handleJobDetails(data: any){
-      console.log('handle job details',data)
-      let filteredCues = data?.preloadedQuestions
+    function handleJobDetails(data: any) {
+      console.log("handle job details", data);
+      let filteredCues = data?.preloadedQuestions;
       if (!filteredCues) {
-        filteredCues = []
+        filteredCues = [];
       }
 
       dispatch(
@@ -954,19 +966,17 @@ export default function DataWrapper({
           jobTitle: data?.jobTitle,
         })
       );
-
     }
-    socket2.on("ai_suggestion_res",handleLiveQna);
-    
-    socket2.on('live_transcriptions_res',handleLiveTranscriptions)
-    socket2.on('questions_loader_res',handleJobDetails)
-    return () => {
-      socket2.off("ai_suggestion_res",handleLiveQna);
-      socket2.off('live_transcriptions_res',handleLiveTranscriptions)
-      socket2.off('questions_loader_res',handleJobDetails)
-    };
-  }, [myId, custId, socket2, isHost]);
+    socket2.on("ai_suggestion_res", handleLiveQna);
 
+    socket2.on("live_transcriptions_res", handleLiveTranscriptions);
+    socket2.on("questions_loader_res", handleJobDetails);
+    return () => {
+      socket2.off("ai_suggestion_res", handleLiveQna);
+      socket2.off("live_transcriptions_res", handleLiveTranscriptions);
+      socket2.off("questions_loader_res", handleJobDetails);
+    };
+  }, [myId, custId, socket2, meetingIsLegit]);
 
   /* ========================================================================= */
   /* ========================================================================= */
@@ -974,9 +984,8 @@ export default function DataWrapper({
   useEffect(() => {
     let intervalId = setInterval(() => {
       //after 4 minute if no one is joined refresh
-      if (peersArrRef.current.length === 0) 
-        null
-        //window.location.reload();
+      if (peersArrRef.current.length === 0) null;
+      //window.location.reload();
       else clearInterval(intervalId);
     }, 1000 * 60 * 4);
 
@@ -1003,7 +1012,9 @@ export default function DataWrapper({
       roomId === "" ||
       custEmailId === "" ||
       name === "" ||
-      audioPeer === null
+      audioPeer === null ||
+      agentId === "" ||
+      meetingIsLegit === false
     )
       return;
 
@@ -1057,8 +1068,7 @@ export default function DataWrapper({
     console.log("after setting usersArrRef", d.toLocaleTimeString());
 
     setUsers((prev) => [...usersArrRef.current]);
-  }, [myId, roomId, isHost, custEmailId, agentId, name, audioPeer]);
-
+  }, [myId, roomId, custEmailId, agentId, name, audioPeer, meetingIsLegit]);
 
   /* ========================================================================= */
   /* ========================================================================= */
@@ -1074,8 +1084,10 @@ export default function DataWrapper({
       usersArrRef.current &&
       usersArrRef.current[0]?.videoStream instanceof MediaStream
     ) {
-      const isVideoEnabled = usersArrRef.current[0].videoStream.getVideoTracks()[0].enabled;
-      usersArrRef.current[0].videoStream.getVideoTracks()[0].enabled = cameraToggle;
+      const isVideoEnabled =
+        usersArrRef.current[0].videoStream.getVideoTracks()[0].enabled;
+      usersArrRef.current[0].videoStream.getVideoTracks()[0].enabled =
+        cameraToggle;
       console.log(isVideoEnabled);
     } else {
       console.log("Video stream is unavailable");
@@ -1093,7 +1105,6 @@ export default function DataWrapper({
     console.log("myData modified", usersArrRef.current, cameraToggle);
   }, [socket, myStream, cameraToggle]);
 
-
   /* ========================================================================= */
   /* ========================================================================= */
   /* 4.2. this code is responsible for enable & disable audiostream */
@@ -1106,8 +1117,10 @@ export default function DataWrapper({
       usersArrRef.current &&
       usersArrRef.current[0]?.audioStream instanceof MediaStream
     ) {
-      const isAudioEnabled = usersArrRef.current[0].audioStream.getAudioTracks()[0].enabled;
-      usersArrRef.current[0].audioStream.getAudioTracks()[0].enabled = microphoneToggle;
+      const isAudioEnabled =
+        usersArrRef.current[0].audioStream.getAudioTracks()[0].enabled;
+      usersArrRef.current[0].audioStream.getAudioTracks()[0].enabled =
+        microphoneToggle;
       console.log(isAudioEnabled);
     } else {
       console.log("Audio stream is unavailable");
@@ -1121,12 +1134,11 @@ export default function DataWrapper({
     setUsers((prev) => [...usersArrRef.current]);
   }, [socket, myAudioStream, microphoneToggle]);
 
-
   /* ========================================================================= */
   /* ========================================================================= */
   /* 4.3.1. Helper function for screen sharing - shares screen stream with all ids (peer2Ids) in peers2ArrRef and also new peer2Ids received on received on socket.on(""receive-connected-user-data") event */
   async function ShareScreenToUser(stream: MediaStream, newUserId: string) {
-    console.log(socket,stream,usersArrRef.current)
+    console.log(socket, stream, usersArrRef.current);
 
     let call = peer2?.call(newUserId, stream);
     let count = 0;
@@ -1271,13 +1283,12 @@ export default function DataWrapper({
     }
   }, [myStream, socket, screenSharing, peer2]);
 
-  
   /* ========================================================================= */
   /* ========================================================================= */
   /* 5.1. this code is responsible for initializing Peer variable - potentially move this declaration to 1.1. */
   /* Potentially put here after timeout because the socket connection might change i.e. new socket connection might be established */
   useEffect(() => {
-    if (socket === null || myId === "") return;
+    if (socket === null || myId === "" || meetingIsLegit === false) return;
 
     let timeOutId = setTimeout(() => {
       if (socket.connected) {
@@ -1290,8 +1301,7 @@ export default function DataWrapper({
     }, 5000);
 
     return () => clearTimeout(timeOutId);
-  }, [socket, myId]);
-
+  }, [socket, myId, meetingIsLegit]);
 
   /* ========================================================================= */
   /* ========================================================================= */
@@ -1346,11 +1356,17 @@ export default function DataWrapper({
     }
 
     //need to modify peersArrRef for video call
-    if (userId) {removeUserFromPeersArr(userId);}
+    if (userId) {
+      removeUserFromPeersArr(userId);
+    }
     //need to modify peers2ArrRef for screen sharing
-    if (peer2Id) {removeUserFromPeers2Arr(peer2Id);}
+    if (peer2Id) {
+      removeUserFromPeers2Arr(peer2Id);
+    }
     //need to modify audioPeersArrRef for audio call
-    if (audioPeerId) {removeUserFromAudioPeersArr(audioPeerId);}
+    if (audioPeerId) {
+      removeUserFromAudioPeersArr(audioPeerId);
+    }
 
     //remove user from usersArrRef
     usersArrRef.current = usersArrRef.current.filter(
@@ -1364,7 +1380,13 @@ export default function DataWrapper({
   /* ========================================================================= */
   /* 7.1. Handling of events from socket server - for connection, and disconnection */
   useEffect(() => {
-    if (socket === null || myStream === null || myId === "") return;
+    if (
+      socket === null ||
+      myStream === null ||
+      myId === "" ||
+      meetingIsLegit === false
+    )
+      return;
 
     function connected() {
       socket.emit("connected", myId);
@@ -1393,8 +1415,7 @@ export default function DataWrapper({
       socket.off("disconnect", disconnect);
       socket.off("user-disconnected", userDisconnect); // Event when another user disconnects from the call.
     };
-  }, [socket, myStream, myId]);
-
+  }, [socket, myStream, myId, meetingIsLegit]);
 
   /* ========================================================================= */
   /* ========================================================================= */
@@ -1413,40 +1434,46 @@ export default function DataWrapper({
     return () => clearTimeout(intervalId);
   }, [peer]);
 
-
   /* ========================================================================= */
   /* ========================================================================= */
   /* 7.3. Handling of events from socket2 server i.e. API server - for connection, and disconnection */
   useEffect(() => {
-    if (socket2 === null || myStream === null || myId === "" || name==="") return;
+    if (
+      socket2 === null ||
+      myStream === null ||
+      myId === "" ||
+      name === "" ||
+      meetingIsLegit === false
+    )
+      return;
 
     function connected() {
-      //socket2.emit("connected socket2", myId);
-
-      let questionsApiReqPayload = {
-        // jobid:jobId,
-        // roomid : roomId,
-        //agentid:agentId,
-        roomid: 'abc-123-fgh-456',
-        jobid: '1',
-        agentid:'1234',
-        custemailid :custEmailId,
-        name:name 
+      if (isHost === true) {
+        let questionsApiReqPayload = {
+          // jobid:jobId,
+          // roomid : roomId,
+          //agentid:agentId,
+          roomid: "abc-123-fgh-456",
+          jobid: "1",
+          agentid: "1234",
+          custemailid: custEmailId,
+          name: name,
+        };
+        // let liveQnaReqPayload= {
+        //   jobid:jobId,
+        //   roomid : roomId,
+        //   agentid:agentId,
+        //   custemailid :custEmailId,
+        //   name:name ,
+        //   ishost:isHost,
+        //   audiomessage:"base64",
+        //   timestamp:"8:30pm"
+        // }
+        console.log("socket2 connect triggered", questionsApiReqPayload);
+        socket2.emit('questions_loader_req',questionsApiReqPayload)
+      } else {
+        console.log("socket2 connect triggered for client / not admin");
       }
-      // let liveQnaReqPayload= {
-      //   jobid:jobId,
-      //   roomid : roomId,
-      //   agentid:agentId,
-      //   custemailid :custEmailId,
-      //   name:name ,
-      //   ishost:isHost,
-      //   audiomessage:"base64",
-      //   timestamp:"8:30pm"
-      // }
-
-      console.log("socket2 connect triggered",questionsApiReqPayload);
-      socket2.emit('questions_loader_req',questionsApiReqPayload)
-
     }
 
     function disconnect() {
@@ -1461,9 +1488,8 @@ export default function DataWrapper({
       socket2.off("connect", connected);
       socket2.off("disconnect", disconnect);
     };
-  }, [socket2, myStream, myId,name]);
+  }, [socket2, myStream, myId, name, meetingIsLegit]);
 
-  
   /* ========================================================================= */
   /* ========================================================================= */
   /* 8. Helper function for console.logging whether peers are available or not - used only for console.logging purpose */
@@ -1580,7 +1606,7 @@ export default function DataWrapper({
     )
       return;
 
-    /* 10.1.1. socket.on("user-connected") event handler i.e. new user has connected as a peer on the call */  
+    /* 10.1.1. socket.on("user-connected") event handler i.e. new user has connected as a peer on the call */
     function newUser(userId: string) {
       console.log("new user triggered");
       if (peersArrRef.current.includes(userId) === true) return;
@@ -1810,8 +1836,6 @@ export default function DataWrapper({
     };
   }, [socket, myStream, myAudioStream, peer, peer2, audioPeer]);
 
-
-
   /* ========================================================================= */
   /* ========================================================================= */
   /* 11.1 Answering Peer connections that have been initiated by peers. Event handlers on peer connections. Obtaining videostreams/audiostreams of peer connections and updating usersArrRef to be used in components */
@@ -1823,7 +1847,9 @@ export default function DataWrapper({
       socket === null ||
       myId === "" ||
       roomId === "" ||
-      myStream === null
+      myStream === null ||
+      meetingIsLegit === false ||
+      myAudioStream === null
     )
       return;
 
@@ -1890,10 +1916,10 @@ export default function DataWrapper({
         // delete peers2ObjRef.current[call.peer]
       });
     }
-    
+
     function videoReply(call: any) {
       console.log("video replying trigerred");
-    
+
       let intervalId: number;
       call.answer();
 
@@ -1904,7 +1930,6 @@ export default function DataWrapper({
 
         //if data is present at peersArrRef then is normal video or audio stream, if data is present at peers2ArrRef then it is screen sharing connection
         peersObjRef.current[call.peer] = { call: call };
-
 
         for (let i = 0; i < usersArrRef.current.length; i++) {
           if (usersArrRef.current[i].id === call.peer) {
@@ -1959,7 +1984,7 @@ export default function DataWrapper({
         console.log("2nd getting audio stream", userAudioStream, call.peer);
 
         //if data is present at peersArrRef then is normal video or audio stream, if data is present at peers2ArrRef then it is screen sharing connection
-        audioPeersObjRef.current[call.peer] = { call: call };        
+        audioPeersObjRef.current[call.peer] = { call: call };
 
         for (let i = 0; i < usersArrRef.current.length; i++) {
           if (usersArrRef.current[i].audioPeerId === call.peer) {
@@ -2011,8 +2036,17 @@ export default function DataWrapper({
       peer.off("open", onOpen);
       peer.off("connection", onConnection);
     };
-  }, [peer, peer2, audioPeer, socket, roomId, myId, myStream, myAudioStream]);
-
+  }, [
+    peer,
+    peer2,
+    audioPeer,
+    socket,
+    roomId,
+    myId,
+    myStream,
+    myAudioStream,
+    meetingIsLegit,
+  ]);
 
   /* ========================================================================= */
   /* ========================================================================= */
@@ -2117,7 +2151,6 @@ export default function DataWrapper({
         "background-color:teal;color:white"
       );
 
-
       sendToServer(mp3Blob, url, { ...usersArrRef.current[0], init: false });
       arrayofChunks = [];
     };
@@ -2166,12 +2199,10 @@ export default function DataWrapper({
             startMediaRecorder(stream, 40000);
           }, 40000);
         });
-
     }
     return () => clearInterval(id);
   }, [recordingOn, microphoneToggle, users]);
 
-  
   /* ========================================================================= */
   /* ========================================================================= */
   /* 13.1. Declaration of the VAD function here */

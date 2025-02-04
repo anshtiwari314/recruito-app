@@ -71,6 +71,13 @@ const initialCuesState = {
 } as CuesState;
 
 let initialCuesLoadState: CuesState = {
+  jobTitle: "",
+  jobDescription: "",
+  interviewGuide: "",
+  CuesList: []
+};
+
+/*let initialCuesLoadState: CuesState = {
   jobTitle: "EDI Developer",
   jobDescription: "https://arxiv.org/pdf/2301.12652", //pdf
   interviewGuide: "https://arxiv.org/pdf/2410.08174", //pdf
@@ -99,48 +106,34 @@ let initialCuesLoadState: CuesState = {
       similarity_query: "Probe cloud integration knowledge",
       isanswered: false,
     },
+  ],
+};*/
+
+/*
+let initialCuesLoadState: CuesState = {
+  jobTitle: "EDI Developer",
+  jobDescription: "https://arxiv.org/pdf/2301.12652", //pdf
+  interviewGuide: "https://arxiv.org/pdf/2410.08174", //pdf
+  CuesList: [
     {
-      content: "",
+      content: "<strong>Date:</strong> February 5, 2024 | 🕒 <strong>Time:</strong> 10:00 AM - 11:00 AM <br/><strong>Participants:</strong> [Consultant Name], [Client Business Lead], [Client Tech Team]<br/><strong>Key Discussion Points:</strong><br/><br/>• Custom risk parameter configurations for different asset classes.<br/>• API integration for real-time data feed from Bloomberg.<br/>• Compliance validation for SEC and ESMA guidelines.<br/>• Automated reporting setup for performance tracking.<br/><br/><strong>Action Items:</strong><br/><br/>1. <strong>Consultant:</strong> Provide a configuration document for risk parameter customization – <strong>Due: Feb 7</strong><br/>2. <strong>Client Tech Team:</strong> Share API specifications for Bloomberg integration – <strong>Due: Feb 8</strong><br/>3. <strong>Consultant:</strong> Validate compliance requirements for SEC & ESMA standards – <strong>Due: Feb 10</strong><br/>4. <strong>Client Business Team:</strong> Approve automated reporting workflow – <strong>Due: Feb 12</strong></br><br/><strong>Next Steps:</strong> Follow-up scheduled for <strong>Feb 14, 2024,</strong> to review progress.<br/>",
       sessionid: "1",
       audiofiletimestamp: "2022-01-01T00:00:00Z",
-      common_id: "3",
-      similarity_query: "Probe cloud integration knowledge",
-      isanswered: false,
+      common_id: "1",
+      similarity_query: "Meeting Summary & Action Items – Call with ABC Asset Management",
+      isanswered: true,
     },
     {
-      content: "",
+      content: "<strong>Aladdin Tech Stack Implementation Checklist – Updated Based on Client Meeting</strong><br/><br/><strong>Section: Portfolio Risk Parameter Configuration</strong><br/><strong>Add:</strong> Custom threshold settings for risk scoring models.<br/><strong>Modify:</strong> Default parameter values for alternative asset classes.<br/><strong>Remove:</strong> Unused predefined thresholds for standardized portfolios.<br/><br/><strong>Section: API Integration & Market Data Feeds</strong><br/><strong>Add:</strong> Bloomberg API integration module.<br/><strong>Modify:</strong> Scheduled data refresh frequency from weekly to daily.<br/><br/><strong>Section: Compliance & Regulatory Updates</strong><br/><strong>Add:</strong> Automated audit logging per <strong>SEC 17a-4 compliance requirements.</strong><br/><strong>Modify:</strong> Encryption settings for data at rest per <strong>ESMA guidelines.</strong><br/>",
       sessionid: "1",
       audiofiletimestamp: "2022-01-01T00:00:00Z",
-      common_id: "3",
-      similarity_query: "Probe cloud integration knowledge",
-      isanswered: false,
-    },
-    {
-      content: "",
-      sessionid: "1",
-      audiofiletimestamp: "2022-01-01T00:00:00Z",
-      common_id: "3",
-      similarity_query: "Probe cloud integration knowledge",
-      isanswered: false,
-    },
-    {
-      content: "",
-      sessionid: "1",
-      audiofiletimestamp: "2022-01-01T00:00:00Z",
-      common_id: "3",
-      similarity_query: "Probe cloud integration knowledge",
-      isanswered: false,
-    },
-    {
-      content: "",
-      sessionid: "1",
-      audiofiletimestamp: "2022-01-01T00:00:00Z",
-      common_id: "3",
-      similarity_query: "Probe cloud integration knowledge",
-      isanswered: false,
-    },
+      common_id: "2",
+      similarity_query: "Changes Required in Implementation Checklist",
+      isanswered: true,
+    }
   ],
 };
+*/
 
 
 // Create a slice for "cues"

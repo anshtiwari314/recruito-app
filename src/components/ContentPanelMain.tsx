@@ -28,19 +28,15 @@ export function SingleCue({
         </div>
         {isAnswered ? (
           <span className="px-2 py-1 bg-neutral-200 rounded text-sm">
-            95% match
+            {question?.match_score ? `${question.match_score} match` : ""}
           </span>
         ) : null}
       </div>
       {!isAnswered ? (
         <div className="ml-8">
-          <button className="text-sm text-neutral-700 hover:text-neutral-900">
-            <i className="fa-solid fa-play mr-1"></i> Question in queue
-          </button>
         </div>
       ) : (
         <div className="ml-8 text-sm text-neutral-600">
-          <p>Question asked and answered satisfactorily</p>
           <button
             className="mt-2 text-neutral-700 hover:text-neutral-900"
             onClick={() => setToggleDetails((p) => !p)}
@@ -54,9 +50,7 @@ export function SingleCue({
           </button>
           <div>
             {toggleDetails && (
-              <p className="mt-2 pl-2 pr-2">
-                It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English.
-              </p>
+              <p className="mt-2 pl-2 pr-2" dangerouslySetInnerHTML={{ __html: question?.content }}/>
             )}
           </div>
         </div>

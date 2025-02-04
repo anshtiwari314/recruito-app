@@ -7,6 +7,7 @@ type QPState = {
   agentId: string,
   name:string
   isHost: boolean,
+  meetingIsLegit: boolean,
 };
 
 const initialQPState = {
@@ -16,6 +17,7 @@ const initialQPState = {
   agentId: "",
   name:"",
   isHost: false,
+  meetingIsLegit: false,
 } as QPState;
 
 // Create a slice for "queryparams"

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useData } from "@/context/DataWrapper";
 import MyLargerVideoComp from "@/components/MyLargerVideoComp";
-import { InitialLoadData } from "@/pages/MainPage";
 import ContentPanelMain from "./ContentPanelMain";
 import ContentPanelFooter from "./ContentPanelFooter";
 import { useAppSelector } from "@/store/store";
