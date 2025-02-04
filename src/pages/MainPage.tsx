@@ -166,8 +166,7 @@ export default function MainPage() {
     };
   }, []);
 
-  //http://localhost:5173/?room_id=123&cust_email_id=saurabhahlawat89@gmail.com&agent_id=43123&job_id=123&is_host=true
-  //http://localhost:5173/?room_id=123&cust_email_id=saurabhahlawat89@gmail.com&agent_id=43123&job_id=123&is_host=false
+  //http://localhost:5173/?room_id=abc-123-fgh-456&cust_email_id=saurabhahlawat89@gmail.com&agent_id=1234&job_id=1
 
   return (
     <>
