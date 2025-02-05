@@ -172,12 +172,19 @@ const cuesSlice = createSlice({
       state.jobTitle = action.payload.jobTitle;
       return state;
     },
+
+    updateCues: (state, action: PayloadAction<CuesState>) => {
+      // Declare default value for state.CuesList
+      let data: CuesDataType = { ...initialCuesObj };
+
+      return {...state,...action.payload}
+    },
   },
 });
 
 export type { CuesState, CuesDataType };
 // Export actions so they can be dispatched from components
-export const { addCues, resetCue, setCues } = cuesSlice.actions;
+export const { addCues, resetCue, setCues,updateCues } = cuesSlice.actions;
 
 export { initialCuesObj };
 

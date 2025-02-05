@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from "uuid";
 import Peer from "peerjs";
 import WavToMp3 from "../functions/wavToMp3";
 import type { CuesDataType } from "@/reducers/cuesReducer";
-import { setCues, addCues, initialCuesObj } from "@/reducers/cuesReducer";
+import { setCues, addCues,updateCues, initialCuesObj } from "@/reducers/cuesReducer";
 import { useAppSelector } from "@/store/store";
 import { useDispatch } from "react-redux";
 import {
@@ -597,7 +597,7 @@ export default function DataWrapper({
   /* ========================================================================= */
   /* ========================================================================= */
   /* function used for updating cues box based on response from socket2 server - deprecated */
-  function updateCues(data: CuesDataType = {} as CuesDataType) {
+  function updateCuesOld(data: CuesDataType = {} as CuesDataType) {
     let date = new Date();
     console.log(
       `%c inside update cues ${
@@ -857,6 +857,7 @@ export default function DataWrapper({
     //This is a socket connection with backend server to handle cues specific requests or other api requests
     let tempSocket2 = io(
       "wss://recruito.vitti.insure"
+     
       //'http://localhost:5000'
     );
     // https://vitt-ai-request-broadcaster-production.up.railway.app
@@ -892,48 +893,7 @@ export default function DataWrapper({
     )
       return;
 
-    function handleLiveQna(data: CuesDataType) {
-      console.log("handle qna", data);
-      if (data?.type === "cues-update") {
-        let filteredCues = CuesList?.map((e) => {
-          if (e.common_id === data?.common_id) {
-            return {
-              ...e,
-              content: e.content + " " + (data.content ?? ""),
-            };
-          }
-          return e;
-        });
-
-        if (!filteredCues) {
-          return;
-        }
-
-        dispatch(
-          setCues({
-            CuesList: filteredCues,
-            jobDescription: jobDescription,
-            interviewGuide: interviewGuide,
-            jobTitle: jobTitle,
-          })
-        );
-      } else {
-        let tempArr: Array<CuesDataType> = [];
-
-        let obj: CuesDataType = { ...initialCuesObj };
-        obj.content = data.content;
-        obj.sessionid = data.sessionid;
-        obj.audiofiletimestamp = data.audiofiletimestamp;
-        obj.common_id = data.common_id;
-        obj.similarity_query = data.similarity_query;
-        obj.isanswered = data.isanswered;
-        //obj.type= data.type
-        obj.match_score = data.match_score;
-        tempArr.push(obj);
-
-        dispatch(addCues(tempArr));
-      }
-    }
+    
 
     function handleLiveTranscriptions(data: any) {
       console.log("handle live transcriptions", data);
@@ -981,16 +941,70 @@ export default function DataWrapper({
         })
       );
     }
-    socket2.on("ai_suggestion_res", handleLiveQna);
+    
 
     socket2.on("live_transcriptions_res", handleLiveTranscriptions);
     socket2.on("questions_loader_res", handleJobDetails);
     return () => {
-      socket2.off("ai_suggestion_res", handleLiveQna);
+      
       socket2.off("live_transcriptions_res", handleLiveTranscriptions);
       socket2.off("questions_loader_res", handleJobDetails);
     };
   }, [myId, custId, socket2, meetingIsLegit]);
+
+  useEffect(()=>{
+    if(socket2===null)
+      return ;
+
+    function handleLiveQna(data: CuesDataType) {
+      console.log("handle qna", data);
+      if (data?.type === "cues-update") {
+        let filteredCues = CuesList?.map((e) => {
+          if (e.common_id === data?.common_id) {
+            return {
+              ...e,
+              //content: e.content + " " + (data.content ?? ""),
+              isanswered :data.isanswered,
+              match_score:data.match_score,
+              content : data.content ?? ""
+            };
+          }
+          return e;
+        });
+
+        if (!filteredCues) {
+          return;
+        }
+
+        console.log('i am filtered cues',filteredCues,CuesList)
+        dispatch(
+          updateCues({
+            CuesList: filteredCues
+          })
+        );
+      } else {
+        let tempArr: Array<CuesDataType> = [];
+
+        let obj: CuesDataType = { ...initialCuesObj };
+        obj.content = data.content;
+        obj.sessionid = data.sessionid;
+        obj.audiofiletimestamp = data.audiofiletimestamp;
+        obj.common_id = data.common_id;
+        obj.similarity_query = data.similarity_query;
+        obj.isanswered = data.isanswered;
+        //obj.type= data.type
+        obj.match_score = data.match_score;
+        tempArr.push(obj);
+
+        dispatch(addCues(tempArr));
+      }
+    }
+    socket2.on("ai_suggestion_res", handleLiveQna);
+
+    return () => {
+      socket2.off("ai_suggestion_res", handleLiveQna);
+    }
+  },[socket2,CuesList])
 
   //random testing
   /*useEffect(() => {
@@ -1502,7 +1516,7 @@ export default function DataWrapper({
         //   timestamp:"8:30pm"
         // }
         console.log("socket2 connect triggered", questionsApiReqPayload);
-        socket2.emit("questions_loader_req", questionsApiReqPayload);
+        //socket2.emit("questions_loader_req", questionsApiReqPayload);
       } else {
         console.log("socket2 connect triggered for client / not admin");
       }
@@ -1522,6 +1536,23 @@ export default function DataWrapper({
     };
   }, [socket2, myStream, myId, name, meetingIsLegit]);
 
+
+  useEffect(()=>{
+    if(socket2===null || myId === '' || myStream===null)
+      return ;
+    let questionsApiReqPayload = {
+      // jobid:jobId,
+      // roomid : roomId,
+      //agentid:agentId,
+      roomid: "abc-123-fgh-456",
+      jobid: "1",
+      agentid: "1234",
+      custemailid: custEmailId,
+      name: name,
+    };
+    console.log('before emiiting questions_loader_req',socket2.connected)
+    socket2.emit("questions_loader_req", questionsApiReqPayload);
+  },[socket2,myStream, myId])
   /* ========================================================================= */
   /* ========================================================================= */
   /* 8. Helper function for console.logging whether peers are available or not - used only for console.logging purpose */
@@ -2481,7 +2512,7 @@ export default function DataWrapper({
         start2IntervalId ? clearInterval(start2IntervalId) : null;
         globalRef.current.recordingStatus = false;
         setRecordingOn(false);
-      }, 100);
+      }, 1000);
     }
 
     //add isHost === false for client specific use-cases
