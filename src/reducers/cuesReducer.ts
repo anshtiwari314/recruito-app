@@ -57,18 +57,11 @@ let initialCuesObj: CuesDataType = {
 
 // Define the initial state for the Cues
 type CuesState = {
-  CuesList: Array<CuesDataType> | null;
+  CuesList: Array<CuesDataType>;
   jobDescription: string;
   interviewGuide: string;
   jobTitle: string;
 };
-
-const initialCuesState = {
-  CuesList: null,
-  jobDescription: "",
-  interviewGuide: "",
-  jobTitle: "",
-} as CuesState;
 
 let initialCuesLoadState: CuesState = {
   jobTitle: "",
@@ -158,14 +151,14 @@ const cuesSlice = createSlice({
 
     // Optionally, you can add actions like reset
     resetCue: (state) => {
-      return initialCuesState;
+      return initialCuesLoadState;
     },
 
     setCues: (state, action: PayloadAction<CuesState>) => {
       // Declare default value for state.CuesList
       let data: CuesDataType = { ...initialCuesObj };
 
-      state.CuesList = null;
+      state.CuesList = [];
       // Add if condition to check if state.CuesList exists and append to array in that case
       if (action.payload.CuesList) {
         let newState = action.payload.CuesList.map((passedState) => {

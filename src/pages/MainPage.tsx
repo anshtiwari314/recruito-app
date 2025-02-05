@@ -3,8 +3,6 @@ import { useParams } from "react-router-dom";
 import { useData } from "@/context/DataWrapper";
 import { v4 as uuidv4 } from "uuid";
 import ContentPanel from "@/components/ContentPanel";
-import type { CuesDataType } from "@/reducers/cuesReducer";
-import { setCues } from "@/reducers/cuesReducer";
 import type { QPState } from "@/reducers/queryparamReducer";
 import { setQP } from "@/reducers/queryparamReducer";
 import { useAppSelector } from "@/store/store";

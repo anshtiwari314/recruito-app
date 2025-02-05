@@ -197,7 +197,7 @@ export default function DataWrapper({
   /* Function to send live audio packet along with payload to backend after every VAD hit */
   function sendToServer(blob, url, data) {
     if (usersArrRef.current.length <= 1) return; //inserted here to ensure that the audio is not processed if there's only one person in the meeting.
-    
+
     let date = new Date();
     console.log(
       `%c just before sending the data ${
@@ -239,7 +239,7 @@ export default function DataWrapper({
         timeStamp: `${date.toLocaleDateString()} ${date.toLocaleTimeString()}:${date.getMilliseconds()}`,
       };
       console.log("from inside send to server", data);
-      socket2.emit('ai_suggestion_req',data)
+      socket2.emit("ai_suggestion_req", data);
     };
     reader.readAsDataURL(blob);
   }
@@ -851,7 +851,7 @@ export default function DataWrapper({
   useEffect(() => {
     if (myId === "" || meetingIsLegit === false) return;
 
-    //This is a socket connection to handle live messages between participants\    
+    //This is a socket connection to handle live messages between participants\
     let tempSocket = io("https://vitt-jarvis-node-production.up.railway.app/");
 
     //This is a socket connection with backend server to handle cues specific requests or other api requests
@@ -958,12 +958,26 @@ export default function DataWrapper({
         filteredCues = [];
       }
 
+      if (CuesList?.length > 0) {
+        filteredCues = [...CuesList, ...filteredCues];
+        const seen = new Set<string>(); // Store unique queries
+        filteredCues = filteredCues.filter((item: CuesDataType) => {
+          if (item?.similarity_query) {
+            if (seen.has(item?.similarity_query)) return false; // Skip duplicates
+            seen.add(item?.similarity_query);
+          }
+          
+          return true; // Keep the first occurrence
+
+        });
+      }
+
       dispatch(
         setCues({
           CuesList: filteredCues,
-          jobDescription: data?.jobDescription,
-          interviewGuide: data?.interviewGuide,
-          jobTitle: data?.jobTitle,
+          jobDescription: (jobDescription === "" ? null : jobDescription) ?? data?.jobDescription,
+          interviewGuide: (interviewGuide === "" ? null : interviewGuide) ?? data?.interviewGuide,
+          jobTitle: (jobTitle === "" ? null : jobTitle) ?? data?.jobTitle,
         })
       );
     }
@@ -977,6 +991,24 @@ export default function DataWrapper({
       socket2.off("questions_loader_res", handleJobDetails);
     };
   }, [myId, custId, socket2, meetingIsLegit]);
+
+  //random testing
+  /*useEffect(() => {
+    let tempArr: Array<CuesDataType> = [];
+
+    let obj: CuesDataType = { ...initialCuesObj };
+    obj.content = "random";
+    obj.sessionid = "xyz";
+    obj.audiofiletimestamp = "";
+    obj.common_id = "box_123";
+    obj.similarity_query = "random new question";
+    obj.isanswered = true;
+    //obj.type= data.type
+    obj.match_score = "55%";
+    tempArr.push(obj);
+
+    dispatch(addCues(tempArr));
+  }, []);*/
 
   /* ========================================================================= */
   /* ========================================================================= */
@@ -1470,7 +1502,7 @@ export default function DataWrapper({
         //   timestamp:"8:30pm"
         // }
         console.log("socket2 connect triggered", questionsApiReqPayload);
-        socket2.emit('questions_loader_req',questionsApiReqPayload)
+        socket2.emit("questions_loader_req", questionsApiReqPayload);
       } else {
         console.log("socket2 connect triggered for client / not admin");
       }
