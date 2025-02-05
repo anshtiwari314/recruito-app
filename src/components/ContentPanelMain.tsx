@@ -2,7 +2,7 @@ import { useData } from "@/context/DataWrapper";
 import { useAppSelector } from "@/store/store";
 import { v4 as uuidv4 } from "uuid";
 import type { CuesDataType } from "@/reducers/cuesReducer";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { TranscriptionDataType } from "@/reducers/transcriptionReducer";
 
 export function SingleCue({
@@ -97,10 +97,19 @@ export default function ContentPanelMain() {
     setIsExpanded(!isExpanded);
   };
 
+  const transcriptionRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (transcriptionRef.current) {
+      transcriptionRef.current.scrollTop = transcriptionRef.current.scrollHeight;
+    }
+  }, [transcriptions]); // Runs when transcriptions update
+
   return (
     <div className={`${!isExpanded ? "flex justify-between" : "flex flex-col"}`}>
       <div
         id="transcription"
+        ref={transcriptionRef}
         className={`${!isExpanded ? "flex-grow-0 flex-shrink-0 w-1/4 min-h-96 max-h-lvh mr-6" : "max-h-96 w-full"} mb-6 bg-white rounded-lg p-4 shadow-sm border-2 border-zinc-500 overflow-y-auto`}
       >
         {/* Header of transcription section */}
