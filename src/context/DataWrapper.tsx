@@ -1538,21 +1538,21 @@ export default function DataWrapper({
 
 
   useEffect(()=>{
-    if(socket2===null || myId === '' || myStream===null)
+    if(socket2===null || myId === '' || myStream===null || isHost === false)
       return ;
     let questionsApiReqPayload = {
-      // jobid:jobId,
-      // roomid : roomId,
-      //agentid:agentId,
-      roomid: "abc-123-fgh-456",
-      jobid: "1",
-      agentid: "1234",
-      custemailid: custEmailId,
-      name: name,
-    };
-    console.log('before emiiting questions_loader_req',socket2.connected)
-    socket2.emit("questions_loader_req", questionsApiReqPayload);
-  },[socket2,myStream, myId])
+        // jobid:jobId,
+        // roomid : roomId,
+        //agentid:agentId,
+        roomid: "abc-123-fgh-456",
+        jobid: "1",
+        agentid: "1234",
+        custemailid: custEmailId,
+        name: name,
+      };
+      console.log('before emiiting questions_loader_req',socket2.connected)
+      socket2.emit("questions_loader_req", questionsApiReqPayload);
+  },[socket2,myStream, myId, isHost])
   /* ========================================================================= */
   /* ========================================================================= */
   /* 8. Helper function for console.logging whether peers are available or not - used only for console.logging purpose */
