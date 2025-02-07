@@ -2277,7 +2277,7 @@ export default function DataWrapper({
     //@ts-ignore
     let myVad = null;
 
-    async function VAD(cb1: () => void, cb2: () => void) {
+    async function VAD(cb1:CallableFunction , cb2: CallableFunction ) {
       sendToServer(new Blob([]), adminUrl, {
         ...usersArrRef.current[0],
 
@@ -2287,6 +2287,11 @@ export default function DataWrapper({
       const myvad = await vad.MicVAD.new({
         onSpeechStart: cb1,
         onSpeechEnd: cb2,
+        //positiveSpeechThreshold:0.9,
+        //negativeSpeechThreshold:0.85,
+        // positiveSpeechThreshold:0.5,
+        // negativeSpeechThreshold:0.3,
+        // redemptionFrames:100
       });
       // myvad.start()
       globalRef.current.myVad = myvad;
@@ -2520,7 +2525,7 @@ export default function DataWrapper({
       //console.log("myvad if",globalRef.current.myVad,globalRef.current.myVad?.listening,microphoneToggle)
 
       if (globalRef.current.myVad === null) {
-        VAD(start2, stop2);
+        VAD(start, stop1);
       } else {
         globalRef.current.myVad?.start();
       }

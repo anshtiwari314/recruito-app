@@ -1,9 +1,11 @@
+import React from 'react'
 import { useData } from "@/context/DataWrapper";
 import { useAppSelector } from "@/store/store";
 import { v4 as uuidv4 } from "uuid";
 import type { CuesDataType } from "@/reducers/cuesReducer";
 import { useEffect, useRef, useState } from "react";
 import type { TranscriptionDataType } from "@/reducers/transcriptionReducer";
+import parse from 'html-react-parser';
 
 export function SingleCue({
   question,
@@ -26,18 +28,18 @@ export function SingleCue({
 
           <span className="text-neutral-900">{question?.similarity_query}</span>
         </div>
-        {isAnswered ? (
+        {/* {isAnswered ? (
           <span className="px-2 py-1 bg-neutral-200 rounded text-sm">
             {question?.match_score ? `${question.match_score} match` : ""}
           </span>
-        ) : null}
+        ) : null} */}
       </div>
       {!isAnswered ? (
         <div className="ml-8">
         </div>
       ) : (
         <div className="ml-8 text-sm text-neutral-600">
-          <button
+          {/* <button
             className="mt-2 text-neutral-700 hover:text-neutral-900"
             onClick={() => setToggleDetails((p) => !p)}
           >
@@ -47,10 +49,12 @@ export function SingleCue({
               <i className="fa-solid fa-chevron-right mr-1" />
             )}
             View Details
-          </button>
+          </button> */}
           <div>
             {toggleDetails && (
-              <p className="mt-2 pl-2 pr-2" dangerouslySetInnerHTML={{ __html: question?.content }}/>
+              <p className="mt-2 pl-2 pr-2" >
+                {parse(question?.content)}
+              </p>
             )}
           </div>
         </div>
@@ -110,10 +114,11 @@ export default function ContentPanelMain() {
       <div
         id="transcription"
         ref={transcriptionRef}
-        className={`${!isExpanded ? "flex-grow-0 flex-shrink-0 w-1/4 min-h-96 max-h-lvh mr-6" : "max-h-96 w-full"} mb-6 bg-white rounded-lg p-4 shadow-sm border-2 border-zinc-500 overflow-y-auto`}
+        style={{overflowY:'hidden',height:'80vh',padding:'0 0.8rem'}}
+        className={`${!isExpanded ? "flex-grow-0 flex-shrink-0 w-1/4 min-h-96 max-h-lvh mr-6" : "max-h-96 w-full"} mb-6 bg-white rounded-lg shadow-sm border-2 border-zinc-500 `}
       >
         {/* Header of transcription section */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4" style={{height:'10%'}}>
           <h2 className="text-lg font-semibold text-neutral-900">
             Live Transcription
           </h2>
@@ -126,7 +131,7 @@ export default function ContentPanelMain() {
         </div>
 
         {/* Details of transcripts to be fetched from API server ; for loop */}
-        <div className="space-y-8 flex-1  overflow-y-auto">
+        <div className="space-y-8 flex-1" style={{overflowY:'scroll',height:'85%'}}>
           {transcriptions.map((transcription, i) => (
             <SingleTranscription data={transcription} key={i} />
           ))}
@@ -153,13 +158,16 @@ export default function ContentPanelMain() {
       {/* AI Suggestions section */}
       <div
         id="ai-suggestions"
-        className={`${!isExpanded ? "flex-grow-0 w-3/4 min-h-96 max-h-lvh" : "w-full max-h-96"} mb-6 bg-white rounded-lg p-4 shadow-sm border-2 border-zinc-500 overflow-y-auto`}
+        style={{overflowY:'hidden',height:'80vh',padding:'0 0.8rem'}}
+        className={`${!isExpanded ? "flex-grow-0 w-3/4 min-h-96 max-h-lvh" : "w-full max-h-96"} mb-6 bg-white rounded-lg shadow-sm border-2 border-zinc-500 overflow-y-auto`}
       >
         {/* AI Suggestions section header */}
-        <h3 className="text-lg font-semibold mb-4 text-neutral-900">
+        <div className="flex items-center justify-between mb-4" style={{height:'10%'}}>
+        <h3 className="text-lg font-semibold text-neutral-900" >
           AI Suggestions
         </h3>
-        <div className="space-y-3">
+        </div>
+        <div className="space-y-3" style={{overflowY:'scroll',height:'85%'}}>
           {/* Details of each suggestion to be fetched from API server ; for loop */}
           {currentCues &&
             currentCues.map((question: CuesDataType, index: number) => (

@@ -21,7 +21,134 @@ const initialTranscriptionObj: TranscriptionDataType = {
   isCandidate: false,
 };
 
-const initialTranscriptionLoadState: Array<TranscriptionDataType> = [];
+const initialTranscriptionLoadState: Array<TranscriptionDataType> = [
+  {
+    id: uuidv4(),
+  speaker: "saurabh",
+  transcription: "How can you utilize JPEG and JPEGJPEG to enhance your interactions on your webpages?",
+  timeStamp: "13:59:01",
+  isCandidate: false,
+  },
+  {
+    id: uuidv4(),
+  speaker: "saurabh",
+  transcription: "How can you utilize JPEG and JPEGJPEG to enhance your interactions on your webpages?",
+  timeStamp: "13:59:01",
+  isCandidate: false,
+  },
+  {
+    id: uuidv4(),
+  speaker: "saurabh",
+  transcription: "How can you utilize JPEG and JPEGJPEG to enhance your interactions on your webpages?",
+  timeStamp: "13:59:01",
+  isCandidate: false,
+  },
+  {
+    id: uuidv4(),
+  speaker: "saurabh",
+  transcription: "How can you utilize JPEG and JPEGJPEG to enhance your interactions on your webpages?",
+  timeStamp: "13:59:01",
+  isCandidate: false,
+  },
+  {
+    id: uuidv4(),
+  speaker: "saurabh",
+  transcription: "How can you utilize JPEG and JPEGJPEG to enhance your interactions on your webpages?",
+  timeStamp: "13:59:01",
+  isCandidate: false,
+  },
+  {
+    id: uuidv4(),
+  speaker: "saurabh",
+  transcription: "How can you utilize JPEG and JPEGJPEG to enhance your interactions on your webpages?",
+  timeStamp: "13:59:01",
+  isCandidate: false,
+  },
+  {
+    id: uuidv4(),
+  speaker: "saurabh",
+  transcription: "How can you utilize JPEG and JPEGJPEG to enhance your interactions on your webpages?",
+  timeStamp: "13:59:01",
+  isCandidate: false,
+  },
+  {
+    id: uuidv4(),
+  speaker: "saurabh",
+  transcription: "How can you utilize JPEG and JPEGJPEG to enhance your interactions on your webpages?",
+  timeStamp: "13:59:01",
+  isCandidate: false,
+  },
+  {
+    id: uuidv4(),
+  speaker: "saurabh",
+  transcription: "How can you utilize JPEG and JPEGJPEG to enhance your interactions on your webpages?",
+  timeStamp: "13:59:01",
+  isCandidate: false,
+  },
+  {
+    id: uuidv4(),
+  speaker: "saurabh",
+  transcription: "How can you utilize JPEG and JPEGJPEG to enhance your interactions on your webpages?",
+  timeStamp: "13:59:01",
+  isCandidate: false,
+  },
+  {
+    id: uuidv4(),
+  speaker: "saurabh",
+  transcription: "How can you utilize JPEG and JPEGJPEG to enhance your interactions on your webpages?",
+  timeStamp: "13:59:01",
+  isCandidate: false,
+  },
+  {
+    id: uuidv4(),
+  speaker: "saurabh",
+  transcription: "How can you utilize JPEG and JPEGJPEG to enhance your interactions on your webpages?",
+  timeStamp: "13:59:01",
+  isCandidate: false,
+  },
+  {
+    id: uuidv4(),
+  speaker: "saurabh",
+  transcription: "How can you utilize JPEG and JPEGJPEG to enhance your interactions on your webpages?",
+  timeStamp: "13:59:01",
+  isCandidate: false,
+  },
+  {
+    id: uuidv4(),
+  speaker: "saurabh",
+  transcription: "How can you utilize JPEG and JPEGJPEG to enhance your interactions on your webpages?",
+  timeStamp: "13:59:01",
+  isCandidate: false,
+  },
+  {
+    id: uuidv4(),
+  speaker: "saurabh",
+  transcription: "How can you utilize JPEG and JPEGJPEG to enhance your interactions on your webpages?",
+  timeStamp: "13:59:01",
+  isCandidate: false,
+  },
+  {
+    id: uuidv4(),
+  speaker: "saurabh",
+  transcription: "How can you utilize JPEG and JPEGJPEG to enhance your interactions on your webpages?",
+  timeStamp: "13:59:01",
+  isCandidate: false,
+  },
+  {
+    id: uuidv4(),
+  speaker: "saurabh",
+  transcription: "How can you utilize JPEG and JPEGJPEG to enhance your interactions on your webpages?",
+  timeStamp: "13:59:01",
+  isCandidate: false,
+  },
+  {
+    id: uuidv4(),
+  speaker: "saurabh",
+  transcription: "How can you utilize JPEG and JPEGJPEG to enhance your interactions on your webpages?",
+  timeStamp: "13:59:01",
+  isCandidate: false,
+  }
+];
 
 const initialTranscriptionState = {
   TranscriptionList: [...initialTranscriptionLoadState],
