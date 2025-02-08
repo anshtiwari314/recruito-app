@@ -1773,9 +1773,6 @@ export default function DataWrapper({
       setUsers((prev) => [...prev, data]);
     }
 
-    /* 10.1.5. executes beforeunload */
-    function executeBeforeTabClose(e: Event) {}
-
     /* 10.1.6. socket.on("camera-toggle-receiver") event handler */
     function cameraToggle(data: any) {
       console.log("camera toggle", data);
@@ -1876,17 +1873,11 @@ export default function DataWrapper({
     socket.on("screen-share-receiver", screenShareDataReceiver);
     socket.on("single-screen-share-receiver", screenShareDataReceiver);
     socket.on("cue-loading-receiver", cueLoadingReceiver);
-    let id = window.addEventListener("beforeunload", executeBeforeTabClose, {
-      capture: true,
-    });
 
     return () => {
       socket.off("user-connected", newUser);
       socket.off("receive-msg", singleMsgReceiver);
       socket.off("to-leave-page-receiver", userMovedToLeavePage);
-      window.removeEventListener("beforeunload", executeBeforeTabClose, {
-        capture: true,
-      });
       socket.off("tab-close-remove-video", removeUser);
       socket.off("receive-connected-user-data", sendUserData);
       socket.off("camera-toggle-receiver", cameraToggle);
@@ -1898,6 +1889,7 @@ export default function DataWrapper({
       socket.off("single-screen-share-receiver", screenShareDataReceiver);
     };
   }, [socket, myStream, myAudioStream, peer, peer2, audioPeer]);
+
 
   /* ========================================================================= */
   /* ========================================================================= */

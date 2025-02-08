@@ -46,8 +46,8 @@ export default function MainPage() {
     };
   }, []);
 
-  useEffect(() => {
 
+  useEffect(() => {
     let params = new URL(window.location.href).searchParams;
     let isMounted = true;
 
@@ -154,13 +154,31 @@ export default function MainPage() {
         }
       };
 
-      
-
       checkLoginData();
     }
 
     return () => {
       isMounted = false; // Cleanup to prevent memory leaks
+    };
+  }, []);
+
+  /* Executes beforeunload */
+  useEffect(()=>{
+    
+    function executeBeforeTabClose(e: BeforeUnloadEvent) {
+      localStorage.setItem("preventClose", "true");
+      e.preventDefault();
+      // Some browsers require returnValue, even though it's deprecated
+      if ("returnValue" in e) {
+        e.returnValue = ""; // Still required for confirmation dialog
+      }
+      return ""; // Some TypeScript versions require an explicit return
+    };
+
+    window.addEventListener("beforeunload", executeBeforeTabClose);
+
+    return () => {
+      window.removeEventListener("beforeunload", executeBeforeTabClose);
     };
   }, []);
 
