@@ -5,6 +5,7 @@ import queryparamReducer from "@/reducers/queryparamReducer";
 import { TypedUseSelectorHook, useSelector } from "react-redux";
 import transcriptionReducer from "@/reducers/transcriptionReducer";
 import usersReducer from "@/reducers/usersReducer";
+import navigationparamReducer from "@/reducers/navigationparamReducer";
 
 // Create and configure the Redux store
 export const store = configureStore({
@@ -12,7 +13,8 @@ export const store = configureStore({
     cuesReducer: cuesReducer.cuesReducer,
     qpReducer: queryparamReducer.qpReducer,
     trcpReducer:transcriptionReducer.transcriptionReducer,
-    usersReducer:usersReducer.usersReducer
+    usersReducer:usersReducer.usersReducer,
+    nvReducer: navigationparamReducer.nvReducer,
   },
 });
 

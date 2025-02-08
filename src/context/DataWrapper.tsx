@@ -103,6 +103,8 @@ export default function DataWrapper({
   const { jobId, roomId, custEmailId, agentId, isHost, meetingIsLegit } =
     useAppSelector((state) => state.qpReducer);
 
+  const {closeCall} = useAppSelector((state) => state.nvReducer);
+
   const [socket, setSocket] = useState<any>(null);
   const [socket2, setSocket2] = useState<any>(null);
 
@@ -118,6 +120,9 @@ export default function DataWrapper({
   const [myAudioStream, setMyAudioStream] = useState<
     MediaStream | null | boolean
   >(null);
+
+  const videoStreamRef = useRef<MediaStream | null>(null);
+  const audioStreamRef = useRef<MediaStream | null>(null);
 
   const peersObjRef = useRef<any>({});
   const peersArrRef = useRef<string[]>([]);
@@ -449,7 +454,7 @@ export default function DataWrapper({
   /* ========================================================================= */
   /* ========================================================================= */
   /* Function to create video streams/audio streams/screen sharing streams for new users */
-  async function gettingVideoStream() {
+  function gettingVideoStream() {
     return navigator.mediaDevices.getUserMedia({
       video: {
         frameRate: {
@@ -1084,6 +1089,7 @@ export default function DataWrapper({
         setMyStream(videoStream);
 
         tempObj.videoStream = videoStream;
+        videoStreamRef.current = videoStream;
         tempObj.isCameraAvailable = true;
         tempObj.isAudioStream = false;
       })
@@ -1100,6 +1106,7 @@ export default function DataWrapper({
         setMyAudioStream(audioStream);
         tempObj.audioStream = audioStream;
         tempObj.isMicrophoneAvailable = true;
+        audioStreamRef.current = audioStream;
       })
       .catch((err) => {
         // let tempStream = new MediaStream()
@@ -1114,7 +1121,36 @@ export default function DataWrapper({
     console.log("after setting usersArrRef", d.toLocaleTimeString());
 
     setUsers((prev) => [...usersArrRef.current]);
+
+    return () => {
+      if (videoStreamRef.current) {
+        videoStreamRef.current.getTracks().forEach((track) => track.stop()); // ✅ Stop camera stream
+        videoStreamRef.current = null;
+      }
+
+      if (audioStreamRef.current) {
+        audioStreamRef.current.getTracks().forEach((track) => track.stop()); // ✅ Stop audio stream
+        audioStreamRef.current = null;
+      }
+    };
   }, [myId, roomId, custEmailId, agentId, name, audioPeer, meetingIsLegit]);
+
+  /* ========================================================================= */
+  /* ========================================================================= */
+  /* 3.3. Clean up function once closecall is initiated */
+  useEffect(() => {
+    if (closeCall === false) return;
+    //else
+    if (videoStreamRef.current) {
+      videoStreamRef.current.getTracks().forEach((track) => track.stop()); // ✅ Stop camera stream
+      videoStreamRef.current = null;
+    }
+
+    if (audioStreamRef.current) {
+      audioStreamRef.current.getTracks().forEach((track) => track.stop()); // ✅ Stop audio stream
+      audioStreamRef.current = null;
+    }
+  }, [closeCall]);
 
   /* ========================================================================= */
   /* ========================================================================= */
@@ -1773,9 +1809,6 @@ export default function DataWrapper({
       setUsers((prev) => [...prev, data]);
     }
 
-    /* 10.1.5. executes beforeunload */
-    function executeBeforeTabClose(e: Event) {}
-
     /* 10.1.6. socket.on("camera-toggle-receiver") event handler */
     function cameraToggle(data: any) {
       console.log("camera toggle", data);
@@ -1876,17 +1909,11 @@ export default function DataWrapper({
     socket.on("screen-share-receiver", screenShareDataReceiver);
     socket.on("single-screen-share-receiver", screenShareDataReceiver);
     socket.on("cue-loading-receiver", cueLoadingReceiver);
-    let id = window.addEventListener("beforeunload", executeBeforeTabClose, {
-      capture: true,
-    });
 
     return () => {
       socket.off("user-connected", newUser);
       socket.off("receive-msg", singleMsgReceiver);
       socket.off("to-leave-page-receiver", userMovedToLeavePage);
-      window.removeEventListener("beforeunload", executeBeforeTabClose, {
-        capture: true,
-      });
       socket.off("tab-close-remove-video", removeUser);
       socket.off("receive-connected-user-data", sendUserData);
       socket.off("camera-toggle-receiver", cameraToggle);
@@ -1898,6 +1925,7 @@ export default function DataWrapper({
       socket.off("single-screen-share-receiver", screenShareDataReceiver);
     };
   }, [socket, myStream, myAudioStream, peer, peer2, audioPeer]);
+
 
   /* ========================================================================= */
   /* ========================================================================= */

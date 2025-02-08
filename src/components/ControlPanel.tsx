@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useData } from "@/context/DataWrapper";
 import { useNavigate } from "react-router-dom";
 import ControlPanelTimer from "@/components/ControlPanelTimer";
+import { useDispatch } from "react-redux";
+import { setNVclosecall } from "@/reducers/navigationparamReducer";
 
 export default function ControlPanel() {
-  const [isAudioMuted, setIsAudioMuted] = useState(false);
-  const [isVideoMuted, setIsVideoMuted] = useState(false);
-  const [isScreenShared, setIsScreenShared] = useState(false);
+  const dispatch = useDispatch();
 
   const navigate = useNavigate();
 
@@ -17,26 +17,25 @@ export default function ControlPanel() {
     const confirmQuit = window.confirm("Are you sure you want to quit?");
     if (confirmQuit) {
       sessionStorage.setItem("exitdone", "true");
+      setMicroPhoneToggle(false);
+      setCameraToggle(false);
+      dispatch(setNVclosecall(true));
       // Include logic here to send audio out along with corresponding ui
-      navigate("/leave");
       console.log("Closing the call...");
     }
   };
 
   const shareScreen = () => {
-    //isScreenShared ? setIsScreenShared(false) : setIsScreenShared(true);
     setScreenSharing((p:boolean)=>!p)
     console.log("Sharing the screen...");
   };
 
   const toggleAudio = () => {
-   // isAudioMuted ? setIsAudioMuted(false) : setIsAudioMuted(true);
     setMicroPhoneToggle((p:boolean)=>!p)
     console.log("toggling the audio...");
   };
 
   const toggleVideo = () => {
-   // isVideoMuted ? setIsVideoMuted(false) : setIsVideoMuted(true);
    setCameraToggle((p:boolean)=>!p)
     console.log("toggling the video...");
   };

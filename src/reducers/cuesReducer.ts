@@ -335,7 +335,7 @@ const cuesSlice = createSlice({
 
     // Optionally, you can add actions like reset
     resetCue: (state) => {
-      return initialCuesLoadState;
+      Object.assign(state, initialCuesLoadState);
     },
 
     setCues: (state, action: PayloadAction<CuesState>) => {
@@ -357,7 +357,7 @@ const cuesSlice = createSlice({
       return state;
     },
 
-    updateCues: (state, action: PayloadAction<CuesState>) => {
+    updateCues: (state, action: PayloadAction<{CuesList: CuesDataType[]}>) => {
       // Declare default value for state.CuesList
       let data: CuesDataType = { ...initialCuesObj };
 
