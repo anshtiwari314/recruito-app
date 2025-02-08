@@ -10,12 +10,15 @@ import { useDispatch } from "react-redux";
 import ControlPanel from "@/components/ControlPanel";
 import RightPanel from "@/components/RightPanel";
 import NotFound from "./NotFoundPage";
+import Leave from "./Leave";
 
 export default function MainPage() {
   //@ts-ignore
   const { setMyId, setName, setCustId } = useData();
   const { isHost, meetingIsLegit } = useAppSelector((state) => state.qpReducer);
   const { jobTitle } = useAppSelector((state) => state.cuesReducer);
+  const { closeCall } = useAppSelector((state) => state.nvReducer);
+
   const dispatch = useDispatch();
   const [meetingIsLegitMain, setMeetingIsLegitMain] = useState<boolean>(true);
 
@@ -45,7 +48,6 @@ export default function MainPage() {
       window.removeEventListener("resize", Resizing);
     };
   }, []);
-
 
   useEffect(() => {
     let params = new URL(window.location.href).searchParams;
@@ -163,17 +165,15 @@ export default function MainPage() {
   }, []);
 
   /* Executes beforeunload */
-  useEffect(()=>{
-    
+  useEffect(() => {
     function executeBeforeTabClose(e: BeforeUnloadEvent) {
-      localStorage.setItem("preventClose", "true");
       e.preventDefault();
       // Some browsers require returnValue, even though it's deprecated
       if ("returnValue" in e) {
         e.returnValue = ""; // Still required for confirmation dialog
       }
       return ""; // Some TypeScript versions require an explicit return
-    };
+    }
 
     window.addEventListener("beforeunload", executeBeforeTabClose);
 
@@ -189,69 +189,73 @@ export default function MainPage() {
       {tempIsHost === null ? (
         "Authenticating ..."
       ) : meetingIsLegitMain ? (
-        <div className="overflow-y-auto w-screen min-h-screen relative bg-neutral-50">
-          {/* App header */}
-          <header
-            id="header"
-            className="w-full bg-white border-b border-neutral-200 px-4 py-3 flex place-items-center justify-between shadow-sm"
-          >
-            <div className="flex place-items-center space-x-4">
-              <div className="h-8 w-[2px] bg-neutral-200"></div>
-              <img
-                src="https://api.dicebear.com/7.x/notionists/svg?scale=200&amp;seed=Logo"
-                className="h-8"
-                alt="Logo"
-              />
-              {jobTitle ? (
-                <div className="text-md text-neutral-500">
-                  Interview: {jobTitle}
-                </div>
-              ) : (
-                <div className="text-md text-neutral-500">
-                  Recruiter Copilot
+        closeCall ? (
+          <Leave />
+        ) : (
+          <div className="overflow-y-auto w-screen min-h-screen relative bg-neutral-50">
+            {/* App header */}
+            <header
+              id="header"
+              className="w-full bg-white border-b border-neutral-200 px-4 py-3 flex place-items-center justify-between shadow-sm"
+            >
+              <div className="flex place-items-center space-x-4">
+                <div className="h-8 w-[2px] bg-neutral-200"></div>
+                <img
+                  src="https://api.dicebear.com/7.x/notionists/svg?scale=200&amp;seed=Logo"
+                  className="h-8"
+                  alt="Logo"
+                />
+                {jobTitle ? (
+                  <div className="text-md text-neutral-500">
+                    Interview: {jobTitle}
+                  </div>
+                ) : (
+                  <div className="text-md text-neutral-500">
+                    Recruiter Copilot
+                  </div>
+                )}
+                {/*<div className="text-md text-neutral-500">Recruiter Copilot</div>*/}
+              </div>
+
+              {isHost && (
+                <div className="flex place-items-center space-x-4">
+                  <button className="flex place-items-center px-3 py-1.5 bg-neutral-50 rounded-full text-md text-neutral-600">
+                    <i className="fa-solid fa-circle text-green-500 mr-2 text-xs"></i>
+                    Live
+                  </button>
+                  <button className="px-3 py-1.5 bg-neutral-50 rounded-full">
+                    <i className="fa-solid fa-download text-neutral-600"></i>
+                  </button>
+                  <button className="px-3 py-1.5 bg-neutral-50 rounded-full">
+                    <i className="fa-solid fa-ellipsis-vertical text-neutral-600"></i>
+                  </button>
                 </div>
               )}
-              {/*<div className="text-md text-neutral-500">Recruiter Copilot</div>*/}
-            </div>
+            </header>
 
-            {isHost && (
-              <div className="flex place-items-center space-x-4">
-                <button className="flex place-items-center px-3 py-1.5 bg-neutral-50 rounded-full text-md text-neutral-600">
-                  <i className="fa-solid fa-circle text-green-500 mr-2 text-xs"></i>
-                  Live
-                </button>
-                <button className="px-3 py-1.5 bg-neutral-50 rounded-full">
-                  <i className="fa-solid fa-download text-neutral-600"></i>
-                </button>
-                <button className="px-3 py-1.5 bg-neutral-50 rounded-full">
-                  <i className="fa-solid fa-ellipsis-vertical text-neutral-600"></i>
-                </button>
+            {/* Main Content */}
+            <main id="main-content" className="flex h-[calc(100vh-120px)]">
+              {/* Content Panel */}
+              <div
+                id="content-panel"
+                className="relative grow w-10/12 p-6 overflow-y-auto"
+              >
+                <ContentPanel isMobile={isMobile} />
+
+                {/**/}
               </div>
-            )}
-          </header>
 
-          {/* Main Content */}
-          <main id="main-content" className="flex h-[calc(100vh-120px)]">
-            {/* Content Panel */}
-            <div
-              id="content-panel"
-              className="relative grow w-10/12 p-6 overflow-y-auto"
+              {/* Right Panel */}
+              <RightPanel />
+            </main>
+            <footer
+              id="footer"
+              className="fixed bottom-0 w-full bg-white border-t border-neutral-200"
             >
-              <ContentPanel isMobile={isMobile} />
-
-              {/**/}
-            </div>
-
-            {/* Right Panel */}
-            <RightPanel />
-          </main>
-          <footer
-            id="footer"
-            className="fixed bottom-0 w-full bg-white border-t border-neutral-200"
-          >
-            <ControlPanel />
-          </footer>
-        </div>
+              <ControlPanel />
+            </footer>
+          </div>
+        )
       ) : (
         <NotFound />
       )}

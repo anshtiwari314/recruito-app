@@ -103,6 +103,8 @@ export default function DataWrapper({
   const { jobId, roomId, custEmailId, agentId, isHost, meetingIsLegit } =
     useAppSelector((state) => state.qpReducer);
 
+  const {closeCall} = useAppSelector((state) => state.nvReducer);
+
   const [socket, setSocket] = useState<any>(null);
   const [socket2, setSocket2] = useState<any>(null);
 
@@ -118,6 +120,9 @@ export default function DataWrapper({
   const [myAudioStream, setMyAudioStream] = useState<
     MediaStream | null | boolean
   >(null);
+
+  const videoStreamRef = useRef<MediaStream | null>(null);
+  const audioStreamRef = useRef<MediaStream | null>(null);
 
   const peersObjRef = useRef<any>({});
   const peersArrRef = useRef<string[]>([]);
@@ -449,7 +454,7 @@ export default function DataWrapper({
   /* ========================================================================= */
   /* ========================================================================= */
   /* Function to create video streams/audio streams/screen sharing streams for new users */
-  async function gettingVideoStream() {
+  function gettingVideoStream() {
     return navigator.mediaDevices.getUserMedia({
       video: {
         frameRate: {
@@ -1084,6 +1089,7 @@ export default function DataWrapper({
         setMyStream(videoStream);
 
         tempObj.videoStream = videoStream;
+        videoStreamRef.current = videoStream;
         tempObj.isCameraAvailable = true;
         tempObj.isAudioStream = false;
       })
@@ -1100,6 +1106,7 @@ export default function DataWrapper({
         setMyAudioStream(audioStream);
         tempObj.audioStream = audioStream;
         tempObj.isMicrophoneAvailable = true;
+        audioStreamRef.current = audioStream;
       })
       .catch((err) => {
         // let tempStream = new MediaStream()
@@ -1114,7 +1121,36 @@ export default function DataWrapper({
     console.log("after setting usersArrRef", d.toLocaleTimeString());
 
     setUsers((prev) => [...usersArrRef.current]);
+
+    return () => {
+      if (videoStreamRef.current) {
+        videoStreamRef.current.getTracks().forEach((track) => track.stop()); // ✅ Stop camera stream
+        videoStreamRef.current = null;
+      }
+
+      if (audioStreamRef.current) {
+        audioStreamRef.current.getTracks().forEach((track) => track.stop()); // ✅ Stop audio stream
+        audioStreamRef.current = null;
+      }
+    };
   }, [myId, roomId, custEmailId, agentId, name, audioPeer, meetingIsLegit]);
+
+  /* ========================================================================= */
+  /* ========================================================================= */
+  /* 3.3. Clean up function once closecall is initiated */
+  useEffect(() => {
+    if (closeCall === false) return;
+    //else
+    if (videoStreamRef.current) {
+      videoStreamRef.current.getTracks().forEach((track) => track.stop()); // ✅ Stop camera stream
+      videoStreamRef.current = null;
+    }
+
+    if (audioStreamRef.current) {
+      audioStreamRef.current.getTracks().forEach((track) => track.stop()); // ✅ Stop audio stream
+      audioStreamRef.current = null;
+    }
+  }, [closeCall]);
 
   /* ========================================================================= */
   /* ========================================================================= */
