@@ -76,7 +76,7 @@ export function RightPanelVideo({e,muted}:{e:any,muted:boolean}) {
                 <video />
               </div>
               <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-                <span className="text-sm bg-black/50 text-white px-2 py-1 rounded">
+                <span className="text-sm bg-black/50 text-white px-2 py-1 rounded" style={{textTransform:'capitalize'}}>
                   {e?.name}
                 </span>
                 <div className="flex space-x-1">

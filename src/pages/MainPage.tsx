@@ -10,7 +10,9 @@ import { useDispatch } from "react-redux";
 import ControlPanel from "@/components/ControlPanel";
 import RightPanel from "@/components/RightPanel";
 import NotFound from "./NotFoundPage";
-import Leave from "./Leave";
+import LeavePage from "./LeavePage";
+import MeetingPageHeader from "../components/MeetingPageHeader";
+import FeedbackModel from "../components/FeedbackModel";
 
 export default function MainPage() {
   //@ts-ignore
@@ -190,70 +192,37 @@ export default function MainPage() {
         "Authenticating ..."
       ) : meetingIsLegitMain ? (
         closeCall ? (
-          <Leave />
+          <LeavePage />
         ) : (
-          <div className="overflow-y-auto w-screen min-h-screen relative bg-neutral-50">
+          <div className="overflow-y-auto w-screen min-h-screen relative bg-neutral-50" style={{height:'100vh',width:'100vw',overflow:'hidden'}}>
             {/* App header */}
-            <header
-              id="header"
-              className="w-full bg-white border-b border-neutral-200 px-4 py-3 flex place-items-center justify-between shadow-sm"
-            >
-              <div className="flex place-items-center space-x-4">
-                <div className="h-8 w-[2px] bg-neutral-200"></div>
-                <img
-                  src="https://api.dicebear.com/7.x/notionists/svg?scale=200&amp;seed=Logo"
-                  className="h-8"
-                  alt="Logo"
-                />
-                {jobTitle ? (
-                  <div className="text-md text-neutral-500">
-                    Interview: {jobTitle}
-                  </div>
-                ) : (
-                  <div className="text-md text-neutral-500">
-                    Recruiter Copilot
-                  </div>
-                )}
-                {/*<div className="text-md text-neutral-500">Recruiter Copilot</div>*/}
-              </div>
-
-              {isHost && (
-                <div className="flex place-items-center space-x-4">
-                  <button className="flex place-items-center px-3 py-1.5 bg-neutral-50 rounded-full text-md text-neutral-600">
-                    <i className="fa-solid fa-circle text-green-500 mr-2 text-xs"></i>
-                    Live
-                  </button>
-                  <button className="px-3 py-1.5 bg-neutral-50 rounded-full">
-                    <i className="fa-solid fa-download text-neutral-600"></i>
-                  </button>
-                  <button className="px-3 py-1.5 bg-neutral-50 rounded-full">
-                    <i className="fa-solid fa-ellipsis-vertical text-neutral-600"></i>
-                  </button>
-                </div>
-              )}
-            </header>
+            
+            <MeetingPageHeader/>
 
             {/* Main Content */}
-            <main id="main-content" className="flex h-[calc(100vh-120px)]">
+            <main id="main-content" className="flex h-[calc(100vh-120px)]" 
+            style={{height:'90vh'}}
+            >
               {/* Content Panel */}
               <div
                 id="content-panel"
-                className="relative grow w-10/12 p-6 overflow-y-auto"
+                className="relative grow w-10/12 p-6 overflow-y-hidden"
+                
               >
+                
                 <ContentPanel isMobile={isMobile} />
-
                 {/**/}
               </div>
 
               {/* Right Panel */}
               <RightPanel />
             </main>
-            <footer
+            {/* <footer
               id="footer"
               className="fixed bottom-0 w-full bg-white border-t border-neutral-200"
             >
               <ControlPanel />
-            </footer>
+            </footer> */}
           </div>
         )
       ) : (
@@ -262,4 +231,5 @@ export default function MainPage() {
     </>
   );
 }
+
 

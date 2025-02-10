@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React,{ useState } from "react";
 import { useData } from "@/context/DataWrapper";
 import { useNavigate } from "react-router-dom";
 import ControlPanelTimer from "@/components/ControlPanelTimer";

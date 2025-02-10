@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React,{ useEffect, useState } from "react";
 import { useAppSelector } from "@/store/store";
 
 export default function ContentPanelFooter() {
@@ -73,7 +73,7 @@ export default function ContentPanelFooter() {
   }, [status]);
 
   return (
-    <div id="ai-query" className="mb-10">
+    <div id="ai-query" className="" style={{flex:0.2}}>
       <div className="bg-white rounded-lg shadow-lg p-4 border border-neutral-200">
         <div className="flex items-center space-x-3">
           <textarea

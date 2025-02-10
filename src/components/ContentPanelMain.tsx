@@ -110,11 +110,14 @@ export default function ContentPanelMain() {
   }, [transcriptions]); // Runs when transcriptions update
 
   return (
-    <div className={`${!isExpanded ? "flex justify-between" : "flex flex-col"}`}>
+    <div className={`${!isExpanded ? "flex justify-between" : "flex flex-col"}`} 
+    style={{flex:0.75,maxHeight:'75%'}}
+    
+    >
       <div
         id="transcription"
         ref={transcriptionRef}
-        style={{overflowY:'hidden',height:'80vh',padding:'0 0.8rem'}}
+        style={{overflowY:'hidden',height:'100%',padding:'0 0.8rem'}}
         className={`${!isExpanded ? "flex-grow-0 flex-shrink-0 w-1/4 min-h-96 max-h-lvh mr-6" : "max-h-96 w-full"} mb-6 bg-white rounded-lg shadow-sm border-2 border-zinc-500 `}
       >
         {/* Header of transcription section */}
@@ -158,7 +161,7 @@ export default function ContentPanelMain() {
       {/* AI Suggestions section */}
       <div
         id="ai-suggestions"
-        style={{overflowY:'hidden',height:'80vh',padding:'0 0.8rem'}}
+        style={{overflowY:'hidden',height:'100%',padding:'0 0.8rem'}}
         className={`${!isExpanded ? "flex-grow-0 w-3/4 min-h-96 max-h-lvh" : "w-full max-h-96"} mb-6 bg-white rounded-lg shadow-sm border-2 border-zinc-500 overflow-y-auto`}
       >
         {/* AI Suggestions section header */}

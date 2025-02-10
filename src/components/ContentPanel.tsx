@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React,{ useEffect, useState } from "react";
 import { useData } from "@/context/DataWrapper";
 import MyLargerVideoComp from "@/components/MyLargerVideoComp";
 import ContentPanelMain from "./ContentPanelMain";
@@ -60,10 +60,19 @@ export default function ContentPanel({
   return (
     <>
       {isHost ? (
-        <>
+        <div style={{
+        //border:'0.2rem solid green',
+        height:'100%',
+        display:'flex',
+        flexDirection:'column',
+        justifyContent:'space-between'
+        }}>
+          
+
           <ContentPanelMain />
+
           <ContentPanelFooter />
-        </>
+        </div>
       ) : (
         largeVideo && (
           <MyLargerVideoComp
