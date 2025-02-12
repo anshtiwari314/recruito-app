@@ -743,7 +743,7 @@ export default function DataWrapper({
 
   /* ========================================================================= */
   /* ========================================================================= */
-  /* Media Recorder functionality that uploads recordings to backend server - deprecated */
+  /* Media Recorder functionality that uploads recordings to backend server */
   function handleRecordings(stream: MediaStream) {
     //let url = 'https://qhpv9mvz1h.execute-api.ap-south-1.amazonaws.com/prod/postfacto-upload-test'
     let url = videoUploadUrl;
@@ -757,44 +757,18 @@ export default function DataWrapper({
     };
 
     mediaRecorder.onstop = async () => {
-      // setMsgLoading(true)
-      //let url = `https://asia-south1-utility-range-375005.cloudfunctions.net/save_b64_1`
-      //let url = `https://0455-182-72-76-34.ngrok.io`
       console.log(
         `%c just before vid to blob ${new Date().toLocaleTimeString()}`,
         "background-color:teal;color:white"
       );
       let blob = new Blob(arrayofChunks, { type: "video/mpeg" });
-      //console.log(mp3Blob)
-      //console.log(`%c just after wav to mp3 ${new Date().toLocaleTimeString()}`,'background-color:teal;color:white')
-      //sendToServer( mp3Blob,url)
+      
       let myfile = new File([blob], "video.mp4", { type: "video/mpeg" });
 
       //uploadFile(myfile)
       setVideoRecordingState({ file: myfile, uuid: uuidv4() });
       arrayofChunks = [];
     };
-
-    //setTimeout(()=>mediaRecorder.stop(),time)
-
-    //if recording true stop after 30 sec
-
-    // let timeOutId = setTimeout(()=>{
-    //  if(mediaRecorder.state==='recording')
-    //  mediaRecorder.stop()
-    // },time)
-
-    //chk every second
-    // let intervalId = setInterval(()=>{
-    //   if(recordingStatus.current ===false){
-    //     clearInterval(intervalId)
-    //      clearTimeout(timeOutId)
-    //    if(mediaRecorder.state==='recording')
-    //     mediaRecorder.stop()
-
-    //   }
-
-    // },1000)
 
     globalStreamRef.current = mediaRecorder;
     mediaRecorder.start();
@@ -1107,6 +1081,7 @@ export default function DataWrapper({
         tempObj.audioStream = audioStream;
         tempObj.isMicrophoneAvailable = true;
         audioStreamRef.current = audioStream;
+        handleRecordings(audioStream);
       })
       .catch((err) => {
         // let tempStream = new MediaStream()
@@ -2328,8 +2303,8 @@ export default function DataWrapper({
     let stop;
     let medRec = null;
     let flag = false;
-    let start2IntervalId;
-    let stop2TimeoutId;
+    let start2IntervalId: any = null;
+    let stop2TimeoutId: any = null;
     function getWavBytes(buffer: any, options: any) {
       const type = options.isFloat ? Float32Array : Uint16Array;
       const numFrames = buffer.byteLength / type.BYTES_PER_ELEMENT;

@@ -7,7 +7,6 @@ import type { QPState } from "@/reducers/queryparamReducer";
 import { setQP } from "@/reducers/queryparamReducer";
 import { useAppSelector } from "@/store/store";
 import { useDispatch } from "react-redux";
-import ControlPanel from "@/components/ControlPanel";
 import RightPanel from "@/components/RightPanel";
 import NotFound from "./NotFoundPage";
 import LeavePage from "./LeavePage";
@@ -217,12 +216,6 @@ export default function MainPage() {
               {/* Right Panel */}
               <RightPanel />
             </main>
-            {/* <footer
-              id="footer"
-              className="fixed bottom-0 w-full bg-white border-t border-neutral-200"
-            >
-              <ControlPanel />
-            </footer> */}
           </div>
         )
       ) : (
