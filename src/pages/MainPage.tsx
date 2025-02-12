@@ -9,13 +9,12 @@ import { useAppSelector } from "@/store/store";
 import { useDispatch } from "react-redux";
 import RightPanel from "@/components/RightPanel";
 import NotFound from "./NotFoundPage";
-import LeavePage from "./LeavePage";
+import Leave from "./LeavePage";
 import MeetingPageHeader from "../components/MeetingPageHeader";
-import FeedbackModel from "../components/FeedbackModel";
 
 export default function MainPage() {
   //@ts-ignore
-  const { setMyId, setName, setCustId } = useData();
+  const { setMyId, setName } = useData();
   const { isHost, meetingIsLegit } = useAppSelector((state) => state.qpReducer);
   const { jobTitle } = useAppSelector((state) => state.cuesReducer);
   const { closeCall } = useAppSelector((state) => state.nvReducer);
@@ -150,8 +149,7 @@ export default function MainPage() {
           };
           // Set the query params state for this meeting
           dispatch(setQP(qParams));
-          // Set the cust_email_id state variable
-          setCustId(params.get("cust_email_id"));
+          
           // Set the myId state variable to the temporary ID
           setMyId(uuidv4());
         }
@@ -191,7 +189,7 @@ export default function MainPage() {
         "Authenticating ..."
       ) : meetingIsLegitMain ? (
         closeCall ? (
-          <LeavePage />
+          <Leave />
         ) : (
           <div className="overflow-y-auto w-screen min-h-screen relative bg-neutral-50" style={{height:'100vh',width:'100vw',overflow:'hidden'}}>
             {/* App header */}

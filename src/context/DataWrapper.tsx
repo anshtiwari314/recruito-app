@@ -11,7 +11,13 @@ import { v4 as uuidv4 } from "uuid";
 import Peer from "peerjs";
 import WavToMp3 from "../functions/wavToMp3";
 import type { CuesDataType } from "@/reducers/cuesReducer";
-import { setCues, addCues,updateCues, initialCuesObj } from "@/reducers/cuesReducer";
+import {
+  setCues,
+  addCues,
+  updateCues,
+  initialCuesObj,
+} from "@/reducers/cuesReducer";
+import { setNVaudioUploadAnimation } from "@/reducers/navigationparamReducer";
 import { useAppSelector } from "@/store/store";
 import { useDispatch } from "react-redux";
 import {
@@ -103,13 +109,12 @@ export default function DataWrapper({
   const { jobId, roomId, custEmailId, agentId, isHost, meetingIsLegit } =
     useAppSelector((state) => state.qpReducer);
 
-  const {closeCall} = useAppSelector((state) => state.nvReducer);
+  const { closeCall } = useAppSelector((state) => state.nvReducer);
 
   const [socket, setSocket] = useState<any>(null);
   const [socket2, setSocket2] = useState<any>(null);
 
   const [myId, setMyId] = useState<string>("");
-  const [custId, setCustId] = useState<string>("");
 
   const [peer, setPeer] = useState<Peer | null>(null);
   const firstTimeConnectRef = useRef<boolean>(true);
@@ -164,17 +169,11 @@ export default function DataWrapper({
   const vadEffectRender = useRef(0);
   const vadFlag = useRef(false);
   const adminMediaRecorderStatus = useRef(false);
-  const clientMediaRecorderStatus = useRef(false);
-  const clientTranscriptionMediaRecorderStatus = useRef(false);
   const [validUrl, setValidUrl] = useState("");
   const globalStreamRef = useRef<any>(null);
   const [largeVideo, setLargeVideo] = useState(null);
   const largeVideoRef = useRef(null);
-  const [videoRecordingState, setVideoRecordingState] = useState({
-    file: null,
-    uuid: null,
-  });
-  const videoRecordingRef = useRef({ file: null, uuid: null });
+  const startAudioTimestampRef = useRef<string | null>(null);
 
   const [recordingOn, setRecordingOn] = useState(false);
   //const adminUrl = `https://tso4smyf1j.execute-api.ap-south-1.amazonaws.com/test/transcription-2way-clientaudio`;
@@ -483,7 +482,7 @@ export default function DataWrapper({
   /* ========================================================================= */
   /* ========================================================================= */
   /* function used for creating a cues box based on response from socket2 server - deprecated */
-  function handleData(data: CuesDataType = {} as CuesDataType) {
+  function handleDataOld(data: CuesDataType = {} as CuesDataType) {
     let date = new Date();
     console.log(
       `%c inside handle Data ${
@@ -638,9 +637,9 @@ export default function DataWrapper({
   /* ========================================================================= */
   /* ========================================================================= */
   /* Function for uploading file chunk by chunk using ajax/xhr */
-  function uploadFile(uploadFileparam: Blob) {
+  function uploadFile(uploadFileparam: File) {
     let uid = uuidv4();
-    const chunkSize = 1 * 1024 * 1024;
+    const chunkSize = 5 * 1024 * 1024;
     let filesUploaded = 0;
     let totalFiles = 1;
     const totalChunks = Math.ceil(uploadFileparam.size / chunkSize);
@@ -649,6 +648,7 @@ export default function DataWrapper({
     // Chunk uploading function
 
     function uploadChunk(chunkStart: number) {
+      console.log("Triggered");
       const chunk = uploadFileparam.slice(chunkStart, chunkStart + chunkSize);
 
       let date = new Date();
@@ -663,17 +663,15 @@ export default function DataWrapper({
       chunkFormData.append("original_file_name", uploadFileparam.name);
       chunkFormData.append("file", chunk);
       // with .ext
-      chunkFormData.append(
-        "filename",
-        `${uid}.${uploadFileparam.name.split(".")[1]}`
-      );
-      //chunkFormData.append('filename', `${filename}.${ uploadFileparam.name.split('.')[1]}`);
+      const fileExt = uploadFileparam.name.split(".").pop(); // Safely get extension
+      chunkFormData.append("filename", `${uid}.${fileExt}`);
+
       // without .ext
       chunkFormData.append("fileid", `${uid}`);
-      chunkFormData.append("chunk", currentChunk);
+      chunkFormData.append("chunk", `${currentChunk}`);
+      chunkFormData.append("startTime", `${startAudioTimestampRef.current}`);
       //chunkFormData.append('sessionuid',currentUser.sessionuid);
-      //chunkFormData.append('agent_username',currentUser.sessionid);
-      chunkFormData.append("totalChunks", totalChunks);
+      chunkFormData.append("totalChunks", `${totalChunks}`);
       chunkFormData.append("date", datelocale);
       chunkFormData.append("time", timelocale);
 
@@ -732,10 +730,13 @@ export default function DataWrapper({
         console.log("Network error or request failed");
       };
 
-      //xhr.open('POST', 'http://127.0.0.1:5000/upload');
-      xhr.open("POST", `${uploadUrl}`, true);
+      //xhr.open("POST", `${uploadUrl}`, true);
       //xhr.open('POST', 'http://35.200.139.251/upload', true);
-      xhr.send(chunkFormData);
+
+      chunkFormData.forEach((value, key) => {
+        console.log("chunkformdata ---", key, value);
+      });
+      //xhr.send(chunkFormData);
     }
 
     uploadChunk(0);
@@ -744,62 +745,91 @@ export default function DataWrapper({
   /* ========================================================================= */
   /* ========================================================================= */
   /* Media Recorder functionality that uploads recordings to backend server */
+  let arrayOfChunks: BlobPart[] = [];
+
+  function getTimestamp() {
+    const now = new Date();
+
+    const year = now.getUTCFullYear();
+    const month = String(now.getUTCMonth() + 1).padStart(2, "0"); // Months are 0-based in JS
+    const day = String(now.getUTCDate()).padStart(2, "0");
+
+    const hours = String(now.getUTCHours()).padStart(2, "0");
+    const minutes = String(now.getUTCMinutes()).padStart(2, "0");
+    const seconds = String(now.getUTCSeconds()).padStart(2, "0");
+
+    const milliseconds = String(now.getUTCMilliseconds()).padStart(3, "0");
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+  }
+
   function handleRecordings(stream: MediaStream) {
     //let url = 'https://qhpv9mvz1h.execute-api.ap-south-1.amazonaws.com/prod/postfacto-upload-test'
     let url = videoUploadUrl;
-    let arrayofChunks: any = [];
-    let mediaRecorder = new MediaRecorder(stream, {
+    const mediaRecorder = new MediaRecorder(stream, {
       audioBitsPerSecond: 32000,
     });
 
-    mediaRecorder.ondataavailable = (e) => {
-      arrayofChunks.push(e.data);
-    };
+    mediaRecorder.ondataavailable = (event) => arrayOfChunks.push(event.data);
 
-    mediaRecorder.onstop = async () => {
+    mediaRecorder.onstop = processRecordedAudio;
+
+    globalStreamRef.current = mediaRecorder;
+    startAudioTimestampRef.current = getTimestamp(); //string format
+    mediaRecorder.start();
+  }
+
+  async function processRecordedAudio() {
+    try {
       console.log(
         `%c just before vid to blob ${new Date().toLocaleTimeString()}`,
         "background-color:teal;color:white"
       );
-      let blob = new Blob(arrayofChunks, { type: "video/mpeg" });
-      
-      let myfile = new File([blob], "video.mp4", { type: "video/mpeg" });
+      dispatch(setNVaudioUploadAnimation(true));
+      // let blob = new Blob(arrayofChunks, { type: "video/mpeg" }); // video blob
+      const audioBlob = new Blob(arrayOfChunks, { type: "audio/wav" });
+      const convertedBlob = await WavToMp3(audioBlob);
 
-      //uploadFile(myfile)
-      setVideoRecordingState({ file: myfile, uuid: uuidv4() });
-      arrayofChunks = [];
-    };
+      //let myfile = new File([blob], "video.mp4", { type: "video/mpeg" });
+      const audioFile = new File([convertedBlob], "audio.mp3", {
+        type: "audio/mpeg",
+      });
 
-    globalStreamRef.current = mediaRecorder;
-    mediaRecorder.start();
-  }
+      arrayOfChunks = []; // Clear recorded chunks after processing
 
-  useEffect(() => {
-    // if(myStream ===null || myStream ===false)
-    //     return ;
-    //console.log("recording acive status",myStream)
-    // navigator.mediaDevices.getUserMedia({
-    //     video:{
-    //         frameRate:{
-    //             ideal:60,
-    //             min:10
-    //         }
-    //     },
-    //     audio:true
-    // }).then(stream=>{
-    //     handleRecordings(stream)
-    // })
-  }, []);
-
-  function stopVideoRecording() {
-    let mediaRecorder = globalStreamRef.current;
-
-    if (mediaRecorder !== null && mediaRecorder.state === "recording") {
-      mediaRecorder.stop();
-      console.log("after media recorder stop");
+      // Handle the recorded file (upload, store, etc.)
+      uploadFile(audioFile);
+      dispatch(setNVaudioUploadAnimation(false));
+    } catch (error) {
+      console.error("Error processing recorded audio:", error);
     }
   }
 
+  function stopVideoRecording(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const mediaRecorder = globalStreamRef.current;
+
+      if (!mediaRecorder || mediaRecorder.state !== "recording") {
+        console.warn("MediaRecorder is already stopped or not initialized.");
+        resolve(); // Resolve the promise immediately
+        return; // Exit the function so the rest of the code doesn't run
+      }
+
+      // Stop recording safely
+      try {
+        mediaRecorder.stop();
+        console.log("Stopping recording...");
+        resolve(); // Resolve immediately after stopping (processRecordedAudio() will handle onstop)
+      } catch (error) {
+        console.error("Error stopping MediaRecorder:", error);
+        reject(error);
+      }
+    });
+  }
+
+  /* ========================================================================= */
+  /* ========================================================================= */
+  /* Useeffect that triggeres to log events at the start of component mounting or when users update */
   /*
     let Data = {
         color: "#7D11E9",
@@ -836,7 +866,7 @@ export default function DataWrapper({
     //This is a socket connection with backend server to handle cues specific requests or other api requests
     let tempSocket2 = io(
       "wss://recruito.vitti.insure"
-     
+
       //'http://localhost:5000'
     );
     // https://vitt-ai-request-broadcaster-production.up.railway.app
@@ -867,12 +897,10 @@ export default function DataWrapper({
     if (
       socket2 === null ||
       myId === "" ||
-      custId === "" ||
+      custEmailId === "" ||
       meetingIsLegit === false
     )
       return;
-
-    
 
     function handleLiveTranscriptions(data: any) {
       console.log("handle live transcriptions", data);
@@ -905,35 +933,35 @@ export default function DataWrapper({
             if (seen.has(item?.similarity_query)) return false; // Skip duplicates
             seen.add(item?.similarity_query);
           }
-          
-          return true; // Keep the first occurrence
 
+          return true; // Keep the first occurrence
         });
       }
 
       dispatch(
         setCues({
           CuesList: filteredCues,
-          jobDescription: (jobDescription === "" ? null : jobDescription) ?? data?.jobDescription,
-          interviewGuide: (interviewGuide === "" ? null : interviewGuide) ?? data?.interviewGuide,
+          jobDescription:
+            (jobDescription === "" ? null : jobDescription) ??
+            data?.jobDescription,
+          interviewGuide:
+            (interviewGuide === "" ? null : interviewGuide) ??
+            data?.interviewGuide,
           jobTitle: (jobTitle === "" ? null : jobTitle) ?? data?.jobTitle,
         })
       );
     }
-    
 
     socket2.on("live_transcriptions_res", handleLiveTranscriptions);
     socket2.on("questions_loader_res", handleJobDetails);
     return () => {
-      
       socket2.off("live_transcriptions_res", handleLiveTranscriptions);
       socket2.off("questions_loader_res", handleJobDetails);
     };
-  }, [myId, custId, socket2, meetingIsLegit]);
+  }, [myId, custEmailId, socket2, meetingIsLegit]);
 
-  useEffect(()=>{
-    if(socket2===null)
-      return ;
+  useEffect(() => {
+    if (socket2 === null) return;
 
     function handleLiveQna(data: CuesDataType) {
       console.log("handle qna", data);
@@ -943,9 +971,9 @@ export default function DataWrapper({
             return {
               ...e,
               //content: e.content + " " + (data.content ?? ""),
-              isanswered :data.isanswered,
-              match_score:data.match_score,
-              content : data.content ?? ""
+              isanswered: data.isanswered,
+              match_score: data.match_score,
+              content: data.content ?? "",
             };
           }
           return e;
@@ -955,10 +983,10 @@ export default function DataWrapper({
           return;
         }
 
-        console.log('i am filtered cues',filteredCues,CuesList)
+        console.log("i am filtered cues", filteredCues, CuesList);
         dispatch(
           updateCues({
-            CuesList: filteredCues
+            CuesList: filteredCues,
           })
         );
       } else {
@@ -982,8 +1010,8 @@ export default function DataWrapper({
 
     return () => {
       socket2.off("ai_suggestion_res", handleLiveQna);
-    }
-  },[socket2,CuesList])
+    };
+  }, [socket2, CuesList]);
 
   //random testing
   /*useEffect(() => {
@@ -1547,23 +1575,27 @@ export default function DataWrapper({
     };
   }, [socket2, myStream, myId, name, meetingIsLegit]);
 
-
-  useEffect(()=>{
-    if(socket2===null || myId === '' || myStream===null || isHost === false)
-      return ;
+  useEffect(() => {
+    if (
+      socket2 === null ||
+      myId === "" ||
+      myStream === null ||
+      isHost === false
+    )
+      return;
     let questionsApiReqPayload = {
-        // jobid:jobId,
-        // roomid : roomId,
-        //agentid:agentId,
-        roomid: "abc-123-fgh-456",
-        jobid: "1",
-        agentid: "1234",
-        custemailid: custEmailId,
-        name: name,
-      };
-      console.log('before emiiting questions_loader_req',socket2.connected)
-      socket2.emit("questions_loader_req", questionsApiReqPayload);
-  },[socket2,myStream, myId, isHost])
+      // jobid:jobId,
+      // roomid : roomId,
+      //agentid:agentId,
+      roomid: "abc-123-fgh-456",
+      jobid: "1",
+      agentid: "1234",
+      custemailid: custEmailId,
+      name: name,
+    };
+    console.log("before emiiting questions_loader_req", socket2.connected);
+    socket2.emit("questions_loader_req", questionsApiReqPayload);
+  }, [socket2, myStream, myId, isHost]);
   /* ========================================================================= */
   /* ========================================================================= */
   /* 8. Helper function for console.logging whether peers are available or not - used only for console.logging purpose */
@@ -1900,7 +1932,6 @@ export default function DataWrapper({
       socket.off("single-screen-share-receiver", screenShareDataReceiver);
     };
   }, [socket, myStream, myAudioStream, peer, peer2, audioPeer]);
-
 
   /* ========================================================================= */
   /* ========================================================================= */
@@ -2239,7 +2270,8 @@ export default function DataWrapper({
   /* ========================================================================= */
   /* ========================================================================= */
   /* 12.3 Useeffect that calls startMediaRecorder as soon as VAD is turned on.  */
-  /* recordingOn implies that VAD is on. If recordingOn is false then VAD is off. This useeffect gets executed every time the VAD goes on */
+  /* recordingOn implies that VAD is on. If recordingOn is false then VAD is off. This useeffect gets executed every time the VAD goes on.
+  Deprecated in the latest iteration as recordingOn is always false */
   useEffect(() => {
     let id: number;
     if (
@@ -2280,7 +2312,7 @@ export default function DataWrapper({
     //@ts-ignore
     let myVad = null;
 
-    async function VAD(cb1:CallableFunction , cb2: CallableFunction ) {
+    async function VAD(cb1: CallableFunction, cb2: CallableFunction) {
       sendToServer(new Blob([]), adminUrl, {
         ...usersArrRef.current[0],
 
@@ -2493,24 +2525,6 @@ export default function DataWrapper({
       // vadFlag.current=false
     }
 
-    function start2() {
-      // if(globalRef.current.recordingStatus===true )
-      // return ;
-
-      //console.log(`%c vad triggered ${new Date().toLocaleTimeString()}`,'background-color:teal;color:white')
-      globalRef.current.recordingStatus = true;
-      setRecordingOn(true);
-      // navigator.mediaDevices.getUserMedia({
-      //     audio:true
-      //   }).then(stream=>{
-      //    startMediaRecorder(stream,10000)
-      //    //@ts-ignore
-      //     start2IntervalId = setInterval(()=>{
-      //       console.log('start2 is interval triggered')
-      //       startMediaRecorder(stream,10000)
-      //     },10000)
-      //   })
-    }
     function stop2() {
       stop2TimeoutId = setTimeout(() => {
         console.log(
@@ -2587,8 +2601,6 @@ export default function DataWrapper({
     largeVideoRef,
     largeVideo,
     setLargeVideo,
-    custId,
-    setCustId,
     adminUrl,
     setAdminUrl,
     videoUploadUrl,

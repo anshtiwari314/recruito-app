@@ -2,14 +2,15 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 //@ts-ignore
 import { useAppSelector } from "@/store/store";
-import { setNVclosecall } from "@/reducers/navigationparamReducer";
+import { setNVclosecall, setNVaudioUploadAnimation } from "@/reducers/navigationparamReducer";
 import { useData } from "../context/DataWrapper";
+import MeetingPageHeaderTimer from "./MeetingPageHeaderTimer";
 
 export default function MeetingPageHeader() {
   const dispatch = useDispatch();
 
   const { jobTitle } = useAppSelector((state) => state.cuesReducer);
-  const { isHost, meetingIsLegit } = useAppSelector((state) => state.qpReducer);
+  const { isHost } = useAppSelector((state) => state.qpReducer);
   //@ts-ignore
   const {
     name,
@@ -18,10 +19,10 @@ export default function MeetingPageHeader() {
     microphoneToggle,
     setMicroPhoneToggle,
     setScreenSharing,
+    stopVideoRecording,
   } = useData();
-  const [seconds, setSeconds] = useState(0);
 
-  const handleCloseCall = () => {
+  async function handleCloseCall() {
     const confirmQuit = window.confirm("Are you sure you want to quit?");
 
     if (confirmQuit) {
@@ -29,6 +30,10 @@ export default function MeetingPageHeader() {
       setMicroPhoneToggle(false);
       setCameraToggle(false);
       dispatch(setNVclosecall(true));
+      dispatch(setNVaudioUploadAnimation(true));
+
+      await stopVideoRecording(); // Wait for recording to stop
+
       // Include logic here to send audio out along with corresponding ui
       console.log("Closing the call...");
     }
@@ -48,25 +53,6 @@ export default function MeetingPageHeader() {
     setCameraToggle((p: boolean) => !p);
     console.log("toggling the video...");
   };
-
-  const formatTime = (totalSeconds: number) => {
-    const minutes = Math.floor(totalSeconds / 60);
-    const secs = totalSeconds % 60;
-    return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(
-      2,
-      "0"
-    )}`;
-  };
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      //setToday(new Date());
-      setSeconds((prevSeconds) => prevSeconds + 1);
-    }, 1000);
-
-    // Clean up the interval on component unmount
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <header
@@ -137,22 +123,7 @@ export default function MeetingPageHeader() {
       </div>
 
       {isHost && (
-        <div className="flex place-items-center space-x-4">
-          <button className="flex place-items-center px-3 py-1.5 bg-neutral-50 rounded-full text-md text-neutral-600">
-            <i className="fa-solid fa-circle text-green-500 mr-2 text-xs"></i>
-            Live
-          </button>
-          <button className="flex place-items-center px-3 py-1.5 bg-neutral-50 rounded-full text-md text-neutral-600">
-            <i className="fa-regular fa-clock mr-1"></i>
-            {formatTime(seconds)}
-          </button>
-          <button className="px-3 py-1.5 bg-neutral-50 rounded-full">
-            <i className="fa-solid fa-download text-neutral-600"></i>
-          </button>
-          <button className="px-3 py-1.5 bg-neutral-50 rounded-full">
-            <i className="fa-solid fa-ellipsis-vertical text-neutral-600"></i>
-          </button>
-        </div>
+        <MeetingPageHeaderTimer />
       )}
     </header>
   );
