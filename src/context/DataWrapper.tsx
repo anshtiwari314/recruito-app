@@ -651,14 +651,6 @@ export default function DataWrapper({
       console.log("Triggered");
       const chunk = uploadFileparam.slice(chunkStart, chunkStart + chunkSize);
 
-      let date = new Date();
-      let datelocale = `${date.getDate()}.${
-        date.getMonth() + 1
-      }.${date.getFullYear()}`;
-      let timelocale = `${date.getHours()}.${date.getMinutes()}.${date.getSeconds()}.${date.getMilliseconds()}`;
-
-      // filename = `${currentUser.sessionid}-${datelocale}-${timelocale}-${currentUser.sessionuid}`
-
       const chunkFormData = new FormData();
       chunkFormData.append("original_file_name", uploadFileparam.name);
       chunkFormData.append("file", chunk);
@@ -668,12 +660,16 @@ export default function DataWrapper({
 
       // without .ext
       chunkFormData.append("fileid", `${uid}`);
+      chunkFormData.append("fileext", `${fileExt}`);
       chunkFormData.append("chunk", `${currentChunk}`);
       chunkFormData.append("startTime", `${startAudioTimestampRef.current}`);
-      //chunkFormData.append('sessionuid',currentUser.sessionuid);
+      chunkFormData.append('roomid', roomId);
+      chunkFormData.append('agentid', agentId);
+      chunkFormData.append('ishost', isHost);
+      chunkFormData.append('jobid', jobId);
+      chunkFormData.append('custemailid', custEmailId);
+      chunkFormData.append('name', name);
       chunkFormData.append("totalChunks", `${totalChunks}`);
-      chunkFormData.append("date", datelocale);
-      chunkFormData.append("time", timelocale);
 
       const xhr = new XMLHttpRequest();
 
