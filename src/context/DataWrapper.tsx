@@ -194,6 +194,18 @@ export default function DataWrapper({
     "https://qhpv9mvz1h.execute-api.ap-south-1.amazonaws.com/prod/postfacto-upload-test"
   );
 
+  let peerOptions = {
+    //host:'localhost',
+    //host: 'temp-meeting-server.onrender.com',
+    port: 3005,
+    path: '/peerjs',
+    secure: true,
+    config: {
+      iceServers: [
+        { url: 'stun:stun.l.google.com:19302' },
+      ]
+    }
+  }
   //@ts-ignore
 
   /* ========================================================================= */
@@ -874,18 +886,7 @@ export default function DataWrapper({
     );
     // https://vitt-ai-request-broadcaster-production.up.railway.app
 
-    let peerOptions = {
-      //host:'localhost',
-      //host: 'temp-meeting-server.onrender.com',
-      port: 3005,
-      path: '/peerjs',
-      secure: true,
-      config: {
-        iceServers: [
-          { url: 'stun:stun.l.google.com:19302' },
-        ]
-      }
-    }
+    
 
     let tempPeer = new Peer(uuidv4(),peerOptions);
     let tempAudioPeer = new Peer(uuidv4(),peerOptions);
@@ -1409,7 +1410,7 @@ export default function DataWrapper({
         //console.log('socket connected')
       }
 
-      let tempPeer = new Peer(myId);
+      let tempPeer = new Peer(myId,peerOptions);
       setPeer(tempPeer);
       clearTimeout(timeOutId);
     }, 5000);
