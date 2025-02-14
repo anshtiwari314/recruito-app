@@ -863,7 +863,7 @@ export default function DataWrapper({
     let tempSocket2 = io(
       "wss://recruito.vitti.insure"
      
-      //'http://localhost:5000'
+     // 'http://localhost:5000'
     );
     // https://vitt-ai-request-broadcaster-production.up.railway.app
     let tempPeer = new Peer(uuidv4());
@@ -1011,6 +1011,18 @@ export default function DataWrapper({
     }
   },[socket2,CuesList])
 
+  function reqruiterNotesRes(data){
+    console.log('recruiter_notes_res',data)
+  }
+
+  useEffect(()=>{
+    if(socket2===null)
+      return ;
+    socket2.on('recruiter_notes_res',reqruiterNotesRes)
+   
+    return socket2.off('recruiter_notes_res',reqruiterNotesRes);
+  },[socket2])
+  
   //random testing
   /*useEffect(() => {
     let tempArr: Array<CuesDataType> = [];

@@ -151,7 +151,7 @@ const initialTranscriptionLoadState: Array<TranscriptionDataType> = [
 ];
 
 const initialTranscriptionState = {
-  TranscriptionList: [...initialTranscriptionLoadState],
+  TranscriptionList: [],
 } as TranscriptionState;
 
 // Create a slice for "transcription"

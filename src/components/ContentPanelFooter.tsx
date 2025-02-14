@@ -1,11 +1,18 @@
 import React,{ useEffect, useState } from "react";
 import { useAppSelector } from "@/store/store";
+import { useData } from "../context/DataWrapper";
+
 
 export default function ContentPanelFooter() {
   const currentQPState = useAppSelector((state) => state.qpReducer);
   const [notes, setNotes] = useState("");
   const [status, setStatus] = useState<string | null>(null); // 'success', 'error', or null
   const [loading, setLoading] = useState(false);
+
+  //@ts-ignore
+  const {socket2} = useData()
+  const { jobId, roomId, custEmailId, agentId, isHost, meetingIsLegit,name } =
+  useAppSelector((state) => state.qpReducer);
 
   const handleNotesChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setNotes(event.target.value);
@@ -15,8 +22,23 @@ export default function ContentPanelFooter() {
     setLoading(true);
     setStatus(null);
 
+    let data = {
+      jobid:jobId, 
+      roomid:roomId, 
+      agentid:agentId, 
+      agent_name:name, 
+      notes, 
+      candidateid: 'abc123'
+    }
+
+    console.log('recruiter_notes_req',data)
+    socket2.emit('recruiter_notes_req',data)
+
+    setLoading(false);
     // Simulate sending notes to an API
     setTimeout(() => {
+
+
       const success = Math.random() > 0.5; // Simulate success or failure randomly
 
       if (success) {
@@ -26,7 +48,7 @@ export default function ContentPanelFooter() {
         setStatus("error");
       }
 
-      setLoading(false);
+      
     }, 2000);
 
     // Replace 'apiurl' with your actual API URL
@@ -71,6 +93,8 @@ export default function ContentPanelFooter() {
       return () => clearTimeout(timer); // Clear the timer when the component unmounts
     }
   }, [status]);
+
+  
 
   return (
     <div id="ai-query" className="" style={{flex:0.2}}>

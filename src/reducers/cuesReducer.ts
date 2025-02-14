@@ -70,6 +70,13 @@ type CuesState = {
 //   CuesList: []
 // };
 
+let initialCuesState={
+  CuesList: [],
+  jobDescription: '',
+  interviewGuide: '',
+  jobTitle: ""
+}
+
 let initialCuesLoadState: CuesState = {
   jobTitle: "EDI Developer",
   jobDescription: "https://arxiv.org/pdf/2301.12652", //pdf
@@ -316,7 +323,7 @@ let initialCuesLoadState: CuesState = {
 // Create a slice for "cues"
 const cuesSlice = createSlice({
   name: "cuesReducer",
-  initialState: {...initialCuesLoadState},
+  initialState: {...initialCuesState},
   reducers: {
     addCues: (state, action: PayloadAction<CuesDataType[]>) => {
       // Declare default value for state.CuesList

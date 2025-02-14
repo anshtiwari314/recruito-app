@@ -26,13 +26,13 @@ export function SingleCue({
             <i className="fa-regular fa-circle text-neutral-600"></i>
           )}
 
-          <span className="text-neutral-900">{question?.similarity_query}</span>
+          <span className="text-neutral-900">{parse(question?.similarity_query)}</span>
         </div>
-        {/* {isAnswered ? (
+        {isAnswered ? (
           <span className="px-2 py-1 bg-neutral-200 rounded text-sm">
             {question?.match_score ? `${question.match_score} match` : ""}
           </span>
-        ) : null} */}
+        ) : null}
       </div>
       {!isAnswered ? (
         <div className="ml-8">

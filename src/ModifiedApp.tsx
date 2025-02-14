@@ -5,7 +5,7 @@ import DataWrapper from "./context/DataWrapper";
 import ReduxProvider from "@/store/Providers";
 import NotFoundPage from "./pages/NotFoundPage";
 import TempPage from './pages/TempPage'
-import TestPage from './pages/TestPage'
+//import TestPage from './pages/TestPage'
 
 export default function App() {
   return (
@@ -23,7 +23,7 @@ export default function App() {
             
             <Route path="/temp" element={<TempPage/>}/> 
 
-            <Route path="/test" element={<TestPage/>}/>
+            {/* <Route path="/test" element={<TestPage/>}/> */}
 
             {/* Catch-all Route for undefined paths */}
             <Route path="*" element={<NotFoundPage />} />
