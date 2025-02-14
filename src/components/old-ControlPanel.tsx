@@ -1,15 +1,13 @@
 import React,{ useState } from "react";
 import { useData } from "@/context/DataWrapper";
 import { useNavigate } from "react-router-dom";
-import ControlPanelTimer from "@/components/ControlPanelTimer";
+import ControlPanelTimer from "@/components/old-ControlPanelTimer";
 import { useDispatch } from "react-redux";
 import { setNVclosecall } from "@/reducers/navigationparamReducer";
 
 export default function ControlPanel() {
   const dispatch = useDispatch();
-
-  const navigate = useNavigate();
-
+  
   //@ts-ignore
   const {users,cameraToggle,setCameraToggle ,microphoneToggle,setMicroPhoneToggle,screenSharing,setScreenSharing,isHost,stopVideoRecording} = useData()
   
