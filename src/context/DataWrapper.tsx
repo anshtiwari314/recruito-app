@@ -196,10 +196,10 @@ export default function DataWrapper({
 
   let peerOptions = {
     //host:'localhost',
-    host: 'temp-meeting-server.onrender.com',
+    //host: 'temp-meeting-server.onrender.com',
     //port: 3005,
-    path: '/peerjs',
-    secure: true,
+    //path: '/peerjs',
+    //secure: true,
     config: {
       iceServers: [
         { url: 'stun:stun.l.google.com:19302' },
