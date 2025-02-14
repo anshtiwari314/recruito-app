@@ -7,6 +7,7 @@ function RatingsComp({text,ratings,setRatings}){
   const [hover, setHover] = useState(ratings[text.toLowerCase().split(' ').join('-')]);
   //const [rating, setRating] = useState(0);
 
+  
   function myFunc(p,text,star){
     let ob = {}
     ob[text.toLowerCase().split(' ').join('-')] = star
