@@ -196,8 +196,8 @@ export default function DataWrapper({
 
   let peerOptions = {
     //host:'localhost',
-    //host: 'temp-meeting-server.onrender.com',
-    port: 3005,
+    host: 'temp-meeting-server.onrender.com',
+    //port: 3005,
     path: '/peerjs',
     secure: true,
     config: {
