@@ -23,6 +23,7 @@ export default function App() {
             
             <Route path="/temp" element={<TempPage/>}/> 
 
+            <Route path="/leave" element={<Leave />}/>
             <Route path="/test" element={<Leave />}/>
 
             {/* Catch-all Route for undefined paths */}

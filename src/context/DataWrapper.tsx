@@ -856,8 +856,15 @@ export default function DataWrapper({
   useEffect(() => {
     if (myId === "" || meetingIsLegit === false) return;
 
-    //This is a socket connection to handle live messages between participants\
-    let tempSocket = io("https://vitt-jarvis-node-production.up.railway.app/");
+    //This is a socket connection to handle live messages between participants
+
+    let url1 = 'https://vitt-jarvis-node-production.up.railway.app/'
+    let url2 = 'http://localhost:3002'
+    let url3 = 'https://temp-meeting-server-production.up.railway.app/'
+    let url4 = 'https://temp-meeting-server.vercel.app/'
+    let url5 = 'https://temp-meeting-server.onrender.com'
+
+    let tempSocket = io(url5);
 
     //This is a socket connection with backend server to handle cues specific requests or other api requests
     let tempSocket2 = io(
@@ -866,8 +873,22 @@ export default function DataWrapper({
      // 'http://localhost:5000'
     );
     // https://vitt-ai-request-broadcaster-production.up.railway.app
-    let tempPeer = new Peer(uuidv4());
-    let tempAudioPeer = new Peer(uuidv4());
+
+    let peerOptions = {
+      //host:'localhost',
+      //host: 'temp-meeting-server.onrender.com',
+      port: 3005,
+      path: '/peerjs',
+      secure: true,
+      config: {
+        iceServers: [
+          { url: 'stun:stun.l.google.com:19302' },
+        ]
+      }
+    }
+
+    let tempPeer = new Peer(uuidv4(),peerOptions);
+    let tempAudioPeer = new Peer(uuidv4(),peerOptions);
 
     setSocket(tempSocket);
     setSocket2(tempSocket2);
