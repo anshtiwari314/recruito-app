@@ -202,6 +202,9 @@ export default function DataWrapper({
     //secure: true,
     config: {
       iceServers: [
+
+        // commenting some servers bcz it duplicating connections
+         
         { urls: 'stun:stun.l.google.com:19302' },
         // {urls:'stun:stun1.l.google.com:19302'},
         // {urls:'stun:stun2.l.google.com:19302'},
