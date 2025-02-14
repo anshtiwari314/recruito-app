@@ -203,10 +203,10 @@ export default function DataWrapper({
     config: {
       iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
-        {urls:'stun:stun1.l.google.com:19302'},
-        {urls:'stun:stun2.l.google.com:19302'},
-        {urls:'stun:stun3.l.google.com:19302'},
-        {urls:'stun:stun4.l.google.com:19302'},
+        // {urls:'stun:stun1.l.google.com:19302'},
+        // {urls:'stun:stun2.l.google.com:19302'},
+        // {urls:'stun:stun3.l.google.com:19302'},
+        // {urls:'stun:stun4.l.google.com:19302'},
         {
           urls: "stun:stun.relay.metered.ca:80",
         },
@@ -215,21 +215,21 @@ export default function DataWrapper({
           username: "9a68873a2f7a5c9a9755e52e",
           credential: "2kG2qDdT1PESBuUQ",
         },
-        {
-          urls: "turn:global.relay.metered.ca:80?transport=tcp",
-          username: "9a68873a2f7a5c9a9755e52e",
-          credential: "2kG2qDdT1PESBuUQ",
-        },
-        {
-          urls: "turn:global.relay.metered.ca:443",
-          username: "9a68873a2f7a5c9a9755e52e",
-          credential: "2kG2qDdT1PESBuUQ",
-        },
-        {
-          urls: "turns:global.relay.metered.ca:443?transport=tcp",
-          username: "9a68873a2f7a5c9a9755e52e",
-          credential: "2kG2qDdT1PESBuUQ",
-        }
+        // {
+        //   urls: "turn:global.relay.metered.ca:80?transport=tcp",
+        //   username: "9a68873a2f7a5c9a9755e52e",
+        //   credential: "2kG2qDdT1PESBuUQ",
+        // },
+        // {
+        //   urls: "turn:global.relay.metered.ca:443",
+        //   username: "9a68873a2f7a5c9a9755e52e",
+        //   credential: "2kG2qDdT1PESBuUQ",
+        // },
+        // {
+        //   urls: "turns:global.relay.metered.ca:443?transport=tcp",
+        //   username: "9a68873a2f7a5c9a9755e52e",
+        //   credential: "2kG2qDdT1PESBuUQ",
+        // }
       ]
     }
   }
