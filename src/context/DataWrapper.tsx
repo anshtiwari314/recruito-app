@@ -790,7 +790,7 @@ export default function DataWrapper({
       };
 
       //xhr.open("POST", `${uploadUrl}`, true);
-      //xhr.open('POST', 'http://35.200.139.251/upload', true);
+      //xhr.open('POST', 'https://qhpv9mvz1h.execute-api.ap-south-1.amazonaws.com/prod/postfacto-recruiter-upload', true);
 
       chunkFormData.forEach((value, key) => {
         console.log("chunkformdata ---", key, value);
@@ -927,13 +927,11 @@ export default function DataWrapper({
     let url4 = 'https://temp-meeting-server.vercel.app/'
     let url5 = 'https://temp-meeting-server.onrender.com'
 
-    let tempSocket = io(url5);
+    let tempSocket = io("wss://recruitonodesocket.vitti.insure");
 
     //This is a socket connection with backend server to handle cues specific requests or other api requests
     let tempSocket2 = io(
       "wss://recruito.vitti.insure"
-     
-     // 'http://localhost:5000'
     );
     // https://vitt-ai-request-broadcaster-production.up.railway.app
 
