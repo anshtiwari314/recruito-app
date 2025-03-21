@@ -11,6 +11,8 @@ export default function MeetingPageHeader() {
 
   const { jobTitle } = useAppSelector((state) => state.cuesReducer);
   const { isHost } = useAppSelector((state) => state.qpReducer);
+
+  const {screenRecording,setScreenRecording}:void = useData()
   //@ts-ignore
   const {
     name,
@@ -52,6 +54,11 @@ export default function MeetingPageHeader() {
   const toggleVideo = () => {
     setCameraToggle((p: boolean) => !p);
     console.log("toggling the video...");
+  };
+
+  const toggleScreenRecording = () => {
+    setScreenRecording((p:boolean)=>!p)
+    console.log("toggling the screen recording...");
   };
 
   return (
@@ -99,6 +106,23 @@ export default function MeetingPageHeader() {
             <i className="fa-solid fa-microphone-slash fa-lg"></i>
           )}
         </button>
+
+        <button
+          className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
+          onClick={toggleScreenRecording}
+        >
+          {screenRecording 
+          ? 
+          <i className="fa-solid fa-circle-dot fa-lg text-red-500 animate-pulse"></i>
+          :
+          <i className="fa-solid fa-circle-dot fa-lg text-gray-500"></i>
+          }
+          
+          
+            {/* <i className="fa-solid fa-microphone-slash fa-lg"></i> */}
+          
+        </button>
+
         {/*
           <button
             className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-600"

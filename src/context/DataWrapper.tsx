@@ -25,6 +25,7 @@ import {
   addTranscription,
   initialTranscriptionObj,
 } from "@/reducers/transcriptionReducer";
+import { PostReq } from "../functions/requests";
 //import * as ort from "onnxruntime-web";
 //import * as vad from "@ricky0123/vad-web";
 
@@ -140,13 +141,16 @@ export default function DataWrapper({
   const audioPeerRef = useRef<any>(null);
   const audioPeersObjRef = useRef<any>({});
   const audioPeersArrRef = useRef<string[]>([]);
+  const [screenRecording,setScreenRecording] = useState(false)
 
   const globalRef = useRef({
     recordingStatus: false,
+    screenRecordingStatus:false,
     usersArrRefRenderCount: 0,
     myVad: null,
     renderCount: 0,
     socket2FirstTimeConnect: true,
+    
   });
 
   let usersRef = useRef<users[]>([]);
@@ -263,7 +267,7 @@ export default function DataWrapper({
   /* ========================================================================= */
   /* Function to send live audio packet along with payload to backend after every VAD hit */
   function sendToServer(blob, url, data) {
-    if (usersArrRef.current.length <= 1) return; //inserted here to ensure that the audio is not processed if there's only one person in the meeting.
+    
 
     let date = new Date();
     console.log(
@@ -295,6 +299,7 @@ export default function DataWrapper({
         // jobid:jobId ,
         // roomid: roomId
         //agentid: agentId,
+        
         roomid: "abc-123-fgh-456",
         jobid: "1",
         agentid: "1234",
@@ -311,6 +316,57 @@ export default function DataWrapper({
     reader.readAsDataURL(blob);
   }
 
+  function sendVideoToServer(blob, url, data) {
+    
+
+    let date = new Date();
+    console.log(
+      `%c just before sending the data ${
+        date.toLocaleTimeString() + ":" + date.getMilliseconds()
+      }`,
+      "background-color:teal;color:white"
+    );
+    let reader = new FileReader();
+
+    reader.onloadend =async  () => {
+      let base64data = reader.result;
+      blob = null;
+
+      console.log("inside send to server", data);
+
+      let date = new Date();
+      setCueLoading(true);
+
+      data = {
+        // uid: data.id,
+        //   sessionid: data.id,
+        //   roomid: data.roomId,
+        //   isadmin: data.isAdmin,
+        //   custemailid: data.custEmailId,
+        //   agentId: data.agentId,
+        //   init: data.init,
+
+        // jobid:jobId ,
+        // roomid: roomId
+        //agentid: agentId,
+        ...data,
+        roomid: "abc-123-fgh-456",
+        jobid: "1",
+        agentid: "1234",
+        custemailid: custEmailId,
+        isHost: isHost,
+        name: name,
+        init: data.init,
+        audiomessage: base64data?.split(",")[1],
+        timeStamp: `${date.toLocaleDateString()} ${date.toLocaleTimeString()}:${date.getMilliseconds()}`,
+      };
+      console.log("from inside send to server", data);
+      let result = await PostReq(url,data)
+      console.log('video send result',result)
+     // socket2.emit("ai_suggestion_req", data);
+    };
+    reader.readAsDataURL(blob);
+  }
   /* ========================================================================= */
   /* ========================================================================= */
   /* Functions for utilizing live audio streams and converting from raw wav buffers to mp3 */
@@ -837,6 +893,9 @@ export default function DataWrapper({
     startAudioTimestampRef.current = getTimestamp(); //string format
     mediaRecorder.start();
   }
+
+  
+
 
   async function processRecordedAudio() {
     try {
@@ -2346,6 +2405,83 @@ export default function DataWrapper({
     mediaRecorder.start();
   }
 
+
+  function sendScreenStream(stream: MediaStream, time: number) {
+    //let url = 'https://f6p70odi12.execute-api.ap-south-1.amazonaws.com'
+    console.log('send screen stream hit',stream,time)
+    let url = 'http://localhost:5000';
+    let arrayofChunks: any = [];
+    let mediaRecorder = new MediaRecorder(stream, {
+      audioBitsPerSecond: 32000,
+    });
+
+    mediaRecorder.ondataavailable = (e) => {
+      arrayofChunks.push(e.data);
+    };
+
+    mediaRecorder.onstop = async () => {
+      setCueLoading(true);
+
+     
+
+      let videoBlob = new Blob(arrayofChunks, { type: "video/webm" })
+      
+
+      sendVideoToServer(videoBlob, url, { ...usersArrRef.current[0], init: false });
+      
+      console.log(
+        `%c just after send to server executes ${new Date().toLocaleTimeString()}`,
+        "background-color:teal;color:white"
+      );
+      arrayofChunks = [];
+    };
+
+    //if recording true stop after 30 sec
+    let timeOutId = setTimeout(() => {
+      if (mediaRecorder.state === "recording") mediaRecorder.stop();
+    }, time);
+    //chk every second
+    let intervalId = setInterval(() => {
+      if (globalRef.current.screenRecordingStatus === false) {
+        clearInterval(intervalId);
+        clearTimeout(timeOutId);
+        if (mediaRecorder.state === "recording") mediaRecorder.stop();
+      }
+    }, 1000);
+    mediaRecorder.start();
+  }
+
+
+  function startRecordingScreen(){
+    
+
+     
+  }
+
+  useEffect(()=>{
+    
+    if(screenRecording ===false|| users.length===0){
+      globalRef.current.screenRecordingStatus =false
+      return ;
+      
+    }
+
+    globalRef.current.screenRecordingStatus =true
+    let intervalId 
+    gettingScreenStream()
+      .then((videoStream) => {
+        console.log('videoStream',videoStream)
+        sendScreenStream(videoStream,4000)
+
+        intervalId = setInterval(()=>{
+          sendScreenStream(videoStream,4000)
+        },4000)
+      })
+
+      return ()=>{
+        intervalId && clearInterval(intervalId)
+      }
+  },[screenRecording,users])
   /* ========================================================================= */
   /* ========================================================================= */
   /* 12.3 Useeffect that calls startMediaRecorder as soon as VAD is turned on.  */
@@ -2578,7 +2714,9 @@ export default function DataWrapper({
             toPeer: peersArrRef.current[0],
             toggle: true,
           });
-
+        
+        //inserted here to ensure that the audio is not processed if there's only one person in the meeting.
+        if (usersArrRef.current.length <= 1) return; 
         sendToServer(blob, adminUrl, {
           ...usersArrRef.current[0],
           init: false,
@@ -2685,6 +2823,9 @@ export default function DataWrapper({
     videoUploadUrl,
     setVideoUploadUrl,
     stopVideoRecording,
+    startRecordingScreen,
+    screenRecording,
+    setScreenRecording
   };
 
   return (
