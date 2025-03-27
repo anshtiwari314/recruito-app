@@ -5,7 +5,8 @@ export function PostReq(url,data){
             method:'POST',
             headers:{
                'Accept':'application.json',
-               'Content-Type':'application/json'
+               'Content-Type':'application/json',
+               'mode': 'no-cors'
             },
     
             body:JSON.stringify(data),

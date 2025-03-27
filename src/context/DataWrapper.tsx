@@ -142,10 +142,12 @@ export default function DataWrapper({
   const audioPeersObjRef = useRef<any>({});
   const audioPeersArrRef = useRef<string[]>([]);
   const [screenRecording,setScreenRecording] = useState(false)
+  const [audioRecording,setaudioRecording] = useState(false)
 
   const globalRef = useRef({
     recordingStatus: false,
     screenRecordingStatus:false,
+    audioRecordingStatus:false,
     usersArrRefRenderCount: 0,
     myVad: null,
     renderCount: 0,
@@ -185,6 +187,8 @@ export default function DataWrapper({
   const [adminUrl, setAdminUrl] = useState(
     `https://qhpv9mvz1h.execute-api.ap-south-1.amazonaws.com/prod/recruiter-copilot`
   );
+  
+  const [ngrokServerUrl,setNgrokServerUrl] = useState('')
   //
   //https://19vnck5aw8.execute-api.ap-south-1.amazonaws.com/Prod/save-adminaudio
   const adminClientUrl = `http://localhost:5005/admin-client`;
@@ -349,7 +353,7 @@ export default function DataWrapper({
         // jobid:jobId ,
         // roomid: roomId
         //agentid: agentId,
-        ...data,
+        
         roomid: "abc-123-fgh-456",
         jobid: "1",
         agentid: "1234",
@@ -357,13 +361,14 @@ export default function DataWrapper({
         isHost: isHost,
         name: name,
         init: data.init,
-        audiomessage: base64data?.split(",")[1],
+
+        mediamessage:base64data?.split(",")[1],
         timeStamp: `${date.toLocaleDateString()} ${date.toLocaleTimeString()}:${date.getMilliseconds()}`,
       };
-      console.log("from inside send to server", data);
+      console.log("from inside send video to server", data);
       let result = await PostReq(url,data)
-      console.log('video send result',result)
-     // socket2.emit("ai_suggestion_req", data);
+      //console.log('video send result',result)
+      //socket2.emit("save_audio_chunks_req", data);
     };
     reader.readAsDataURL(blob);
   }
@@ -991,6 +996,7 @@ export default function DataWrapper({
     //This is a socket connection with backend server to handle cues specific requests or other api requests
     let tempSocket2 = io(
       "wss://recruito.vitti.insure"
+     // 'https://7615-2409-40f0-2c-4693-7849-e792-7e8e-b8a0.ngrok-free.app'
     );
     // https://vitt-ai-request-broadcaster-production.up.railway.app
 
@@ -2406,10 +2412,52 @@ export default function DataWrapper({
   }
 
 
+  function sendAudioStream(stream: MediaStream, time: number) {
+    //let url = 'https://f6p70odi12.execute-api.ap-south-1.amazonaws.com'
+    console.log('send screen stream hit',stream,time)
+    let url = `${ngrokServerUrl}/save_audio_chunks_req`
+    let arrayofChunks: any = [];
+    let mediaRecorder = new MediaRecorder(stream, {
+      audioBitsPerSecond: 32000,
+    });
+
+    mediaRecorder.ondataavailable = (e) => {
+      arrayofChunks.push(e.data);
+    };
+
+    mediaRecorder.onstop = async () => {
+      setCueLoading(true);
+
+      let wavBlob = new Blob(arrayofChunks, { type: "audio/ogg" })
+      
+      sendVideoToServer(wavBlob, url, { ...usersArrRef.current[0], init: false });
+      
+      console.log(
+        `%c just after send to server executes ${new Date().toLocaleTimeString()}`,
+        "background-color:teal;color:white"
+      );
+      arrayofChunks = [];
+    };
+
+    //if recording true stop after 30 sec
+    let timeOutId = setTimeout(() => {
+      if (mediaRecorder.state === "recording") mediaRecorder.stop();
+    }, time);
+    //chk every second
+    let intervalId = setInterval(() => {
+      if (globalRef.current.audioRecordingStatus === false) {
+        clearInterval(intervalId);
+        clearTimeout(timeOutId);
+        if (mediaRecorder.state === "recording") mediaRecorder.stop();
+      }
+    }, 1000);
+    mediaRecorder.start();
+  }
+
   function sendScreenStream(stream: MediaStream, time: number) {
     //let url = 'https://f6p70odi12.execute-api.ap-south-1.amazonaws.com'
     console.log('send screen stream hit',stream,time)
-    let url = 'http://localhost:5000';
+    let url = `${ngrokServerUrl}/save_video_chunks_req`;
     let arrayofChunks: any = [];
     let mediaRecorder = new MediaRecorder(stream, {
       audioBitsPerSecond: 32000,
@@ -2460,28 +2508,42 @@ export default function DataWrapper({
 
   useEffect(()=>{
     
-    if(screenRecording ===false|| users.length===0){
+    if(screenRecording ===false|| users.length===0|| socket2===null){
       globalRef.current.screenRecordingStatus =false
+      globalRef.current.audioRecordingStatus =false
       return ;
       
     }
 
     globalRef.current.screenRecordingStatus =true
+    globalRef.current.audioRecordingStatus=true 
+
     let intervalId 
+    let audioIntervalId 
     gettingScreenStream()
       .then((videoStream) => {
         console.log('videoStream',videoStream)
-        sendScreenStream(videoStream,4000)
+        sendScreenStream(videoStream,10000)
 
         intervalId = setInterval(()=>{
-          sendScreenStream(videoStream,4000)
-        },4000)
+          sendScreenStream(videoStream,10000)
+        },10000)
+      })
+      gettingAudioStream()
+      .then((AudioStream) => {
+        console.log('videoStream',AudioStream)
+        sendAudioStream(AudioStream,10000)
+
+        audioIntervalId = setInterval(()=>{
+          sendAudioStream(AudioStream,10000)
+        },10000)
       })
 
       return ()=>{
         intervalId && clearInterval(intervalId)
+        audioIntervalId && clearInterval(audioIntervalId)
       }
-  },[screenRecording,users])
+  },[screenRecording,users,socket2,ngrokServerUrl])
   /* ========================================================================= */
   /* ========================================================================= */
   /* 12.3 Useeffect that calls startMediaRecorder as soon as VAD is turned on.  */
@@ -2634,6 +2696,9 @@ export default function DataWrapper({
       vadFlag.current = true;
     }
     function stop1(audio: any) {
+      //inserted here to ensure that the audio is not processed if there's only one person in the meeting.
+     // if (usersArrRef.current.length <= 1) return; 
+
       let date = new Date();
       console.log(
         `%c vad stopped ${
@@ -2715,8 +2780,7 @@ export default function DataWrapper({
             toggle: true,
           });
         
-        //inserted here to ensure that the audio is not processed if there's only one person in the meeting.
-        if (usersArrRef.current.length <= 1) return; 
+        
         sendToServer(blob, adminUrl, {
           ...usersArrRef.current[0],
           init: false,
@@ -2825,7 +2889,7 @@ export default function DataWrapper({
     stopVideoRecording,
     startRecordingScreen,
     screenRecording,
-    setScreenRecording
+    setScreenRecording,ngrokServerUrl,setNgrokServerUrl
   };
 
   return (

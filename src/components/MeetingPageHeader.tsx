@@ -12,7 +12,8 @@ export default function MeetingPageHeader() {
   const { jobTitle } = useAppSelector((state) => state.cuesReducer);
   const { isHost } = useAppSelector((state) => state.qpReducer);
 
-  const {screenRecording,setScreenRecording}:void = useData()
+  //@ts-ignore
+  
   //@ts-ignore
   const {
     name,
@@ -22,7 +23,8 @@ export default function MeetingPageHeader() {
     setMicroPhoneToggle,
     setScreenSharing,
     stopVideoRecording,
-  } = useData();
+    screenRecording,setScreenRecording,ngrokServerUrl,setNgrokServerUrl
+  }:void = useData();
 
   async function handleCloseCall() {
     const confirmQuit = window.confirm("Are you sure you want to quit?");
@@ -62,12 +64,33 @@ export default function MeetingPageHeader() {
   };
 
   return (
+    <>
+    
+    <div style={{textAlign:'center'}}>
+          <input
+          type="text"
+          placeholder="Enter your ngrok url"
+          value={ngrokServerUrl}
+          onChange={(e)=>setNgrokServerUrl(e.target.value)}
+          style={{width: "60%",
+            padding: "10px",
+            fontSize: "16px",
+            border: "1px solid #ccc",
+            borderRadius: "5px",
+            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+            outline: "none",
+            transition: "border-color 0.3s",}}
+          />
+        </div>
+    
     <header
       id="header"
       className="w-full bg-white border-b border-neutral-200 px-4 py-3 flex place-items-center justify-between shadow-sm"
       style={{ height: "10vh" }}
     >
+      
       <div className="flex place-items-center space-x-4">
+        
         <div className="h-8 w-[2px] bg-neutral-200"></div>
         <img
           src="https://api.dicebear.com/7.x/notionists/svg?scale=200&amp;seed=Logo"
@@ -150,5 +173,6 @@ export default function MeetingPageHeader() {
         <MeetingPageHeaderTimer />
       )}
     </header>
+    </>
   );
 }
