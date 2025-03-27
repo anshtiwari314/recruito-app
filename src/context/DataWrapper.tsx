@@ -188,7 +188,7 @@ export default function DataWrapper({
     `https://qhpv9mvz1h.execute-api.ap-south-1.amazonaws.com/prod/recruiter-copilot`
   );
   
-  const [ngrokServerUrl,setNgrokServerUrl] = useState('')
+  const [ngrokServerUrl,setNgrokServerUrl] = useState('https://wpv7kxos9g.execute-api.ap-south-1.amazonaws.com/test/recruito-upload-apis')
   //
   //https://19vnck5aw8.execute-api.ap-south-1.amazonaws.com/Prod/save-adminaudio
   const adminClientUrl = `http://localhost:5005/admin-client`;
