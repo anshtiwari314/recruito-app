@@ -26,6 +26,19 @@ import {
   initialTranscriptionObj,
 } from "@/reducers/transcriptionReducer";
 import { PostReq } from "../functions/requests";
+import {
+  getTimestamp,
+  gettingAudioStream,
+  gettingScreenStream,
+  gettingVideoStream,
+  isUserAvailable,
+  processRecordedAudio,
+  sendToServer,
+  sendVideoToServer,
+  stopVideoRecording,
+} from "../functions/mettingsUtils";
+import { addNewUserAction } from "../reducers/usersReducer.ts";
+import { bufferToWav, downsampleToWav, encodeMp3, handleRecordings, uploadFile } from "../functions/mettingUtils2.tsx";
 //import * as ort from "onnxruntime-web";
 //import * as vad from "@ricky0123/vad-web";
 
@@ -141,16 +154,15 @@ export default function DataWrapper({
   const audioPeerRef = useRef<any>(null);
   const audioPeersObjRef = useRef<any>({});
   const audioPeersArrRef = useRef<string[]>([]);
-  const [screenRecording,setScreenRecording] = useState(false)
+  const [screenRecording, setScreenRecording] = useState(false);
 
   const globalRef = useRef({
     recordingStatus: false,
-    screenRecordingStatus:false,
+    screenRecordingStatus: false,
     usersArrRefRenderCount: 0,
     myVad: null,
     renderCount: 0,
     socket2FirstTimeConnect: true,
-    
   });
 
   let usersRef = useRef<users[]>([]);
@@ -206,14 +218,13 @@ export default function DataWrapper({
     //secure: true,
     config: {
       iceServers: [
-
         // commenting some servers bcz it duplicating connections
-         
-        { urls: 'stun:stun.l.google.com:19302' },
-        {urls:'stun:stun1.l.google.com:19302'},
-        {urls:'stun:stun2.l.google.com:19302'},
-        {urls:'stun:stun3.l.google.com:19302'},
-        {urls:'stun:stun4.l.google.com:19302'},
+
+        { urls: "stun:stun.l.google.com:19302" },
+        { urls: "stun:stun1.l.google.com:19302" },
+        { urls: "stun:stun2.l.google.com:19302" },
+        { urls: "stun:stun3.l.google.com:19302" },
+        { urls: "stun:stun4.l.google.com:19302" },
         {
           urls: "stun:stun.relay.metered.ca:80",
         },
@@ -236,714 +247,86 @@ export default function DataWrapper({
           urls: "turns:global.relay.metered.ca:443?transport=tcp",
           username: "9a68873a2f7a5c9a9755e52e",
           credential: "2kG2qDdT1PESBuUQ",
-        },{
-          url: 'stun:global.stun.twilio.com:3478',
-          urls: 'stun:global.stun.twilio.com:3478'
         },
         {
-          url: 'turn:global.turn.twilio.com:3478?transport=udp',
-          username: '81c1cec94e2e43736ac98b05d3d093f19919a3405b5686dd57e4525c795f8832',
-          urls: 'turn:global.turn.twilio.com:3478?transport=udp',
-          credential: 'uuaXnZ1XBD6pfyEiSC2owYcCMQkWhFI4sGvJQ+9yc3A='
+          url: "stun:global.stun.twilio.com:3478",
+          urls: "stun:global.stun.twilio.com:3478",
         },
         {
-          url: 'turn:global.turn.twilio.com:3478?transport=tcp',
-          username: '81c1cec94e2e43736ac98b05d3d093f19919a3405b5686dd57e4525c795f8832',
-          urls: 'turn:global.turn.twilio.com:3478?transport=tcp',
-          credential: 'uuaXnZ1XBD6pfyEiSC2owYcCMQkWhFI4sGvJQ+9yc3A='
+          url: "turn:global.turn.twilio.com:3478?transport=udp",
+          username:
+            "81c1cec94e2e43736ac98b05d3d093f19919a3405b5686dd57e4525c795f8832",
+          urls: "turn:global.turn.twilio.com:3478?transport=udp",
+          credential: "uuaXnZ1XBD6pfyEiSC2owYcCMQkWhFI4sGvJQ+9yc3A=",
         },
         {
-          url: 'turn:global.turn.twilio.com:443?transport=tcp',
-          username: '81c1cec94e2e43736ac98b05d3d093f19919a3405b5686dd57e4525c795f8832',
-          urls: 'turn:global.turn.twilio.com:443?transport=tcp',
-          credential: 'uuaXnZ1XBD6pfyEiSC2owYcCMQkWhFI4sGvJQ+9yc3A='
-        }
-      ]
-    }
-  }
+          url: "turn:global.turn.twilio.com:3478?transport=tcp",
+          username:
+            "81c1cec94e2e43736ac98b05d3d093f19919a3405b5686dd57e4525c795f8832",
+          urls: "turn:global.turn.twilio.com:3478?transport=tcp",
+          credential: "uuaXnZ1XBD6pfyEiSC2owYcCMQkWhFI4sGvJQ+9yc3A=",
+        },
+        {
+          url: "turn:global.turn.twilio.com:443?transport=tcp",
+          username:
+            "81c1cec94e2e43736ac98b05d3d093f19919a3405b5686dd57e4525c795f8832",
+          urls: "turn:global.turn.twilio.com:443?transport=tcp",
+          credential: "uuaXnZ1XBD6pfyEiSC2owYcCMQkWhFI4sGvJQ+9yc3A=",
+        },
+      ],
+    },
+  };
   //@ts-ignore
 
   /* ========================================================================= */
   /* ========================================================================= */
   /* Function to send live audio packet along with payload to backend after every VAD hit */
-  function sendToServer(blob, url, data) {
-    
 
-    let date = new Date();
-    console.log(
-      `%c just before sending the data ${
-        date.toLocaleTimeString() + ":" + date.getMilliseconds()
-      }`,
-      "background-color:teal;color:white"
-    );
-    let reader = new FileReader();
+  // sendToServer => here it was written this fxn now it is in mettings utils 
 
-    reader.onloadend = () => {
-      let base64data = reader.result;
-      blob = null;
-
-      console.log("inside send to server", data);
-
-      let date = new Date();
-      setCueLoading(true);
-
-      data = {
-        // uid: data.id,
-        //   sessionid: data.id,
-        //   roomid: data.roomId,
-        //   isadmin: data.isAdmin,
-        //   custemailid: data.custEmailId,
-        //   agentId: data.agentId,
-        //   init: data.init,
-
-        // jobid:jobId ,
-        // roomid: roomId
-        //agentid: agentId,
-        
-        roomid: "abc-123-fgh-456",
-        jobid: "1",
-        agentid: "1234",
-        custemailid: custEmailId,
-        isHost: isHost,
-        name: name,
-        init: data.init,
-        audiomessage: base64data?.split(",")[1],
-        timeStamp: `${date.toLocaleDateString()} ${date.toLocaleTimeString()}:${date.getMilliseconds()}`,
-      };
-      console.log("from inside send to server", data);
-      socket2.emit("ai_suggestion_req", data);
-    };
-    reader.readAsDataURL(blob);
-  }
-
-  function sendVideoToServer(blob, url, data) {
-    
-
-    let date = new Date();
-    console.log(
-      `%c just before sending the data ${
-        date.toLocaleTimeString() + ":" + date.getMilliseconds()
-      }`,
-      "background-color:teal;color:white"
-    );
-    let reader = new FileReader();
-
-    reader.onloadend =async  () => {
-      let base64data = reader.result;
-      blob = null;
-
-      console.log("inside send to server", data);
-
-      let date = new Date();
-      setCueLoading(true);
-
-      data = {
-        // uid: data.id,
-        //   sessionid: data.id,
-        //   roomid: data.roomId,
-        //   isadmin: data.isAdmin,
-        //   custemailid: data.custEmailId,
-        //   agentId: data.agentId,
-        //   init: data.init,
-
-        // jobid:jobId ,
-        // roomid: roomId
-        //agentid: agentId,
-        ...data,
-        roomid: "abc-123-fgh-456",
-        jobid: "1",
-        agentid: "1234",
-        custemailid: custEmailId,
-        isHost: isHost,
-        name: name,
-        init: data.init,
-        audiomessage: base64data?.split(",")[1],
-        timeStamp: `${date.toLocaleDateString()} ${date.toLocaleTimeString()}:${date.getMilliseconds()}`,
-      };
-      console.log("from inside send to server", data);
-      let result = await PostReq(url,data)
-      console.log('video send result',result)
-     // socket2.emit("ai_suggestion_req", data);
-    };
-    reader.readAsDataURL(blob);
-  }
   /* ========================================================================= */
   /* ========================================================================= */
   /* Functions for utilizing live audio streams and converting from raw wav buffers to mp3 */
   /* Helper function used to convert audio buffers to wav - redundant (present in functions/wavToMp3) */
-  function bufferToWav(abuffer: ArrayBuffer, len: number) {
-    //console.log("abuffer", abuffer, len);
-
-    //@ts-ignore
-    var numOfChan = abuffer.numberOfChannels,
-      length = len * numOfChan * 2 + 44,
-      buffer = new ArrayBuffer(length),
-      view = new DataView(buffer),
-      channels = [],
-      i,
-      sample,
-      offset = 0,
-      pos = 0;
-
-    // write WAVE header
-
-    //console.log("pos", pos, length);
-    setUint32(0x46464952); // "RIFF"
-    //console.log("pos", pos, length);
-    setUint32(length - 8); // file length - 8
-    //console.log("pos", pos, length);
-    setUint32(0x45564157); // "WAVE"
-    //console.log("pos", pos, length);
-    setUint32(0x20746d66); // "fmt " chunk
-    //console.log("pos", pos, length);
-    setUint32(16); // length = 16
-    //console.log("pos", pos, length);
-    setUint16(1); // PCM (uncompressed)
-    //console.log("pos", pos, length);
-    setUint16(numOfChan);
-    //console.log("pos", pos, length);
-    //@ts-ignore
-    setUint32(abuffer.sampleRate);
-    //console.log("pos", pos, length);
-    //@ts-ignore
-    setUint32(abuffer.sampleRate * 2 * numOfChan); // avg. bytes/sec
-    //console.log("pos", pos, length);
-    setUint16(numOfChan * 2); // block-align
-    //console.log("pos", pos, length);
-    setUint16(16); // 16-bit (hardcoded in this demo)
-    //console.log("pos", pos, length);
-    setUint32(0x61746164); // "data" - chunk
-    //console.log("pos", pos, length);
-    setUint32(length - pos - 4); // chunk length
-    //console.log("pos", pos, length);
-
-    // write interleaved data
-    //@ts-ignore
-    for (i = 0; i < abuffer.numberOfChannels; i++)
-      //@ts-ignore
-      channels.push(abuffer.getChannelData(i));
-
-    while (pos < length) {
-      for (i = 0; i < numOfChan; i++) {
-        // interleave channels
-        sample = Math.max(-1, Math.min(1, channels[i][offset])); // clamp
-        sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0; // scale to 16-bit signed int
-        view.setInt16(pos, sample, true); // write 16-bit sample
-        pos += 2;
-      }
-      offset++; // next source sample
-    }
-
-    return buffer;
-    //@ts-ignore
-    function setUint16(data) {
-      view.setUint16(pos, data, true);
-      pos += 2;
-    }
-    //@ts-ignore
-    function setUint32(data) {
-      view.setUint32(pos, data, true);
-      pos += 4;
-    }
-  }
-
+  
   /* ========================================================================= */
   /* ========================================================================= */
   /* Function used to convert raw blob / array of audio chunks into wav format - redundant (present in functions/wavToMp3) */
-  function downsampleToWav(file: any, callback: CallableFunction) {
-    //Browser compatibility
-    // https://caniuse.com/?search=AudioContext
-
-    //@ts-ignore
-    const AudioContext =
-      window.AudioContext || window.webkitAudioContext || AudioContext;
-    const audioCtx = new AudioContext();
-    const fileReader1 = new FileReader();
-    fileReader1.onload = function (ev) {
-      // Decode audio
-      //@ts-ignore
-      audioCtx.decodeAudioData(ev.target.result, (buffer) => {
-        // this is where you down sample the audio, usually is 44100 samples per second
-        const usingWebkit = !window.OfflineAudioContext;
-        //console.log("usingWebkit", usingWebkit);
-
-        //@ts-ignore
-        const OfflineAudioContext =
-          window.OfflineAudioContext || window.webkitOfflineAudioContext;
-        // {
-        //   numberOfChannels: 1,
-        //   length: 16000 * buffer.duration,
-        //   sampleRate: 16000
-        // }
-        var offlineAudioCtx = new OfflineAudioContext(
-          1,
-          16000 * buffer.duration,
-          16000
-        );
-
-        let soundSource = offlineAudioCtx.createBufferSource();
-        soundSource.buffer = buffer;
-        soundSource.connect(offlineAudioCtx.destination);
-
-        const reader2 = new FileReader();
-        reader2.onload = function (ev) {
-          const renderCompleteHandler = function (evt: any) {
-            //console.log("renderCompleteHandler", evt, offlineAudioCtx);
-            let renderedBuffer = usingWebkit ? evt.renderedBuffer : evt;
-            const buffer = bufferToWav(renderedBuffer, renderedBuffer.length);
-            if (callback) {
-              callback(buffer);
-            }
-          };
-          if (usingWebkit) {
-            offlineAudioCtx.addEventListener("complete", renderCompleteHandler);
-            offlineAudioCtx.startRendering();
-          } else {
-            offlineAudioCtx
-              .startRendering()
-              .then(renderCompleteHandler)
-              .catch(function (err) {
-                console.log(err);
-              });
-          }
-        };
-        reader2.readAsArrayBuffer(file);
-
-        soundSource.start(0);
-      });
-    };
-
-    fileReader1.readAsArrayBuffer(file);
-  }
+  
 
   /* ========================================================================= */
   /* ========================================================================= */
   /* Function to convert raw wav buffers to mp3 - redundant (present in functions/wavToMp3) */
-  function encodeMp3(arrayBuffer: any) {
-    //@ts-ignore
-    const wav = lamejs.WavHeader.readHeader(new DataView(arrayBuffer));
-    console.log("i am wav", wav);
-    const dataView = new Int16Array(
-      arrayBuffer,
-      wav.dataOffset,
-      wav.dataLen / 2
-    );
-    //@ts-ignore
-    const mp3Encoder = new lamejs.Mp3Encoder(wav.channels, wav.sampleRate, 128);
-    const maxSamples = 1152;
-
-    const samplesLeft =
-      wav.channels === 1
-        ? dataView
-        : new Int16Array(wav.dataLen / (2 * wav.channels));
-
-    const samplesRight =
-      wav.channels === 2
-        ? new Int16Array(wav.dataLen / (2 * wav.channels))
-        : undefined;
-
-    if (wav.channels > 1) {
-      //@ts-ignore
-      for (var j = 0; j < samplesLeft.length; i++) {
-        samplesLeft[j] = dataView[j * 2];
-        //@ts-ignore
-        samplesRight[j] = dataView[j * 2 + 1];
-      }
-    }
-
-    let dataBuffer = [];
-    let remaining = samplesLeft.length;
-    for (var i = 0; remaining >= maxSamples; i += maxSamples) {
-      var left = samplesLeft.subarray(i, i + maxSamples);
-      var right;
-      if (samplesRight) {
-        right = samplesRight.subarray(i, i + maxSamples);
-      }
-      var mp3buf = mp3Encoder.encodeBuffer(left, right);
-      dataBuffer.push(new Int8Array(mp3buf));
-      remaining -= maxSamples;
-    }
-
-    const mp3Lastbuf = mp3Encoder.flush();
-    dataBuffer.push(new Int8Array(mp3Lastbuf));
-    return dataBuffer;
-  }
+  
 
   /* ========================================================================= */
   /* ========================================================================= */
   /* Function to create video streams/audio streams/screen sharing streams for new users */
-  function gettingVideoStream() {
-    return navigator.mediaDevices.getUserMedia({
-      video: {
-        frameRate: {
-          ideal: 60,
-          min: 10,
-        },
-      },
-      audio: false,
-    });
-  }
-  function gettingAudioStream() {
-    return navigator.mediaDevices.getUserMedia({
-      audio: true,
-    });
-  }
-  function gettingScreenStream() {
-    return navigator.mediaDevices.getDisplayMedia({
-      video: {
-        //@ts-ignore
-        cursor: "always",
-      },
-      audio: false,
-    });
-  }
 
   /* ========================================================================= */
   /* ========================================================================= */
   /* function used for creating a cues box based on response from socket2 server - deprecated */
-  function handleDataOld(data: CuesDataType = {} as CuesDataType) {
-    let date = new Date();
-    console.log(
-      `%c inside handle Data ${
-        date.toLocaleTimeString() + ":" + date.getMilliseconds()
-      }`,
-      "background-color:teal;color:white"
-    );
-
-    setCueLoading(false);
-    //@ts-ignore
-    let arr: CuesDataType[] = [];
-    //@ts-ignore
-    let obj: CuesDataType = {};
-
-    if (data?.loading) {
-      return;
-    }
-
-    if (data?.imageUrl && data?.imageUrl !== "") {
-      //@ts-ignore
-      obj["id"] = uuidv4();
-      obj["common_id"] = data?.common_id;
-      obj["type"] = "ImageMsg";
-      obj["imageUrl"] = data?.imageUrl;
-      obj["iconName"] = "fa-solid fa-forward-fast";
-      obj["similarity_query"] = data?.similarity_query;
-      obj["color"] = data?.color;
-      obj["iconColor"] = data?.iconColor;
-      obj["sessionid"] = data?.sessionid;
-      obj["audiofiletimestamp"] = data?.audiofiletimestamp;
-
-      //arr.push(obj)
-      arr = [...arr, obj];
-      //@ts-ignore
-      obj = {};
-    }
-    if (data?.value && data?.value !== "") {
-      //@ts-ignore
-      obj["id"] = uuidv4();
-      obj["common_id"] = data?.common_id;
-      obj["type"] = "InputForm";
-      obj["iconName"] = "fa-regular fa-pen-to-square";
-      obj["value"] = data?.value;
-      obj["label"] = data?.label;
-      obj["color"] = data?.color;
-      obj["iconColor"] = data?.iconColor;
-      obj["similarity_query"] = data?.similarity_query;
-      obj["sessionid"] = data?.sessionid;
-      obj["audiofiletimestamp"] = data?.audiofiletimestamp;
-
-      //arr.push(obj)
-      arr = [...arr, obj];
-      //@ts-ignore
-      obj = {};
-    }
-    if (data?.radio && data?.radio !== "") {
-      //@ts-ignore
-      obj["id"] = uuidv4();
-      obj["common_id"] = data?.common_id;
-      obj["type"] = "RadioForm";
-      obj["iconName"] = "fa-regular fa-pen-to-square";
-      obj["label"] = data?.label;
-      obj["radio"] = data?.radio;
-      obj["color"] = data?.color;
-      obj["iconColor"] = data?.iconColor;
-      obj["similarity_query"] = data?.similarity_query;
-      obj["sessionid"] = data?.sessionid;
-      obj["audiofiletimestamp"] = data?.audiofiletimestamp;
-
-      //arr.push(obj)
-      arr = [...arr, obj];
-      //@ts-ignore
-      obj = {};
-    }
-
-    if (data?.content || data?.similarity_query) {
-      //@ts-ignore
-      obj["id"] = uuidv4();
-      obj["common_id"] = data?.common_id;
-      obj["type"] = "TextMsg";
-      obj["content"] = data.content;
-      obj["iconName"] = "fa-solid fa-circle-question";
-      obj["color"] = data?.color;
-      obj["iconColor"] = data?.iconColor;
-      obj["similarity_query"] = data?.similarity_query;
-      obj["sessionid"] = data?.sessionid;
-      obj["audiofiletimestamp"] = data?.audiofiletimestamp;
-
-      //arr.push(obj)
-      arr = [...arr, obj];
-      //@ts-ignore
-      obj = {};
-    }
-    if (data?.replies && data?.replies?.length > 0) {
-      //@ts-ignore
-      obj["id"] = uuidv4();
-      obj["common_id"] = data?.common_id;
-      obj["type"] = "SuggestiveMsg";
-      obj["replies"] = data?.replies;
-      obj["color"] = data?.color;
-      obj["iconColor"] = data?.iconColor;
-      obj["similarity_query"] = data?.similarity_query;
-      obj["iconName"] = "fa-solid fa-forward-fast";
-      obj["sessionid"] = data?.sessionid;
-      obj["audiofiletimestamp"] = data?.audiofiletimestamp;
-
-      //arr.push(obj)
-      arr = [...arr, obj];
-      //@ts-ignore
-      obj = {};
-    }
-    //@ts-ignore
-    dispatch(addCues(arr));
-  }
+  
+  //function handleDataOld was here
 
   /* ========================================================================= */
   /* ========================================================================= */
   /* function used for updating cues box based on response from socket2 server - deprecated */
-  function updateCuesOld(data: CuesDataType = {} as CuesDataType) {
-    let date = new Date();
-    console.log(
-      `%c inside update cues ${
-        date.toLocaleTimeString() + ":" + date.getMilliseconds()
-      }`,
-      "background-color:teal;color:white"
-    );
-
-    let filteredCues = CuesList?.map((e) => {
-      if (e.common_id === data?.common_id) {
-        return {
-          ...e,
-          content: e.content + " " + (data.content ?? ""),
-        };
-      }
-      return e;
-    });
-
-    if (!filteredCues) {
-      return;
-    }
-
-    dispatch(
-      setCues({
-        CuesList: filteredCues,
-        jobDescription: jobDescription,
-        interviewGuide: interviewGuide,
-        jobTitle: jobTitle,
-      })
-    );
-  }
+  
 
   /* ========================================================================= */
   /* ========================================================================= */
   /* Function for uploading file chunk by chunk using ajax/xhr */
-  function uploadFile(uploadFileparam: File) {
-    let uid = uuidv4();
-    const chunkSize = 5 * 1024 * 1024;
-    let filesUploaded = 0;
-    let totalFiles = 1;
-    const totalChunks = Math.ceil(uploadFileparam.size / chunkSize);
-    let currentChunk = 0;
-    let uploadUrl = videoUploadUrl;
-    // Chunk uploading function
-
-    function uploadChunk(chunkStart: number) {
-      console.log("Triggered");
-      const chunk = uploadFileparam.slice(chunkStart, chunkStart + chunkSize);
-
-      const chunkFormData = new FormData();
-      chunkFormData.append("original_file_name", uploadFileparam.name);
-      chunkFormData.append("file", chunk);
-      // with .ext
-      const fileExt = uploadFileparam.name.split(".").pop(); // Safely get extension
-      chunkFormData.append("filename", `${uid}.${fileExt}`);
-
-      // without .ext
-      chunkFormData.append("fileid", `${uid}`);
-      chunkFormData.append("fileext", `${fileExt}`);
-      chunkFormData.append("chunk", `${currentChunk}`);
-      chunkFormData.append("startTime", `${startAudioTimestampRef.current}`);
-      chunkFormData.append('roomid', roomId);
-      chunkFormData.append('agentid', agentId);
-      chunkFormData.append('ishost', isHost);
-      chunkFormData.append('jobid', jobId);
-      chunkFormData.append('custemailid', custEmailId);
-      chunkFormData.append('name', name);
-      chunkFormData.append("totalChunks", `${totalChunks}`);
-
-      const xhr = new XMLHttpRequest();
-
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const percentComplete =
-            ((currentChunk * chunkSize + event.loaded) / uploadFileparam.size) *
-            100;
-
-          let num = Math.round(percentComplete);
-          if (num < 100) {
-          }
-          //setProgress({uploaded:num,hidden:false})
-          else {
-            //setProgress({uploaded:100,hidden:false})
-            // setTimeout(()=>{
-            //   setProgress({uploaded:0,hidden:true})
-            // },2000)
-          }
-          //progressBarFill.style.width = percentComplete + '%';
-          //progressBarFill.textContent = Math.round(percentComplete) + '%';
-        }
-      };
-
-      xhr.onload = () => {
-        if (xhr.status === 200) {
-          currentChunk++;
-          if (currentChunk < totalChunks) {
-            uploadChunk(currentChunk * chunkSize);
-          } else {
-            filesUploaded++;
-            if (filesUploaded === totalFiles) {
-              let ob = {
-                original_file_name: uploadFileparam.name,
-                filename: `${uid}.${uploadFileparam.name.split(".")[1]}`,
-                fileid: uid,
-              };
-              //setUploadedFiles([ob])
-
-              //message.textContent = 'All files successfully uploaded!';
-              //message.style.color = 'green';
-              //progressBar.classList.add('hidden');
-            }
-          }
-        } else {
-          //  message.textContent = 'Error uploading files.';
-          //  message.style.color = 'red';
-
-          console.error("Error:", xhr.responseText);
-        }
-      };
-
-      xhr.onerror = () => {
-        console.log("Network error or request failed");
-      };
-
-      //xhr.open("POST", `${uploadUrl}`, true);
-      //xhr.open('POST', 'https://qhpv9mvz1h.execute-api.ap-south-1.amazonaws.com/prod/postfacto-recruiter-upload', true);
-
-      chunkFormData.forEach((value, key) => {
-        console.log("chunkformdata ---", key, value);
-      });
-      //xhr.send(chunkFormData);
-    }
-
-    uploadChunk(0);
-  }
-
-  /* ========================================================================= */
-  /* ========================================================================= */
-  /* Media Recorder functionality that uploads recordings to backend server */
-  let arrayOfChunks: BlobPart[] = [];
-
-  function getTimestamp() {
-    const now = new Date();
-
-    const year = now.getUTCFullYear();
-    const month = String(now.getUTCMonth() + 1).padStart(2, "0"); // Months are 0-based in JS
-    const day = String(now.getUTCDate()).padStart(2, "0");
-
-    const hours = String(now.getUTCHours()).padStart(2, "0");
-    const minutes = String(now.getUTCMinutes()).padStart(2, "0");
-    const seconds = String(now.getUTCSeconds()).padStart(2, "0");
-
-    const milliseconds = String(now.getUTCMilliseconds()).padStart(3, "0");
-
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
-  }
-
-  function handleRecordings(stream: MediaStream) {
-    //let url = 'https://qhpv9mvz1h.execute-api.ap-south-1.amazonaws.com/prod/postfacto-upload-test'
-    let url = videoUploadUrl;
-    const mediaRecorder = new MediaRecorder(stream, {
-      audioBitsPerSecond: 32000,
-    });
-
-    mediaRecorder.ondataavailable = (event) => arrayOfChunks.push(event.data);
-
-    mediaRecorder.onstop = processRecordedAudio;
-
-    globalStreamRef.current = mediaRecorder;
-    startAudioTimestampRef.current = getTimestamp(); //string format
-    mediaRecorder.start();
-  }
-
   
+//---uploadFile() was here
 
 
-  async function processRecordedAudio() {
-    try {
-      console.log(
-        `%c just before vid to blob ${new Date().toLocaleTimeString()}`,
-        "background-color:teal;color:white"
-      );
-      dispatch(setNVaudioUploadAnimation(true));
-      // let blob = new Blob(arrayofChunks, { type: "video/mpeg" }); // video blob
-      const audioBlob = new Blob(arrayOfChunks, { type: "audio/wav" });
-      const convertedBlob = await WavToMp3(audioBlob);
-
-      //let myfile = new File([blob], "video.mp4", { type: "video/mpeg" });
-      const audioFile = new File([convertedBlob], "audio.mp3", {
-        type: "audio/mpeg",
-      });
-
-      arrayOfChunks = []; // Clear recorded chunks after processing
-
-      // Handle the recorded file (upload, store, etc.)
-      uploadFile(audioFile);
-      dispatch(setNVaudioUploadAnimation(false));
-    } catch (error) {
-      console.error("Error processing recorded audio:", error);
-    }
-  }
-
-  function stopVideoRecording(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const mediaRecorder = globalStreamRef.current;
-
-      if (!mediaRecorder || mediaRecorder.state !== "recording") {
-        console.warn("MediaRecorder is already stopped or not initialized.");
-        resolve(); // Resolve the promise immediately
-        return; // Exit the function so the rest of the code doesn't run
-      }
-
-      // Stop recording safely
-      try {
-        mediaRecorder.stop();
-        console.log("Stopping recording...");
-        resolve(); // Resolve immediately after stopping (processRecordedAudio() will handle onstop)
-      } catch (error) {
-        console.error("Error stopping MediaRecorder:", error);
-        reject(error);
-      }
-    });
-  }
+  /* ========================================================================= */
+  /* ========================================================================= */
+  /* Media Recorder functionality that uploads recordings to backend server */  
+    const mediaRecorder = globalStreamRef.current;
+    stopVideoRecording(mediaRecorder);//since this was not use any place i leave it here as it is 
+// can be used in some button and stuff 
 
   /* ========================================================================= */
   /* ========================================================================= */
@@ -980,24 +363,20 @@ export default function DataWrapper({
 
     //This is a socket connection to handle live messages between participants
 
-    let url1 = 'https://vitt-jarvis-node-production.up.railway.app/'
-    let url2 = 'http://localhost:3002'
-    let url3 = 'https://temp-meeting-server-production.up.railway.app/'
-    let url4 = 'https://temp-meeting-server.vercel.app/'
-    let url5 = 'https://temp-meeting-server.onrender.com'
+    let url1 = "https://vitt-jarvis-node-production.up.railway.app/";
+    let url2 = "http://localhost:3002";
+    let url3 = "https://temp-meeting-server-production.up.railway.app/";
+    let url4 = "https://temp-meeting-server.vercel.app/";
+    let url5 = "https://temp-meeting-server.onrender.com";
 
     let tempSocket = io("wss://recruitonodesocket.vitti.insure");
 
     //This is a socket connection with backend server to handle cues specific requests or other api requests
-    let tempSocket2 = io(
-      "wss://recruito.vitti.insure"
-    );
+    let tempSocket2 = io("wss://recruito.vitti.insure");
     // https://vitt-ai-request-broadcaster-production.up.railway.app
 
-    
-
-    let tempPeer = new Peer(uuidv4(),peerOptions);
-    let tempAudioPeer = new Peer(uuidv4(),peerOptions);
+    let tempPeer = new Peer(uuidv4(), peerOptions);
+    let tempAudioPeer = new Peer(uuidv4(), peerOptions);
 
     setSocket(tempSocket);
     setSocket2(tempSocket2);
@@ -1136,21 +515,20 @@ export default function DataWrapper({
 
     return () => {
       socket2.off("ai_suggestion_res", handleLiveQna);
-    }
-  },[socket2,CuesList])
+    };
+  }, [socket2, CuesList]);
 
-  function reqruiterNotesRes(data){
-    console.log('recruiter_notes_res',data)
+  function reqruiterNotesRes(data) {
+    console.log("recruiter_notes_res", data);
   }
 
-  useEffect(()=>{
-    if(socket2===null)
-      return ;
-    socket2.on('recruiter_notes_res',reqruiterNotesRes)
-   
-    return socket2.off('recruiter_notes_res',reqruiterNotesRes);
-  },[socket2])
-  
+  useEffect(() => {
+    if (socket2 === null) return;
+    socket2.on("recruiter_notes_res", reqruiterNotesRes);
+
+    return socket2.off("recruiter_notes_res", reqruiterNotesRes);
+  }, [socket2]);
+
   //random testing
   /*useEffect(() => {
     let tempArr: Array<CuesDataType> = [];
@@ -1247,7 +625,15 @@ export default function DataWrapper({
         tempObj.audioStream = audioStream;
         tempObj.isMicrophoneAvailable = true;
         audioStreamRef.current = audioStream;
-        handleRecordings(audioStream);
+         // Ensure these references and functions are defined in your component
+    handleRecordings(
+      audioStream,
+      uploadFile,                    
+      setNVaudioUploadAnimation,    
+      WavToMp3,                     
+      globalStreamRef,               
+      startAudioTimestampRef         
+    );
       })
       .catch((err) => {
         // let tempStream = new MediaStream()
@@ -1260,7 +646,7 @@ export default function DataWrapper({
     usersArrRef.current.push(tempObj);
     let d = new Date();
     console.log("after setting usersArrRef", d.toLocaleTimeString());
-
+    // dispatch(addNewUserAction(tempObj));
     setUsers((prev) => [...usersArrRef.current]);
 
     return () => {
@@ -1296,6 +682,7 @@ export default function DataWrapper({
   /* ========================================================================= */
   /* ========================================================================= */
   /* 4.1. This code is responsible for enable & disable videostream */
+
   useEffect(() => {
     if (socket === null || myStream === null || myStream === false) return;
     //@ts-ignore
@@ -1518,7 +905,7 @@ export default function DataWrapper({
         //console.log('socket connected')
       }
 
-      let tempPeer = new Peer(myId,peerOptions);
+      let tempPeer = new Peer(myId, peerOptions);
       setPeer(tempPeer);
       clearTimeout(timeOutId);
     }, 5000);
@@ -1737,17 +1124,6 @@ export default function DataWrapper({
   /* ========================================================================= */
   /* ========================================================================= */
   /* 8. Helper function for console.logging whether peers are available or not - used only for console.logging purpose */
-  function isUserAvailable(userId: string) {
-    let flag = false;
-    for (let i = 0; i < peersArrRef.current.length; i++) {
-      if (peersArrRef.current[i] === userId) {
-        flag = true;
-        break;
-      }
-    }
-    return flag;
-  }
-
   /* ========================================================================= */
   /* ========================================================================= */
   /* 9.1. Helper function for video sharing - shares video stream with any new peers received on */
@@ -2125,7 +1501,7 @@ export default function DataWrapper({
 
         console.log(
           "peersArray2",
-          isUserAvailable(call.peer),
+          isUserAvailable(call.peer,peersArrRef),
           call.peer,
           peers2ArrRef.current,
           peers2ObjRef.current,
@@ -2181,7 +1557,7 @@ export default function DataWrapper({
 
         console.log(
           "peersArray2",
-          isUserAvailable(call.peer),
+          isUserAvailable(call.peer,peersArrRef),
           call.peer,
           peersArrRef.current,
           peersObjRef.current,
@@ -2235,7 +1611,7 @@ export default function DataWrapper({
 
         console.log(
           "audioPeersArrRef",
-          isUserAvailable(call.peer),
+          isUserAvailable(call.peer,peersArrRef),
           call.peer,
           peersArrRef.current,
           peersObjRef.current,
@@ -2405,11 +1781,10 @@ export default function DataWrapper({
     mediaRecorder.start();
   }
 
-
   function sendScreenStream(stream: MediaStream, time: number) {
     //let url = 'https://f6p70odi12.execute-api.ap-south-1.amazonaws.com'
-    console.log('send screen stream hit',stream,time)
-    let url = 'http://localhost:5000';
+    console.log("send screen stream hit", stream, time);
+    let url = "http://localhost:5000";
     let arrayofChunks: any = [];
     let mediaRecorder = new MediaRecorder(stream, {
       audioBitsPerSecond: 32000,
@@ -2422,13 +1797,13 @@ export default function DataWrapper({
     mediaRecorder.onstop = async () => {
       setCueLoading(true);
 
-     
+      let videoBlob = new Blob(arrayofChunks, { type: "video/webm" });
 
-      let videoBlob = new Blob(arrayofChunks, { type: "video/webm" })
-      
+      sendVideoToServer(videoBlob, url, {
+        ...usersArrRef.current[0],
+        init: false,
+      });
 
-      sendVideoToServer(videoBlob, url, { ...usersArrRef.current[0], init: false });
-      
       console.log(
         `%c just after send to server executes ${new Date().toLocaleTimeString()}`,
         "background-color:teal;color:white"
@@ -2451,37 +1826,29 @@ export default function DataWrapper({
     mediaRecorder.start();
   }
 
+  function startRecordingScreen() {}
 
-  function startRecordingScreen(){
-    
-
-     
-  }
-
-  useEffect(()=>{
-    
-    if(screenRecording ===false|| users.length===0){
-      globalRef.current.screenRecordingStatus =false
-      return ;
-      
+  useEffect(() => {
+    if (screenRecording === false || users.length === 0) {
+      globalRef.current.screenRecordingStatus = false;
+      return;
     }
 
-    globalRef.current.screenRecordingStatus =true
-    let intervalId 
-    gettingScreenStream()
-      .then((videoStream) => {
-        console.log('videoStream',videoStream)
-        sendScreenStream(videoStream,4000)
+    globalRef.current.screenRecordingStatus = true;
+    let intervalId;
+    gettingScreenStream().then((videoStream) => {
+      console.log("videoStream", videoStream);
+      sendScreenStream(videoStream, 4000);
 
-        intervalId = setInterval(()=>{
-          sendScreenStream(videoStream,4000)
-        },4000)
-      })
+      intervalId = setInterval(() => {
+        sendScreenStream(videoStream, 4000);
+      }, 4000);
+    });
 
-      return ()=>{
-        intervalId && clearInterval(intervalId)
-      }
-  },[screenRecording,users])
+    return () => {
+      intervalId && clearInterval(intervalId);
+    };
+  }, [screenRecording, users]);
   /* ========================================================================= */
   /* ========================================================================= */
   /* 12.3 Useeffect that calls startMediaRecorder as soon as VAD is turned on.  */
@@ -2714,9 +2081,9 @@ export default function DataWrapper({
             toPeer: peersArrRef.current[0],
             toggle: true,
           });
-        
+
         //inserted here to ensure that the audio is not processed if there's only one person in the meeting.
-        if (usersArrRef.current.length <= 1) return; 
+        if (usersArrRef.current.length <= 1) return;
         sendToServer(blob, adminUrl, {
           ...usersArrRef.current[0],
           init: false,
@@ -2825,12 +2192,10 @@ export default function DataWrapper({
     stopVideoRecording,
     startRecordingScreen,
     screenRecording,
-    setScreenRecording
+    setScreenRecording,
   };
-
   return (
     //@ts-ignore
     <Context.Provider value={values}>{children}</Context.Provider>
   );
 }
-

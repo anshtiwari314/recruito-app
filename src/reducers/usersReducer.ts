@@ -1,5 +1,5 @@
-import { createSlice } from "@reduxjs/toolkit";
-import {addNewUser,removeUser,updateUser} from '../functions/users'
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import {addNewUser,removeUser,updateUser,toggleCamera,setUserAudioStream,setUserStream,setUserVideoStream,toggleScreenSharing,toggleMicrophone, setUserLoading, updateUserAvailability} from '../functions/users'
 
 type UserType = {
     id: string;
@@ -26,23 +26,45 @@ type UserType = {
     containsScreenStream: boolean;
   };
 
-  type UsersType = Array<UserType> | []
+  type UsersType = UserType[]
 
   const Users:UsersType = []
 
-  const cuesSlice = createSlice({
+  const usersSlice = createSlice({
     name: "usersReducer",
     initialState: Users,
     reducers: {
       addNewUser,
       removeUser,
       updateUser,
-      
+      toggleCamera,
+      setUserAudioStream,
+      setUserStream,
+      setUserVideoStream,
+      toggleScreenSharing,
+      toggleMicrophone,
+      setUserLoading,
+      updateUserAvailability
     },
   });
 
   export type {UserType,UsersType}
+  
+  // Export the action creators
+  export const { 
+    addNewUser: addNewUserAction,
+    removeUser: removeUserAction,
+    updateUser: updateUserAction,
+    toggleCamera: toggleCameraAction,
+    setUserAudioStream: setUserAudioStreamAction,
+    setUserStream: setUserStreamAction,
+    setUserVideoStream: setUserVideoStreamAction,
+    toggleScreenSharing: toggleScreenSharingAction,
+    toggleMicrophone: toggleMicrophoneAction,
+    setUserLoading: setUserLoadingAction,
+    updateUserAvailability: updateUserAvailabilityAction
+  } = usersSlice.actions;
 
   export default {
-    usersReducer: cuesSlice.reducer,
+    usersReducer: usersSlice.reducer,
   };

@@ -2,7 +2,7 @@ import React from "react";
 import MainPage from "./pages/MainPage";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import DataWrapper from "./context/DataWrapper";
-import ReduxProvider from "@/store/Providers";
+import ReduxProvider from "./store/Providers";
 import NotFoundPage from "./pages/NotFoundPage";
 import TempPage from './pages/TempPage'
 import Leave from "./pages/LeavePage";

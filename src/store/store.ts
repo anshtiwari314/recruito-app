@@ -4,7 +4,7 @@ import cuesReducer from "@/reducers/cuesReducer";
 import queryparamReducer from "@/reducers/queryparamReducer";
 import { TypedUseSelectorHook, useSelector } from "react-redux";
 import transcriptionReducer from "@/reducers/transcriptionReducer";
-import usersReducer from "@/reducers/usersReducer";
+import usersReducer from "../reducers/usersReducer";
 import navigationparamReducer from "@/reducers/navigationparamReducer";
 
 // Create and configure the Redux store
