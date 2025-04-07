@@ -1,5 +1,5 @@
 import React from "react";
-import { useAppSelector } from "@/store/store";
+import { useAppSelector } from "../store/store";
 
 export function RightPanelResource() {
   const { jobDescription, interviewGuide, jobTitle } = useAppSelector(

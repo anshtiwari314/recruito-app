@@ -2,11 +2,12 @@ import React from "react";
 import { RightPanelVideo } from "./RightPanelVideo";
 import { RightPanelResource } from "./RightPanelResource";
 import { useData } from "../context/DataWrapper";
-import { useAppSelector } from "@/store/store";
-
+import { useAppSelector } from "../store/store";
+import { UserType } from "../reducers/usersReducer";
 export default function RightPanel() {
-  const { users } = useData();
-  const { isHost } = useAppSelector((state) => state.qpReducer);
+  const username=useAppSelector((state)=>state.usersReducer)
+  console.log("Here is the UserDta",username)
+   const { isHost } = useAppSelector((state) => state.qpReducer);
   return (
     <div
       id="right-panel"
@@ -14,10 +15,10 @@ export default function RightPanel() {
     >
       <div className="p-4 border-b border-neutral-200">
         <h2 className="font-semibold mb-4 text-neutral-900">
-          Participants ({users.length})
+          Participants ({username.length})
         </h2>
         <div className="space-y-4">
-          {users.map((e, i) => (
+          {username.map((e, i) => (
             <RightPanelVideo e={e} key={i} muted={i === 0 ? true : false} />
           ))}
 

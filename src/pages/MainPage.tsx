@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useData } from "@/context/DataWrapper";
+import { useData } from "../context/DataWrapper";
 import { v4 as uuidv4 } from "uuid";
-import ContentPanel from "@/components/ContentPanel";
-import type { QPState } from "@/reducers/queryparamReducer";
-import { setQP } from "@/reducers/queryparamReducer";
-import { useAppSelector } from "@/store/store";
+import ContentPanel from "../components/ContentPanel";
+import type { QPState } from "../reducers/queryparamReducer";
+import { setQP } from "../reducers/queryparamReducer";
+import { useAppSelector } from "../store/store";
 import { useDispatch } from "react-redux";
-import RightPanel from "@/components/RightPanel";
+import RightPanel from "../components/RightPanel";
 import NotFound from "./NotFoundPage";
 import Leave from "./LeavePage";
 import MeetingPageHeader from "../components/MeetingPageHeader";
@@ -182,8 +182,6 @@ export default function MainPage() {
   }, []);
 
     //http://localhost:5173/?room_id=abc-123-fgh-456&cust_email_id=saurabhahlawat89@gmail.com&agent_id=1234&job_id=1
-  
-
   return (
     <>
       {tempIsHost === null ? (

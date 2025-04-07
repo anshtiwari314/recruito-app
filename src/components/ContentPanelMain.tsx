@@ -1,10 +1,10 @@
 import React from 'react'
-import { useData } from "@/context/DataWrapper";
-import { useAppSelector } from "@/store/store";
+import { useData } from "../context/DataWrapper";
+import { useAppSelector } from "../store/store";
 import { v4 as uuidv4 } from "uuid";
-import type { CuesDataType } from "@/reducers/cuesReducer";
+import type { CuesDataType } from "../reducers/cuesReducer";
 import { useEffect, useRef, useState } from "react";
-import type { TranscriptionDataType } from "@/reducers/transcriptionReducer";
+import type { TranscriptionDataType } from "../reducers/transcriptionReducer";
 import parse from 'html-react-parser';
 
 export function SingleCue({
@@ -92,7 +92,7 @@ export function SingleTranscription({ data }: { data: TranscriptionDataType }) {
 export default function ContentPanelMain() {
   const [currentCues, transcriptions] = useAppSelector((state) => [
     state.cuesReducer.CuesList,
-    state.trcpReducer.TranscriptionList,
+    state.transcriptionReducer?.TranscriptionList,
   ]);
 
   const [isExpanded, setIsExpanded] = useState(false);

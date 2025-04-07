@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import {addNewUser,removeUser,updateUser,toggleCamera,setUserAudioStream,setUserStream,setUserVideoStream,toggleScreenSharing,toggleMicrophone, setUserLoading, updateUserAvailability} from '../functions/users'
+import {addNewUser,removeUser,updateUser,toggleCamera,setUserAudioStream,setUserStream,setUserVideoStream,toggleScreenSharing,toggleMicrophone, setUserLoading, updateUserAvailability, setAllUser} from '../functions/users'
 
 type UserType = {
     id: string;
@@ -44,13 +44,13 @@ type UserType = {
       toggleScreenSharing,
       toggleMicrophone,
       setUserLoading,
-      updateUserAvailability
+      updateUserAvailability,
+      setAllUser
     },
   });
 
   export type {UserType,UsersType}
   
-  // Export the action creators
   export const { 
     addNewUser: addNewUserAction,
     removeUser: removeUserAction,
@@ -62,7 +62,8 @@ type UserType = {
     toggleScreenSharing: toggleScreenSharingAction,
     toggleMicrophone: toggleMicrophoneAction,
     setUserLoading: setUserLoadingAction,
-    updateUserAvailability: updateUserAvailabilityAction
+    updateUserAvailability: updateUserAvailabilityAction,
+    setAllUser:setAllUserActions,
   } = usersSlice.actions;
 
   export default {

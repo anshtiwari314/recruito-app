@@ -1,6 +1,6 @@
 import type React from "react";
 import { v4 as uuidv4 } from "uuid";
-import type { UserType } from "@/reducers/usersReducer";
+import type { UserType } from "../reducers/usersReducer";
 import { io } from "socket.io-client";
 import Peer from "peerjs";
 
@@ -19,7 +19,7 @@ export function downsampleToWav(file: Blob, callback: CallableFunction): void {
       const usingWebkit = !window.OfflineAudioContext;
 
       //@ts-ignore
-      const OfflineAudioContext =
+          const OfflineAudioContext =
         window.OfflineAudioContext || window.webkitOfflineAudioContext;
       var offlineAudioCtx = new OfflineAudioContext(
         1,

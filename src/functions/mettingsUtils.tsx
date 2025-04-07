@@ -1,13 +1,8 @@
 
-
 import { io } from "socket.io-client";
 import { PostReq } from "./requests";
 const socket = io("wss://recruitonodesocket.vitti.insure"); 
 const socket2=io("wss://recruito.vitti.insure");
-
-
-
-
 //funcationalties that are absoluetly feels redundant aahgh 
 
 export function getTimestamp(){
@@ -36,6 +31,7 @@ in line 576 it has been declared and has been used on lines
 */
 
 export function gettingVideoStream(): Promise<MediaStream> {
+  console.log("Stream is triggered")
   return navigator.mediaDevices.getUserMedia({
     video: {
       frameRate: {
@@ -199,7 +195,73 @@ export function sendToServer(blob: Blob, url: string, data: any): Promise<void> 
 }
 
 //depracted or not in using but still in file------------------------------------------------************-----------------------
+//  function sendVadStreamToServer(
+//     stream: MediaStream,
+//     data: any,
+//     url: string,
+//     time: number
+//   ) {
+//     let mediaStream = new MediaStream();
+//     //medRec = mediaStream
+//     mediaStream.addTrack(stream.getAudioTracks()[0]);
+//     try {
+//       let arrayofChunks: Blob[] = [];
+//       let mediaRecorder = new MediaRecorder(mediaStream, {
+//         audioBitsPerSecond: 32000,
+//       });
+//       mediaRecorder.ondataavailable = (e) => {
+//         arrayofChunks.push(e.data);
+//       };
+//       mediaRecorder.onstop = () => {
+//         // console.log('media recorder stop triggered')
+//         //  adminMediaRecorderStatus.current = false
+//         downsampleToWav(
+//           new Blob(arrayofChunks, { type: "audio/ogg" }),
+//           (buffer: ArrayBuffer) => {
+//             const mp3Buffer = encodeMp3(buffer);
+//             let blob = new Blob(mp3Buffer, { type: "audio/mp3" });
+//             console.log("send to server", data);
+//             sendToServer(blob, url, data);
+//             arrayofChunks = [];
+//             //@ts-ignore
+//             blob = null;
+//           }
+//         );
+//       };
 
+//       let timeOutId: any = null;
+//       let intervalId: any = null;
+
+//       //stop after T time
+//       timeOutId = setTimeout(() => {
+//         // console.log('state mediaRecorder inside timeout',mediaRecorder.state,intervalId,timeOutId)
+//         clearInterval(intervalId);
+//         clearTimeout(timeOutId);
+//         if (mediaRecorder.state === "recording") mediaRecorder.stop();
+//       }, time);
+
+//       //check at specific interval & stop immediately
+//       intervalId = setInterval(() => {
+//         if (vadFlag.current === false) {
+//           // console.log('state mediaRecorder inside interval',mediaRecorder.state,intervalId,timeOutId)
+//           clearTimeout(timeOutId);
+//           clearInterval(intervalId);
+//           if (mediaRecorder.state === "recording") mediaRecorder.stop();
+
+//           adminMediaRecorderStatus.current === false;
+//         }
+//       }, 150);
+
+//       mediaRecorder.start();
+//       console.log("state mediaRecorder", mediaRecorder.state);
+//       // if(mediaRecorder.state==='recording'){
+
+//       // }
+//     } catch (e) {
+//       console.log(e);
+//       return;
+//     }
+//   }
 
 // function handleDataOld(data: CuesDataType = {} as CuesDataType) {
 //     let date = new Date();

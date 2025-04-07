@@ -7,10 +7,12 @@ import NotFoundPage from "./pages/NotFoundPage";
 import TempPage from './pages/TempPage'
 import Leave from "./pages/LeavePage";
 
+
+
 export default function App() {
   return (
     <Router>
-        <ReduxProvider>
+        <ReduxProvider >
         <DataWrapper>
           <Routes>
             
@@ -30,6 +32,7 @@ export default function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
           </DataWrapper>
+     
         </ReduxProvider>
     </Router>
     //<Leave/>

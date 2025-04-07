@@ -1,10 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 //@ts-ignore
-import { useAppSelector } from "@/store/store";
-import { setNVclosecall, setNVaudioUploadAnimation } from "@/reducers/navigationparamReducer";
+import { useAppSelector } from "../store/store";
+import {
+  setNVclosecall,
+  setNVaudioUploadAnimation,
+} from "../reducers/navigationparamReducer";
 import { useData } from "../context/DataWrapper";
 import MeetingPageHeaderTimer from "./MeetingPageHeaderTimer";
+import {
+  toggleCameraAction,
+  toggleMicrophoneAction,
+} from "../reducers/usersReducer";
 
 export default function MeetingPageHeader() {
   const dispatch = useDispatch();
@@ -12,34 +19,25 @@ export default function MeetingPageHeader() {
   const { jobTitle } = useAppSelector((state) => state.cuesReducer);
   const { isHost } = useAppSelector((state) => state.qpReducer);
 
-  const {screenRecording,setScreenRecording}:void = useData()
+  const { screenRecording, setScreenRecording }: any = useData();
   //@ts-ignore
-  const {
-    name,
-    cameraToggle,
-    setCameraToggle,
-    microphoneToggle,
-    setMicroPhoneToggle,
-    setScreenSharing,
-    stopVideoRecording,
-  } = useData();
 
+  const { name, myId, setScreenSharing, stopVideoRecording }: any = useData();
+  const incomingUsers = useAppSelector((state) => state.usersReducer);
+  console.log(incomingUsers);
+  const theCurrentUser = incomingUsers.find((user) => user.id === myId);
   async function handleCloseCall() {
     const confirmQuit = window.confirm("Are you sure you want to quit?");
-
     if (confirmQuit) {
       sessionStorage.setItem("exitdone", "true");
-      setMicroPhoneToggle(false);
-      setCameraToggle(false);
+      dispatch(toggleMicrophoneAction({ id: myId, enabled: false }));
+      dispatch(toggleCameraAction({ id: myId, enabled: false }));
       dispatch(setNVclosecall(true));
       dispatch(setNVaudioUploadAnimation(true));
-
-      await stopVideoRecording(); // Wait for recording to stop
-
-      // Include logic here to send audio out along with corresponding ui
+      await stopVideoRecording();
       console.log("Closing the call...");
     }
-  };
+  }
 
   const shareScreen = () => {
     setScreenSharing((p: boolean) => !p);
@@ -47,17 +45,19 @@ export default function MeetingPageHeader() {
   };
 
   const toggleAudio = () => {
-    setMicroPhoneToggle((p: boolean) => !p);
-    console.log("toggling the audio...");
+    const newStatus = !theCurrentUser?.microphoneStatus;
+    dispatch(toggleMicrophoneAction({ id: myId, enabled: newStatus }));
+    console.log("Toggling The Audio");
   };
 
   const toggleVideo = () => {
-    setCameraToggle((p: boolean) => !p);
-    console.log("toggling the video...");
+    const newStatus = !theCurrentUser?.cameraStatus;
+    dispatch(toggleCameraAction({ id: myId, enabled: newStatus }));
+    console.log("Toggling The Video");
   };
 
   const toggleScreenRecording = () => {
-    setScreenRecording((p:boolean)=>!p)
+    setScreenRecording((p: boolean) => !p);
     console.log("toggling the screen recording...");
   };
 
@@ -90,7 +90,7 @@ export default function MeetingPageHeader() {
           className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
           onClick={toggleVideo}
         >
-          {cameraToggle ? (
+          {theCurrentUser?.cameraStatus ? (
             <i className="fa-solid fa-video fa-lg"></i>
           ) : (
             <i className="fa-solid fa-video-slash fa-lg"></i>
@@ -100,7 +100,7 @@ export default function MeetingPageHeader() {
           className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
           onClick={toggleAudio}
         >
-          {microphoneToggle ? (
+          {theCurrentUser?.microphoneStatus ? (
             <i className="fa-solid fa-microphone fa-lg"></i>
           ) : (
             <i className="fa-solid fa-microphone-slash fa-lg"></i>
@@ -111,16 +111,13 @@ export default function MeetingPageHeader() {
           className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
           onClick={toggleScreenRecording}
         >
-          {screenRecording 
-          ? 
-          <i className="fa-solid fa-circle-dot fa-lg text-red-500 animate-pulse"></i>
-          :
-          <i className="fa-solid fa-circle-dot fa-lg text-gray-500"></i>
-          }
-          
-          
-            {/* <i className="fa-solid fa-microphone-slash fa-lg"></i> */}
-          
+          {screenRecording ? (
+            <i className="fa-solid fa-circle-dot fa-lg text-red-500 animate-pulse"></i>
+          ) : (
+            <i className="fa-solid fa-circle-dot fa-lg text-gray-500"></i>
+          )}
+
+          {/* <i className="fa-solid fa-microphone-slash fa-lg"></i> */}
         </button>
 
         {/*
@@ -146,9 +143,7 @@ export default function MeetingPageHeader() {
         </button>
       </div>
 
-      {isHost && (
-        <MeetingPageHeaderTimer />
-      )}
+      {isHost && <MeetingPageHeaderTimer />}
     </header>
   );
 }
