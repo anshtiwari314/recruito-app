@@ -6,7 +6,7 @@ import ReduxProvider from "./store/Providers";
 import NotFoundPage from "./pages/NotFoundPage";
 import TempPage from './pages/TempPage'
 import Leave from "./pages/LeavePage";
-
+import TestWrapper from './context/TestWrapper'
 
 
 export default function App() {
@@ -18,7 +18,7 @@ export default function App() {
             
             {/* <Route path="/" element={<HomePage/>}/> */}
             {/* Main Page Route */}
-            <Route path="/" element={<MainPage/>} />
+            <Route path="/" element={<TestWrapper><MainPage/></TestWrapper>} />
             {/* 404 Page Route */}
             
             <Route path="/404" element={<NotFoundPage />} />

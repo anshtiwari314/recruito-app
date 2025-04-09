@@ -138,9 +138,7 @@ export default function DataWrapper({
   // const [users, setUsers] = useState<users[]>([]);
 
   const [myStream, setMyStream] = useState<MediaStream | null | boolean>(null);
-  const [myAudioStream, setMyAudioStream] = useState<
-    MediaStream | null | boolean
-  >(null);
+  const [myAudioStream, setMyAudioStream] = useState<MediaStream | null | boolean>(null);
 
   const videoStreamRef = useRef<MediaStream | null>(null);
   const audioStreamRef = useRef<MediaStream | null>(null);

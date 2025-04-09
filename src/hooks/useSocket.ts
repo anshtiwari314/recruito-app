@@ -1,0 +1,54 @@
+import { useEffect, useRef, useState } from "react";
+import { io } from "socket.io-client";
+
+const useSocket = (url, options = {}) => {
+  const socketRef = useRef(null);
+  const [isConnected, setIsConnected] = useState(false);
+
+  useEffect(() => {
+    // Create a new Socket.IO connection
+    const socket = io(url, options);
+    socketRef.current = socket;
+
+    // Event: Connection established
+    socket.on("connect", () => {
+      setIsConnected(true);
+      console.log("Socket connected:", socket.id);
+    });
+
+    // Event: Connection disconnected
+    socket.on("disconnect", () => {
+      setIsConnected(false);
+      console.log("Socket disconnected");
+    });
+
+    // Cleanup function to disconnect the socket
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+      }
+    };
+  }, [url, options]);
+
+  // Function to emit events
+  const emitEvent = (event, data) => {
+    if (socketRef.current) {
+      socketRef.current.emit(event, data);
+    }
+  };
+
+  // Function to listen to events
+  const onEvent = (event, callback) => {
+    if (socketRef.current) {
+      socketRef.current.on(event, callback);
+    }
+  };
+
+  return [
+    isConnected,
+    emitEvent,
+    onEvent,
+  ];
+};
+
+export default useSocket;

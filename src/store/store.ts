@@ -4,6 +4,7 @@ import queryparamReducer from "../reducers/queryparamReducer"
 import transcriptionReducer from "../reducers/transcriptionReducer"
 import usersReducer from "../reducers/usersReducer"
 import navigationparamReducer from "../reducers/navigationparamReducer"
+import myStateReducer from "../reducers/myStateReducer"
 import { type TypedUseSelectorHook, useSelector, useDispatch } from "react-redux"
 
 export const store = configureStore({
@@ -12,7 +13,8 @@ export const store = configureStore({
     qpReducer: queryparamReducer.qpReducer, 
     transcriptionReducer: transcriptionReducer.transcriptionReducer, 
     usersReducer: usersReducer.usersReducer,
-    nvReducer: navigationparamReducer.nvReducer
+    nvReducer: navigationparamReducer.nvReducer,
+    myStateReducer:myStateReducer.myStateReducer
 }})
 
 export type RootState = ReturnType<typeof store.getState>
