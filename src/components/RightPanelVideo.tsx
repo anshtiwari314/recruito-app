@@ -10,7 +10,12 @@ export function RightPanelVideo({e,muted}:{e:any,muted:boolean}) {
   const videoStream = e?.id ? getUserVideoStream(e.id) : null
   const audioStream = e?.id ? getUserAudioStream(e.id) : null
 
-  console.log("Streams from management system:", { id: e?.id, videoStream, audioStream })
+  console.log("Stream from the magement sys:",{
+    id:e?.id,
+    videoStream:videoStream?"YES":"NO",
+    audioStream:audioStream?"YES":"NO",
+  });
+  
 
   useEffect(() => {
     if (!hasLoggedStreams) {
@@ -24,12 +29,17 @@ export function RightPanelVideo({e,muted}:{e:any,muted:boolean}) {
     const vid = vidRef.current
     if (!vid || !e?.id) return
 
-    console.log(`Setting up video for user ${e.id}, camera available: ${e.isCameraAvailable}, stream:`, videoStream)
+console.log(`Setting up video for user ${e.id}, camera available: ${e.isCameraAvailable}, stream:`, 
+      videoStream ? "Present" : "null")
+
+   if (vid.srcObject) {
+      vid.srcObject = null
+    }
 
     if (videoStream instanceof MediaStream && e.isCameraAvailable) {
       console.log(`Setting srcObject for video element of user ${e.id}`)
       vid.srcObject = videoStream
-
+   
       function onLoaded() {
         console.log(`Video loaded for user ${e.id}, playing...`)
         vid.play().catch((err) => console.error("Error playing video:", err))

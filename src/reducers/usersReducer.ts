@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import {addNewUser,removeUser,updateUser,toggleCamera,setUserAudioStream,setUserStream,setUserVideoStream,toggleScreenSharing,toggleMicrophone, setUserLoading, updateUserAvailability, setAllUser} from '../functions/users'
+import {addNewUser,removeUser,updateUser,toggleCamera,setUserAudioStream,setUserStream,setUserVideoStream,toggleScreenSharing,toggleMicrophone, setUserLoading, updateUserAvailability, setAllUser, clearAllUsers} from '../functions/users'
 
 type UserType = {
     id: string;
@@ -45,7 +45,7 @@ type UserType = {
       toggleMicrophone,
       setUserLoading,
       updateUserAvailability,
-      setAllUser
+      setAllUser,clearAllUsers
     },
   });
 
@@ -64,6 +64,7 @@ type UserType = {
     setUserLoading: setUserLoadingAction,
     updateUserAvailability: updateUserAvailabilityAction,
     setAllUser:setAllUserActions,
+    clearAllUsers:clearAllUsersActions
   } = usersSlice.actions;
 
   export default {

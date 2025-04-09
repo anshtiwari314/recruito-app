@@ -9,6 +9,7 @@ import {
 import { useData } from "../context/DataWrapper";
 import MeetingPageHeaderTimer from "./MeetingPageHeaderTimer";
 import {
+  clearAllUsersActions,
   toggleCameraAction,
   toggleMicrophoneAction,
 } from "../reducers/usersReducer";
@@ -35,6 +36,7 @@ export default function MeetingPageHeader() {
       dispatch(setNVclosecall(true));
       dispatch(setNVaudioUploadAnimation(true));
       await stopVideoRecording();
+      dispatch(clearAllUsersActions());
       console.log("Closing the call...");
     }
   }
