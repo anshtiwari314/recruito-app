@@ -56,7 +56,10 @@ type UserType = {
     reducers: {
         updateMyState:()=>{
 
-        }
+        },
+         setId: (state, action: PayloadAction<string>) => {
+      state.id = action.payload
+    },
     //   toggleCamera,
     //   setUserAudioStream,
     //   setUserStream,
@@ -69,6 +72,6 @@ type UserType = {
     },
   });
 
-  export const { updateMyState } = myStateSlice.actions;
+  export const { updateMyState,setId } = myStateSlice.actions;
 
   export default {myStateReducer : myStateSlice.reducer } 

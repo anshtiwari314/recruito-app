@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 
-const useSocket = (url, options = {}) => {
+const useSocket = (
+  url: string,
+  options = {}
+): [boolean, (event: string, data: any) => void, (event: string, callback: (...args: any[]) => void) => void] => {
+  //coz it was cauisng issue so i mentioned the type 
   const socketRef = useRef(null);
   const [isConnected, setIsConnected] = useState(false);
 

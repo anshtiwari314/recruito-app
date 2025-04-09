@@ -1340,7 +1340,6 @@ console.log("iha aaye");
 
       usersArrRef.current.push(data);
       console.log("connected-usr-data", data);
-
      dispatch(addNewUserAction(data))
     }
 

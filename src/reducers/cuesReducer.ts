@@ -70,7 +70,7 @@ type CuesState = {
 //   CuesList: []
 // };
 
-let initialCuesState={
+export let initialCuesState={
   CuesList: [],
   jobDescription: '',
   interviewGuide: '',
