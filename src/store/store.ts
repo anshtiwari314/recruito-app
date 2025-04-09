@@ -12,8 +12,34 @@ export const store = configureStore({
     qpReducer: queryparamReducer.qpReducer, 
     transcriptionReducer: transcriptionReducer.transcriptionReducer, 
     usersReducer: usersReducer.usersReducer,
-    nvReducer: navigationparamReducer.nvReducer
-}})
+    nvReducer: navigationparamReducer.nvReducer,
+   
+},
+ middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [
+          "usersReducer/setUserStream",
+          "usersReducer/setUserAudioStream",
+          "usersReducer/setUserVideoStream",
+          "usersReducer/toggleCamera",
+          "usersReducer/updateUserAvailability",
+          "usersReducer/removeUser"
+        ],
+     
+        ignoredPaths: [
+          "usersReducer.0.stream",
+          "usersReducer.0.audioStream",
+          "usersReducer.0.videoStream",
+          "usersReducer.1.stream",
+          "usersReducer.1.audioStream",
+          "usersReducer.1.videoStream",
+          
+        ],
+      },
+    }),
+
+})
 
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch

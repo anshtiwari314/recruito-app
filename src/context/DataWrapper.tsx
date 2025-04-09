@@ -25,7 +25,6 @@ import {
   addTranscription,
   initialTranscriptionObj,
 } from "../reducers/transcriptionReducer";
-import { PostReq } from "../functions/requests";
 import {
   getTimestamp,
   gettingAudioStream,
@@ -552,30 +551,31 @@ console.log("iha aaye");
       .then((videoStream) => {
         console.log("553 line has been reaching ",videoStream);
         setMyStream(videoStream);
-        tempObj.videoStream = videoStream;
+        // tempObj.videoStream = videoStream;
         videoStreamRef.current = videoStream;
-        tempObj.isCameraAvailable = true;
-        tempObj.isAudioStream = false;
-           console.log(`Setting video stream for user ${myId} in DataWrapper`)
+        // tempObj.isCameraAvailable = true;
+        // tempObj.isAudioStream = false;
+           console.log(`559 video stream for user ${myId} in DataWrapper`)
         dispatch(updateUserAvailabilityAction({
           id: myId,
           isCameraAvailable: true,
         }))
         setUserStream(myId,videoStream);
         setUserVideoStream(myId,videoStream);
-        // dispatch(setUserVideoStreamAction({
-        //   id: myId,
-        //   videoStream: videoStream
-        // }))
-        // dispatch(setUserStreamAction({
-        //   id: myId,
-        //   stream:videoStream
-        // }))
+        dispatch(setUserVideoStreamAction({
+          id: myId,
+          videoStream: videoStream
+        }))
+        dispatch(setUserStreamAction({
+          id: myId,
+          stream:videoStream
+        }))
+        console.log("Video stream successfully set for user:", myId);
       })
       .catch((err) => {
         // let tempStream = new MediaStream()
         setMyStream(false);
-        tempObj.isCameraAvailable = false;
+        // tempObj.isCameraAvailable = false;
         tempObj.videoStream = false;
         console.log("camera permission", err);
         dispatch(
@@ -590,14 +590,14 @@ console.log("iha aaye");
     gettingAudioStream()
       .then((audioStream) => {
         setMyAudioStream(audioStream);
-        tempObj.audioStream = audioStream;
-        tempObj.isMicrophoneAvailable = true;
+        // tempObj.audioStream = audioStream;
+        // tempObj.isMicrophoneAvailable = true;
         audioStreamRef.current = audioStream;
         setUserAudioStream(myId,audioStream)
-        // dispatch(setUserAudioStreamAction({
-        //   id: myId,
-        //   audioStream: audioStream,
-        // }))
+        dispatch(setUserAudioStreamAction({
+          id: myId,
+          audioStream: audioStream,
+        }))
         dispatch(
           updateUserAvailabilityAction({
             id: myId,
@@ -621,9 +621,9 @@ console.log("iha aaye");
       })
       .catch((err) => {
         // let tempStream = new MediaStream()
-        setMyAudioStream(false);
-        tempObj.isMicrophoneAvailable = false;
-        tempObj.audioStream = false;
+        // setMyAudioStream(false);
+        // tempObj.isMicrophoneAvailable = false;
+        // tempObj.audioStream = false;
         console.log("microphone permission", err);
         dispatch(
           updateUserAvailabilityAction({
@@ -1369,7 +1369,7 @@ console.log("iha aaye");
 
       usersArrRef.current = usersArrRef.current.map((e: any, i: number) => {
         if (e.id === data.id) {
-          e.microphoneStatus = data.microphoneStatus;
+          // e.microphoneStatus = data.microphoneStatus;
         }
         return e;
       });
@@ -1522,18 +1522,18 @@ console.log("iha aaye");
             };
             setUserStream(usersArrRef.current[i].id,userVideoStream);
             setUserVideoStream(usersArrRef.current[i].id,userVideoStream)
-            // dispatch(
-            //   setUserStreamAction({
-            //     id:usersArrRef.current[i].id,
-            //     stream: userVideoStream,
-            //   })
-            // )
-            // dispatch(
-            //   setUserVideoStreamAction({
-            //     id: usersArrRef.current[i].id,
-            //     videoStream: userVideoStream,
-            //   })
-            // )
+            dispatch(
+              setUserStreamAction({
+                id:usersArrRef.current[i].id,
+                stream: userVideoStream,
+              })
+            )
+            dispatch(
+              setUserVideoStreamAction({
+                id: usersArrRef.current[i].id,
+                videoStream: userVideoStream,
+              })
+            )
             dispatch(
               setUserLoadingAction
               ({
@@ -1598,18 +1598,18 @@ console.log("iha aaye");
             };
                 setUserStream(call.peer, userVideoStream)
             setUserVideoStream(call.peer, userVideoStream)
-            // dispatch(
-            //   setUserStreamAction({
-            //     id:call.peer,
-            //     stream: userVideoStream,
-            //   })
-            // )
-            // dispatch(
-            //   setUserVideoStreamAction({
-            //     id: call.peer,
-            //     videoStream: userVideoStream,
-            //   })
-            // )
+            dispatch(
+              setUserStreamAction({
+                id:call.peer,
+                stream: userVideoStream,
+              })
+            )
+            dispatch(
+              setUserVideoStreamAction({
+                id: call.peer,
+                videoStream: userVideoStream,
+              })
+            )
             dispatch(
               setUserLoadingAction({
                 id: call.peer,
@@ -1671,12 +1671,12 @@ console.log("iha aaye");
               isLoading: false,
             };
               setUserAudioStream(usersArrRef.current[i].id, userAudioStream)
-            // dispatch(
-            //   setUserAudioStreamAction({
-            //     id:usersArrRef.current[i].id,
-            //     audioStream: userAudioStream,
-            //   })
-            // )
+            dispatch(
+              setUserAudioStreamAction({
+                id:usersArrRef.current[i].id,
+                audioStream: userAudioStream,
+              })
+            )
 
             dispatch(setUserLoadingAction({
               id: usersArrRef.current[i].id,

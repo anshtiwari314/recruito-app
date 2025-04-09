@@ -30,18 +30,19 @@ in line 576 it has been declared and has been used on lines
 1227 and this was done because user media has been intialialized been called during component will be mounting to set users camera 
 */
 
-export function gettingVideoStream(): Promise<MediaStream> {
-  console.log("Stream is triggered")
-  return navigator.mediaDevices.getUserMedia({
-    video: {
-      frameRate: {
-        ideal: 60,
-        min: 10,
+// utils/gettingVideoStream.ts
+  export function gettingVideoStream() {
+    return navigator.mediaDevices.getUserMedia({
+      video: {
+        frameRate: {
+          ideal: 60,
+          min: 10,
+        },
       },
-    },
-    audio: false,
-  });
-}
+      audio: false,
+    });
+  }
+
 
 /*
 declared on 587 used on 1244 [same as video stream ] used in useEffect for calling when mounting in action for users microPhone

@@ -11,7 +11,7 @@ export function logAllStreams() {
   console.log("All streams in userStreamsMap:")
   userStreamsMap.forEach((streams, userId) => {
     console.log(`User ${userId}:`, {
-      stream: streams.stream ? "Present" : "Not present",
+      stream: streams.stream ? streams : "Not present",
       videoStream: streams.videoStream ? "Present" : "Not present",
       audioStream: streams.audioStream ? "Present" : "Not present",
     })
