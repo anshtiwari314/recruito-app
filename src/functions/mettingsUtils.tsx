@@ -31,7 +31,7 @@ in line 576 it has been declared and has been used on lines
 */
 
 // utils/gettingVideoStream.ts
-  export function gettingVideoStream() {
+  export function gettingVideoStream():Promise<MediaStream> {
     return navigator.mediaDevices.getUserMedia({
       video: {
         frameRate: {

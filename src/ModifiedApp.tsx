@@ -7,6 +7,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import TempPage from './pages/TempPage'
 import Leave from "./pages/LeavePage";
 import TestWrapper from './context/TestWrapper'
+import SocketWrapper from "./context/SocketWrapper";
 
 
 export default function App() {

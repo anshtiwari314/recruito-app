@@ -1,11 +1,14 @@
 import React,{useRef,useEffect, useState} from "react"
 import { getUserAudioStream, getUserVideoStream, logAllStreams } from "../functions/userStream"
 import { useData } from "../context/DataWrapper"
+import { useTestWrapper } from "../context/TestWrapper"
 
 export function RightPanelVideo({e,muted}:{e:any,muted:boolean}) {
   console.log("RightPanelVideo props:", e)
   const [hasLoggedStreams, setHasLoggedStreams] = useState(false)
   const vidRef = useRef<any>(null)
+  // const val=useTestWrapper()
+  // console.log(val); for testing in UI 
 
   const videoStream = e?.id ? getUserVideoStream(e.id) : null
   const audioStream = e?.id ? getUserAudioStream(e.id) : null
