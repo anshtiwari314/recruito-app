@@ -1,5 +1,5 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import {addNewUser,removeUser,updateUser,toggleCamera,setUserAudioStream,setUserStream,setUserVideoStream,toggleScreenSharing,toggleMicrophone, setUserLoading, updateUserAvailability, setAllUser, clearAllUsers} from '../functions/users'
+import { createSlice, PayloadAction,current } from "@reduxjs/toolkit";
+import {addFirstUser,addNewUser,removeUser,updateUser,toggleCamera,setUserAudioStream,setUserStream,setUserVideoStream,toggleScreenSharing,toggleMicrophone, setUserLoading, updateUserAvailability, setAllUser, clearAllUsers} from '../functions/users'
 
 type UserType = {
     id: string;

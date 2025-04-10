@@ -55,7 +55,10 @@ type UserType = {
     initialState: myState,
     reducers: {
         updateMyState: (state, action) => {
-          Object.assign(state, action.payload);
+          // Object.assign(state, action.payload);
+          console.log('i am payload',state,action)
+          //state = {...action.payload}
+          return {...state ,...action.payload}
         },
 
          setId: (state, action: PayloadAction<string>) => {

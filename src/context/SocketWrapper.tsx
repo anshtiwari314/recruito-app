@@ -9,7 +9,7 @@ import { addCues, initialCuesObj, setCues, updateCues } from "../reducers/cuesRe
 
 
 
-const SocketWrapperContext = React.createContext('testWrapper')
+const SocketWrapperContext = React.createContext('socketWrapper')
 
 export function useSocketWrapper(){
     return useContext(SocketWrapperContext)
@@ -118,12 +118,12 @@ export default function SocketWrapper({children}){
 
         function handleUserChatReciver(data){
             console.log('user chat event',data);
-            dispatch(setChatHistory(data.chats));//unsure where to send this data in dataWrapper it was managed by useState and ref
+           // dispatch(setChatHistory(data.chats));//unsure where to send this data in dataWrapper it was managed by useState and ref
         }
 
         function handleReciveMsg(data){
             console.log('recive msg event',data);
-            dispatch(addChatHistory(data));//unsure where to send this data
+           // dispatch(addChatHistory(data));//unsure where to send this data
         }
 
         function handleCueLoadingReciver(data){

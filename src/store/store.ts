@@ -8,6 +8,17 @@ import myStateReducer from "../reducers/myStateReducer"
 import { type TypedUseSelectorHook, useSelector, useDispatch } from "react-redux"
 
 export const store = configureStore({
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        // Ignore these action types
+        ignoredActions: ["usersReducer/updateMyState"],
+        // Ignore these field paths in all actions
+        ignoredActionPaths: ['meta.arg', 'payload.timestamp'],
+        // Ignore these paths in the state
+        ignoredPaths: ['items.dates'],
+      },
+    }),
   reducer: {
     cuesReducer: cuesReducer.cuesReducer, 
     qpReducer: queryparamReducer.qpReducer, 

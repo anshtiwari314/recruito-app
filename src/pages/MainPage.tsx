@@ -12,7 +12,7 @@ import NotFound from "./NotFoundPage";
 import Leave from "./LeavePage";
 import MeetingPageHeader from "../components/MeetingPageHeader";
 
-export default function MainPage() {
+export function MainPage() {
   //@ts-ignore
   const { setMyId, setName } = useData();
   const { isHost, meetingIsLegit } = useAppSelector((state) => state.qpReducer);
@@ -223,3 +223,34 @@ export default function MainPage() {
 }
 
 
+
+export default function TempMainPage(){
+
+  const [isMobile, setIsMobile] = useState(false);
+  return (
+    <div className="overflow-y-auto w-screen min-h-screen relative bg-neutral-50" style={{height:'100vh',width:'100vw',overflow:'hidden'}}>
+            {/* App header */}
+            
+            <MeetingPageHeader/>
+
+            {/* Main Content */}
+            <main id="main-content" className="flex h-[calc(100vh-120px)]" 
+            style={{height:'90vh'}}
+            >
+              {/* Content Panel */}
+              <div
+                id="content-panel"
+                className="relative grow w-10/12 p-6 overflow-y-hidden"
+                style={{border:'0.1rem solid red'}}
+              >
+                
+                {/* <ContentPanel isMobile={isMobile} /> */}
+                {/**/}
+              </div>
+
+              {/* Right Panel */}
+              <RightPanel />
+            </main>
+          </div>
+  )
+}

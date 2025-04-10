@@ -23,94 +23,84 @@ export function useTestWrapper(){
 
 export default function TestWrapper({children}){
     const dispatch=useDispatch();
-    //as what has been mentioned in the DataWrapper.tsx   
-const [videoPeer,isVideoPeer_Connected,videoPeer_Connections,videoPeer_connectToPeer,peer1_sendToPeer] = usePeer(myState.id)
-const [audioPeer,isAudioPeer_Connected,audioPeer_Connections,audioPeer_connectToPeer,audioPeer_sendToPeer] = usePeer(myState.audioPeerId)
-const [screenPeer,isScreenPeer_Connected,screenPeer_Connections,screenPeer_connectToPeer,screenPeer_sendToPeer] = usePeer(myState.peer2Id)
-
+    //as what has been mentioned in the DataWrapper.tsx
+    
     const [users,myState] = useAppSelector((state)=>[state.usersReducer,state.myStateReducer])
+
+//const [videoPeer,isVideoPeer_Connected,videoPeer_Connections,videoPeer_connectToPeer,peer1_sendToPeer] = usePeer(myState.id)
+//const [audioPeer,isAudioPeer_Connected,audioPeer_Connections,audioPeer_connectToPeer,audioPeer_sendToPeer] = usePeer(myState.audioPeerId)
+//const [screenPeer,isScreenPeer_Connected,screenPeer_Connections,screenPeer_connectToPeer,screenPeer_sendToPeer] = usePeer(myState.peer2Id)
+
+    
     const {CuesList,jobDescription,interviewGuide,jobTitle}=useAppSelector((state)=>state.cuesReducer)
 
 
-    const handleStreamError = (streamName: string) => (err: any) => {
-    console.log(`Error init ${streamName} Stream`, err);
-    return null;
-    };
+    async function init(id:string){
+    
+    let tempUser = { ...UserTypeInitialLoadState };
+    tempUser.id = id
+    tempUser.audioPeerId = uuidv4();
+    tempUser.peer2Id = uuidv4();
+    
+    try{
+        let videoStream = await gettingVideoStream()
+        let audioStream = await gettingAudioStream()
 
+        if(videoStream){
+            tempUser.videoStream = videoStream
+            tempUser.isCameraAvailable = true
+        }else{
+            tempUser.videoStream = false
+            tempUser.isCameraAvailable = false
+        }
+        if(audioStream){
+            tempUser.audioStream = audioStream 
+            tempUser.isMicrophoneAvailable = true
+        }else{
+            tempUser.audioStream = false
+            tempUser.isMicrophoneAvailable = false
+        }
+    }catch(err){
+        console.log('err in try catch block',err)
+    }finally{
+        dispatch(updateMyState(tempUser))
+        dispatch(addNewUserAction(tempUser))
+    }
+        
+    }
+    
     // initialise to myState 
    useEffect(() => {
-        async function initMedia() {
-        let tempUser = { ...UserTypeInitialLoadState };
-        tempUser.id = uuidv4();
-        tempUser.audioPeerId = uuidv4();
-        tempUser.peer2Id = uuidv4();
 
-        try {
-        const [videoStream, audioStream,screenStream] = await Promise.all([
-            gettingVideoStream()
-            .then((stream) => {
-                console.log("Video Stream Properly Coming");
-                return stream;
-            })
-            .catch(handleStreamError("Video")),
-
-            gettingAudioStream()
-            .then((stream) => {
-                console.log("Audio Stream Properly Coming");
-                return stream;
-            })
-            .catch(handleStreamError("Audio")),
-            
-            gettingScreenStream()
-            .then((stream) => {
-                console.log("Screen Stream Properly Coming");
-                return stream;
-            })
-            .catch(handleStreamError("screen"))
-        ]);
-         if(videoStream){
-            tempUser.videoStream=videoStream;
-            tempUser.stream=videoStream;
-            tempUser.isCameraAvailable=true;
-            console.log(`Video Stream Init for user ${tempUser.id}`);
-         }else{
-            tempUser.isCameraAvailable=false;
-         }
-
-         if(audioStream){
-            tempUser.audioStream=audioStream;
-            tempUser.isMicrophoneAvailable=true;
-            const audioTrack=audioStream.getAudioTracks();
-            if(audioTrack.length>0){
-                audioTrack[0].enabled=true;
-                tempUser.microphoneStatus=true;   
-            }
-            console.log(`Audio Stream Init for user ${tempUser.id}`);
-          }else{
-            tempUser.isMicrophoneAvailable=false;
-            }
-           
-            if(screenStream){
-                tempUser.isScreenSharingEnabled=true;
-                tempUser.containsScreenStream=true;
-            }else{
-                tempUser.isScreenSharingEnabled=false;
-                tempUser.isScreenSharingEnabled=false;
-            }
-
-            console.log("[Debug] Streams intitlailized  properly");
-
-            console.log("[Debug] the value of tempUser ",tempUser ,"  the val of UserTypeInitialLoadState ",UserTypeInitialLoadState);
-            
-            dispatch(updateMyState(tempUser));
-
-        } catch (error) {
-        console.log("Error in Init of Either Stream", error);
-        }
+    let id = uuidv4()
+    init(id)
+    
+    return ()=> {
+        
+        dispatch(removeUserAction(id))
     }
-  initMedia();
-}, []);
+    }, []);
  //this all is made in a sense that it will be stored in myState so dispatched to reducers meant in myState.
+
+    
+    
+    useEffect(()=>{
+        console.log('users',users)
+        if(users.length===0)
+            return ;
+        
+    
+        // let timeOutId = setTimeout(()=>{
+        //     console.log('time out runs')
+        //     dispatch(removeUserAction( users[0].id))
+        // },5000)
+
+        // return ()=>clearTimeout(timeOutId)
+    },[users])
+
+    useEffect(()=>{
+        console.log(myState)
+    },[myState])
 
     let values =  {
         users,

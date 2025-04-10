@@ -14,12 +14,12 @@ export default function App() {
   return (
     <Router>
         <ReduxProvider >
-        <DataWrapper>
+        {/* <DataWrapper> */}
           <Routes>
             
             {/* <Route path="/" element={<HomePage/>}/> */}
             {/* Main Page Route */}
-            <Route path="/" element={<TestWrapper><SocketWrapper><MainPage/></SocketWrapper></TestWrapper>} />
+            <Route path="/" element={<TestWrapper><MainPage/></TestWrapper>} />
             {/* 404 Page Route */}
             
             <Route path="/404" element={<NotFoundPage />} />
@@ -32,7 +32,7 @@ export default function App() {
             {/* Catch-all Route for undefined paths */}
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
-          </DataWrapper>
+          {/* </DataWrapper> */}
      
         </ReduxProvider>
     </Router>
