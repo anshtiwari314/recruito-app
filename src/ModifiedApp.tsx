@@ -18,7 +18,7 @@ export default function App() {
             
             {/* <Route path="/" element={<HomePage/>}/> */}
             {/* Main Page Route */}
-            <Route path="/" element={<TestWrapper><MainPage/></TestWrapper>} />
+            <Route path="/" element={<TestWrapper><SocketWrapper><MainPage/></SocketWrapper></TestWrapper>} />
             {/* 404 Page Route */}
             
             <Route path="/404" element={<NotFoundPage />} />

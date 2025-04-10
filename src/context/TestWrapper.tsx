@@ -2,16 +2,21 @@
 
 import { useSelector } from "react-redux";
 import useSocket from "../hooks/useSocket";
+import usePeer from "../hooks/usePeer";
 import React,{ createContext, useContext, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useAppSelector } from "../store/store";
 import { useDispatch } from "react-redux";
-import { setId } from "../reducers/myStateReducer";
+import { setId,UserTypeInitialLoadState } from "../reducers/myStateReducer";
 import { removeUser, toggleCamera } from "../functions/users";
 import { addNewUserAction, removeUserAction, toggleCameraAction, toggleMicrophoneAction } from "../reducers/usersReducer";
 import { addTranscription, initialTranscriptionObj } from "../reducers/transcriptionReducer";
 import { addCues, initialCuesObj, setCues, updateCues } from "../reducers/cuesReducer";
-
+import {
+    getTimestamp,
+    gettingAudioStream,
+    gettingScreenStream,
+    gettingVideoStream} from "../functions/mettingsUtils";
 
 const TestWrapperContext = React.createContext('testWrapper')
 
@@ -26,20 +31,27 @@ export default function TestWrapper({children}){
     const socket2Url='wss://recruito.vitti.insure';
     const [isSocket1_Connected,socket1_emitEvent,socket1_onEvent] = useSocket(socket1Url)
     const [isSocket2_Connected,socket2_emitEvent,socket2_onEvent] = useSocket(socket2Url)
+    
+    const [videoPeer,isVideoPeer_Connected,videoPeer_Connections,videoPeer_connectToPeer,peer1_sendToPeer] = usePeer(myState.id)
+    const [audioPeer,isAudioPeer_Connected,audioPeer_Connections,audioPeer_connectToPeer,audioPeer_sendToPeer] = usePeer(myState.audioPeerId)
+    const [screenPeer,isScreenPeer_Connected,screenPeer_Connections,screenPeer_connectToPeer,screenPeer_sendToPeer] = usePeer(myState.peer2Id)
+
     const [users,myState] = useAppSelector((state)=>[state.usersReducer,state.myStateReducer])
     const {CuesList,jobDescription,interviewGuide,jobTitle}=useAppSelector((state)=>state.cuesReducer)
 
     // initialise to myState 
     useEffect(()=>{
+        let tempUser = {...UserTypeInitialLoadState}
         // initialising id
-        const id=uuidv4()
-        dispatch(setId(id));
-
+        tempUser.id = uuidv4()
+        
         const peer2Id=uuidv4()
         dispatch(setPeer2Id(peer2Id))
 
         const audioPeerId=uuidv4()
         dispatch(setAudioPeerId(audioPeerId))
+
+
         //initialise videoStream 
         navigator.mediaDevices.getUserMedia({video:true})
         .then((videoStream)=>{
@@ -70,7 +82,9 @@ export default function TestWrapper({children}){
             dispatch(setAudioStream(false));
             console.log("MicroPhone error occured or permision denied",err);
         })
-    },[dispatch]) //this all is made in a sense that it will be stored in myState so dispatched to reducers meant in myState.
+
+        dispatch()
+    },[]) //this all is made in a sense that it will be stored in myState so dispatched to reducers meant in myState.
 
     //define socket1 & socket2 onEvents here 
     useEffect(()=>{

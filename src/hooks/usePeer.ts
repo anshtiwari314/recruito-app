@@ -75,13 +75,13 @@ const usePeer = (peerId = null, options = {}) => {
     }
   };
 
-  return {
-    peer: peerRef.current,
+  return [
+    peerRef.current,
     isConnected,
     connections,
     connectToPeer,
     sendToPeer,
-  };
+  ]
 };
 
 export default usePeer;

@@ -25,7 +25,7 @@ type UserType = {
     containsScreenStream: boolean;
   };
 
-  const UserTypeInitialLoadState = {
+  export const UserTypeInitialLoadState = {
     id: '',
     peer2Id: '',
     audioPeerId: '',
@@ -54,8 +54,8 @@ type UserType = {
     name: "usersReducer",
     initialState: myState,
     reducers: {
-        updateMyState:()=>{
-
+        updateMyState:(state,action)=>{
+          
         },
          setId: (state, action: PayloadAction<string>) => {
       state.id = action.payload
