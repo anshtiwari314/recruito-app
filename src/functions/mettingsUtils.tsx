@@ -1,8 +1,8 @@
 
 import { io } from "socket.io-client";
 import { PostReq } from "./requests";
-const socket = io("wss://recruitonodesocket.vitti.insure"); 
-const socket2=io("wss://recruito.vitti.insure");
+// const socket = io("wss://recruitonodesocket.vitti.insure"); 
+// const socket2=io("wss://recruito.vitti.insure");
 //funcationalties that are absoluetly feels redundant aahgh 
 
 export function getTimestamp(){

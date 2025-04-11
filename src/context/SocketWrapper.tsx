@@ -19,12 +19,36 @@ export default function SocketWrapper({children}){
     const dispatch=useDispatch();
 
     const socket1Url='wss://recruitonodesocket.vitti.insure';
+    const socket1Url2 = 'https://vitt-jarvis-node-production.up.railway.app/'
+    const socket1Url3 = 'http://localhost:3005'
+
     const socket2Url='wss://recruito.vitti.insure';
-    const [isSocket1_Connected,socket1_emitEvent,socket1_onEvent,socket1_offEvent] = useSocket(socket1Url)
-    const [isSocket2_Connected,socket2_emitEvent,socket2_onEvent,socket2_offEvent] = useSocket(socket2Url)
+    const socket2Url2 = null
+    
+    const options = {
+        reconnection: false,
+        reconnectionAttempts: 5, // Number of retries before giving up
+        reconnectionDelay: 1000, // Time between retries (in ms)
+      };
+
+    const [isSocket1_Connected,socket1_emitEvent,socket1_onEvent,socket1_offEvent] = useSocket(socket1Url3,options,socketConnectedFirstTime)
+    //const [isSocket2_Connected,socket2_emitEvent,socket2_onEvent,socket2_offEvent] = useSocket(socket2Url2)
     const [users,myState] = useAppSelector((state)=>[state.usersReducer,state.myStateReducer])
     const {CuesList,jobDescription,interviewGuide,jobTitle}=useAppSelector((state)=>state.cuesReducer)
 
+    function socketConnectedFirstTime(){
+        console.log('socketConnectedFirstTime')
+    // share details of myState to others participants only once
+     
+    }
+
+    function socket2_onEvent(){
+
+    }
+
+    useEffect(()=>{
+        console.log('socket1',isSocket1_Connected)
+    },[isSocket1_Connected])
 
     useEffect(()=>{
             //socket 1 event handler 
@@ -207,52 +231,52 @@ export default function SocketWrapper({children}){
             console.log("recruiter notes response event", data)
         }
 
-        socket1_onEvent("user-connected", handleUserConnected)
-        socket1_onEvent("user-disconnected", handleUserDisconected)
-        socket1_onEvent("tab-close-remove-video", handleTabCloseRemoveVideo)
-        socket1_onEvent("to-leave-page-receiver", handleToLeavePageReciver)
-        socket1_onEvent("camera-toggle-receiver", handleCameraToggle)
-        socket1_onEvent("microphone-toggle-receiver", handleMicroPhoneToggle)
-        socket1_onEvent("receive-connected-user-data", handleUserData)
-        socket1_onEvent("screen-share-receiver", handleScreenShareReciver)
-        socket1_onEvent("screen-share-end-receiver", handleScreenShareEndReciver)
-        socket1_onEvent("single-screen-share-receiver", handleSingleScreenShareReceiver)
-        socket1_onEvent("user-chat-receiver", handleUserChatReciver)
-        socket1_onEvent("receive-msg", handleReciveMsg)
-        socket1_onEvent("cue-loading-receiver", handleCueLoadingReciver)
+        // socket1_onEvent("user-connected", handleUserConnected)
+        // socket1_onEvent("user-disconnected", handleUserDisconected)
+        // socket1_onEvent("tab-close-remove-video", handleTabCloseRemoveVideo)
+        // socket1_onEvent("to-leave-page-receiver", handleToLeavePageReciver)
+        // socket1_onEvent("camera-toggle-receiver", handleCameraToggle)
+        // socket1_onEvent("microphone-toggle-receiver", handleMicroPhoneToggle)
+        // socket1_onEvent("receive-connected-user-data", handleUserData)
+        // socket1_onEvent("screen-share-receiver", handleScreenShareReciver)
+        // socket1_onEvent("screen-share-end-receiver", handleScreenShareEndReciver)
+        // socket1_onEvent("single-screen-share-receiver", handleSingleScreenShareReceiver)
+        // socket1_onEvent("user-chat-receiver", handleUserChatReciver)
+        // socket1_onEvent("receive-msg", handleReciveMsg)
+        // socket1_onEvent("cue-loading-receiver", handleCueLoadingReciver)
 
 
-        socket2_onEvent("live_transcription_res", handleLiveTranscriptions)
-        socket2_onEvent("questions_loader_res", handleJobDetails)
-        socket2_onEvent("ai_suggestion_res", handleLiveQna)
-        socket2_onEvent("recruiter_notes_res", handleRecruiterNotesRes)
+        // socket2_onEvent("live_transcription_res", handleLiveTranscriptions)
+        // socket2_onEvent("questions_loader_res", handleJobDetails)
+        // socket2_onEvent("ai_suggestion_res", handleLiveQna)
+        // socket2_onEvent("recruiter_notes_res", handleRecruiterNotesRes)
 
-        if (isSocket1_Connected && myState.id) {
-            socket1_emitEvent('join-room', {
-                roomId: myState.roomId || "default-room",
-                userId: myState.id
-            });
-        }
-        return () =>{
-        socket1_offEvent("user-connected", handleUserConnected)
-        socket1_offEvent("user-disconnected", handleUserDisconected)
-        socket1_offEvent("tab-close-remove-video", handleTabCloseRemoveVideo)
-        socket1_offEvent("to-leave-page-receiver", handleToLeavePageReciver)
-        socket1_offEvent("camera-toggle-receiver", handleCameraToggle)
-        socket1_offEvent("microphone-toggle-receiver", handleMicroPhoneToggle)
-        socket1_offEvent("receive-connected-user-data", handleUserData)
-        socket1_offEvent("screen-share-receiver", handleScreenShareReciver)
-        socket1_offEvent("screen-share-end-receiver", handleScreenShareEndReciver)
-        socket1_offEvent("single-screen-share-receiver", handleSingleScreenShareReceiver)
-        socket1_offEvent("user-chat-receiver", handleUserChatReciver)
-        socket1_offEvent("receive-msg", handleReciveMsg)
-        socket1_offEvent("cue-loading-receiver", handleCueLoadingReciver)
+        // if (isSocket1_Connected && myState.id) {
+        //     socket1_emitEvent('join-room', {
+        //         roomId: myState.roomId || "default-room",
+        //         userId: myState.id
+        //     });
+        // }
+        // return () =>{
+        // socket1_offEvent("user-connected", handleUserConnected)
+        // socket1_offEvent("user-disconnected", handleUserDisconected)
+        // socket1_offEvent("tab-close-remove-video", handleTabCloseRemoveVideo)
+        // socket1_offEvent("to-leave-page-receiver", handleToLeavePageReciver)
+        // socket1_offEvent("camera-toggle-receiver", handleCameraToggle)
+        // socket1_offEvent("microphone-toggle-receiver", handleMicroPhoneToggle)
+        // socket1_offEvent("receive-connected-user-data", handleUserData)
+        // socket1_offEvent("screen-share-receiver", handleScreenShareReciver)
+        // socket1_offEvent("screen-share-end-receiver", handleScreenShareEndReciver)
+        // socket1_offEvent("single-screen-share-receiver", handleSingleScreenShareReceiver)
+        // socket1_offEvent("user-chat-receiver", handleUserChatReciver)
+        // socket1_offEvent("receive-msg", handleReciveMsg)
+        // socket1_offEvent("cue-loading-receiver", handleCueLoadingReciver)
 
-        socket2_offEvent("live_transcription_res", handleLiveTranscriptions)
-        socket2_offEvent("questions_loader_res", handleJobDetails)
-        socket2_offEvent("ai_suggestion_res", handleLiveQna)
-        socket2_offEvent("recruiter_notes_res", handleRecruiterNotesRes)
-        }
+        // socket2_offEvent("live_transcription_res", handleLiveTranscriptions)
+        // socket2_offEvent("questions_loader_res", handleJobDetails)
+        // socket2_offEvent("ai_suggestion_res", handleLiveQna)
+        // socket2_offEvent("recruiter_notes_res", handleRecruiterNotesRes)
+        // }
     },[socket1_onEvent,socket2_onEvent,socket1_emitEvent,isSocket1_Connected]);
     
    const handleToggleCamera=()=>{
@@ -294,9 +318,9 @@ export default function SocketWrapper({children}){
   }
    let values =  {
         isSocket1_Connected,
-        isSocket2_Connected,
+        //isSocket2_Connected,
         socket1_emitEvent,
-        socket2_emitEvent,
+        //socket2_emitEvent,
         toggleCamera:handleToggleCamera,
         toggleMicrophone:handleToggleMicrophone,
     }

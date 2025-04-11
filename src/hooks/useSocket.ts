@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
+import { v4 as uuidv4 } from "uuid";
 
 const useSocket = (
   url: string,
-  options = {}
-): [
+  options = {},
+  socketConnectedFirstTime
+  ): [
   boolean,
   (event: string, data: any) => void,
   (event: string, callback: (...args: any[]) => void) => void,
@@ -13,22 +15,45 @@ const useSocket = (
   //coz it was cauisng issue so i mentioned the type
   const socketRef = useRef<any>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const countRef = useRef(0)
+  const firstTimeConnect  = useRef(false)
+  
+  
+  
+
+  useEffect(()=>{
+    console.log('url in usesocket get changed',url)
+  },[url,options])
 
   useEffect(() => {
+    // if(socketRef.current)
+    //   return ;
     // Create a new Socket.IO connection
     const socket = io(url, options);
     socketRef.current = socket;
 
     // Event: Connection established
     socket.on("connect", () => {
-      setIsConnected(true);
       console.log("Socket connected:", socket.id);
+     // setIsConnected(true);
+
+     socket.emit('connected',uuidv4(),uuidv4())
+     // join room every time 
+     
+    
+      if(firstTimeConnect.current===false){
+        firstTimeConnect.current = true
+        socketConnectedFirstTime()
+      }
+        
+      
     });
 
     // Event: Connection disconnected
     socket.on("disconnect", () => {
-      setIsConnected(false);
-      console.log("Socket disconnected");
+      
+      console.log("Socket disconnected",socket.id);
+      //setIsConnected(false);
     });
 
     // Cleanup function to disconnect the socket
@@ -60,7 +85,7 @@ const useSocket = (
     }
   };
 
-  return [isConnected, emitEvent, onEvent, offEvent];
+  return [isConnected, emitEvent, onEvent, offEvent,firstTimeConnect.current];
 };
 
 export default useSocket;
