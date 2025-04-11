@@ -3,7 +3,7 @@
 import { useSelector } from "react-redux";
 import useSocket from "../hooks/useSocket";
 import usePeer from "../hooks/usePeer";
-import React,{ createContext, useContext, useEffect } from "react";
+import React,{ createContext, useContext, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useAppSelector } from "../store/store";
 import { useDispatch } from "react-redux";
@@ -65,36 +65,33 @@ export default function TestWrapper({children}){
     }finally{
         dispatch(updateMyState(tempUser))
         dispatch(addNewUserAction(tempUser))
+    }   
     }
-        
-    }
-    
     // initialise to myState 
    useEffect(() => {
 
-    let id = uuidv4()
+    let id:string = uuidv4()
+    
     init(id)
     
     return ()=> {
-        
-        dispatch(removeUserAction(id))
+        dispatch(removeUserAction({id}))
+        //seems like its working now .
     }
     }, []);
  //this all is made in a sense that it will be stored in myState so dispatched to reducers meant in myState.
 
     
-    
+    const [cnt,setCnt]=useState(0);
     useEffect(()=>{
-        console.log('users',users)
+        console.log('[DEBUG-USER]',users)
         if(users.length===0)
             return ;
-        
-    
-        // let timeOutId = setTimeout(()=>{
-        //     console.log('time out runs')
-        //     dispatch(removeUserAction( users[0].id))
-        // },5000)
-
+        let timeOutId = setTimeout(()=>{
+            setCnt((cnt)=>cnt+1)
+            console.log('time out runs',cnt)
+            dispatch(removeUserAction( {id:users[0].id}))
+        },5000)
         // return ()=>clearTimeout(timeOutId)
     },[users])
 

@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { v4 as uuidv4 } from "uuid";
 
-type CuesDataType = {
+export type CuesDataType = {
   id?: string | null;
   color?: string;
   content?: string;

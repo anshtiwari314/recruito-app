@@ -11,17 +11,19 @@ export function addNewUser(state: UsersType, action: PayloadAction<UserType>) {
          break; 
       }
    }
+   
    if (!userExist) {
-      state.push(action.payload);
-      console.log("haha",action);
-      console.log("added");
+     state.push(action.payload);
+     console.log("[DEBUGGER]","USER ADDED");
    }
 }
 
 export function removeUser(state: UsersType, action: PayloadAction<{id:string}>) {
     //with the extracted id provided to me i will match and exclude it from the state of UserType array
-    console.log("User is about to get removed",state.filter((user) => user.id !== action.payload.id));
-    return state.filter((user) => user.id !== action.payload.id);
+    // console.log("User is about to get removed",state.filter((user) => user.id !== action.payload.id));
+    console.log("[DEBUG-DELETE]I am Deleting The User ");
+    
+     return state.filter((user) => user.id !== action.payload.id);
 }
 
 export function updateUser(state: UsersType, action: PayloadAction<UserType>) {

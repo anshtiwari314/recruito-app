@@ -4,9 +4,14 @@ import { io } from "socket.io-client";
 const useSocket = (
   url: string,
   options = {}
-): [boolean, (event: string, data: any) => void, (event: string, callback: (...args: any[]) => void) => void] => {
-  //coz it was cauisng issue so i mentioned the type 
-  const socketRef = useRef(null);
+): [
+  boolean,
+  (event: string, data: any) => void,
+  (event: string, callback: (...args: any[]) => void) => void,
+  (event: string, callback: (...args: any[]) => void) => void
+] => {
+  //coz it was cauisng issue so i mentioned the type
+  const socketRef = useRef<any>(null);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
@@ -48,11 +53,14 @@ const useSocket = (
     }
   };
 
-  return [
-    isConnected,
-    emitEvent,
-    onEvent,
-  ];
+  //function to stop listening to an event
+  const offEvent = (event, callback) => {
+    if (socketRef.current) {
+      socketRef.current.off(event, callback);
+    }
+  };
+
+  return [isConnected, emitEvent, onEvent, offEvent];
 };
 
 export default useSocket;

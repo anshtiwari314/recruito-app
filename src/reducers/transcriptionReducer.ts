@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { v4 as uuidv4 } from "uuid";
 
-type TranscriptionDataType = {
+export type TranscriptionDataType = {
   id?: string | null;
   speaker?: string;
   transcription?: string;
@@ -9,7 +9,7 @@ type TranscriptionDataType = {
   isCandidate: boolean;
 };
 
-type TranscriptionState = {
+export type TranscriptionState = {
   TranscriptionList: Array<TranscriptionDataType>;
 };
 
