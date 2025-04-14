@@ -12,9 +12,9 @@ export const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: {
         // Ignore these action types
-        ignoredActions: ["usersReducer/updateMyState"],
+        ignoredActions: ["usersReducer/updateMyState","usersReducers/toggleCamera"],
         // Ignore these field paths in all actions
-        ignoredActionPaths: ['meta.arg', 'payload.timestamp'],
+        ignoredActionPaths: ['meta.arg', 'payload.timestamp','payload.videoStream','usersReducer.1.videoStream'],
         // Ignore these paths in the state
         ignoredPaths: ['items.dates'],
       },

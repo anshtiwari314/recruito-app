@@ -8,22 +8,23 @@ const useSocket = (
   socketConnectedFirstTime
   ): [
   boolean,
-  (event: string, data: any) => void,
+  (event: string, ...args: any) => void,
   (event: string, callback: (...args: any[]) => void) => void,
-  (event: string, callback: (...args: any[]) => void) => void
+  (event: string, callback: (...args: any[]) => void) => void,
+  boolean
 ] => {
   //coz it was cauisng issue so i mentioned the type
   const socketRef = useRef<any>(null);
   const [isConnected, setIsConnected] = useState(false);
   const countRef = useRef(0)
   const firstTimeConnect  = useRef(false)
-  
-  
-  
+
+
 
   useEffect(()=>{
     console.log('url in usesocket get changed',url)
   },[url,options])
+
 
   useEffect(() => {
     // if(socketRef.current)
@@ -34,7 +35,7 @@ const useSocket = (
 
     // Event: Connection established
     socket.on("connect", () => {
-      console.log("Socket connected:", socket.id);
+      console.log("Socket connected:", socket);
      // setIsConnected(true);
 
      socket.emit('connected',uuidv4(),uuidv4())
@@ -46,7 +47,6 @@ const useSocket = (
         socketConnectedFirstTime()
       }
         
-      
     });
 
     // Event: Connection disconnected
@@ -62,12 +62,16 @@ const useSocket = (
         socketRef.current.disconnect();
       }
     };
-  }, [url, options]);
+  }, [url, options,socketConnectedFirstTime]);
 
   // Function to emit events
-  const emitEvent = (event, data) => {
+  const emitEvent = (event:string, ...args:any[]) => {
     if (socketRef.current) {
-      socketRef.current.emit(event, data);
+      console.log("Emiited->|<");
+      
+      socketRef.current.emit(event, ...args);
+    }else{
+      console.log('socket not connected,cnat emit',event);
     }
   };
 
@@ -81,6 +85,7 @@ const useSocket = (
   //function to stop listening to an event
   const offEvent = (event, callback) => {
     if (socketRef.current) {
+
       socketRef.current.off(event, callback);
     }
   };

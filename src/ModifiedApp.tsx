@@ -8,6 +8,7 @@ import TempPage from './pages/TempPage'
 import Leave from "./pages/LeavePage";
 import TestWrapper from './context/TestWrapper'
 import SocketWrapper from "./context/SocketWrapper";
+import HomePage from "./pages/old-HomePage";
 
 
 export default function App() {
@@ -19,16 +20,25 @@ export default function App() {
             
             {/* <Route path="/" element={<HomePage/>}/> */}
             {/* Main Page Route */}
-            <Route path="/" element={<SocketWrapper><MainPage/></SocketWrapper>} />
+           
+           <Route path="/" element={<HomePage />} /> 
+           {/* this is the home page maybe in fture desigen need to change of it [maybe asking for name or email] */}
+           <Route path="/meeting.html"
+                  element={
+                      <TestWrapper>
+
+                      <SocketWrapper>
+                        <MainPage />
+                      </SocketWrapper>
+                      </TestWrapper>
+                        }
+                    />
             {/* 404 Page Route */}
             
             <Route path="/404" element={<NotFoundPage />} />
-            
             <Route path="/temp" element={<TempPage/>}/> 
-
             <Route path="/leave" element={<Leave />}/>
             <Route path="/test" element={<Leave />}/>
-
             {/* Catch-all Route for undefined paths */}
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

@@ -61,8 +61,7 @@ export default function HomePage() {
             console.log('error in verifying mobile',err)
             //meetingBtn.disabled = false
         })
-
-        setLink(`${window.location.protocol}//${window.location.host}/meeting.html?room_id=${roomId}&cust_id=${custId}&mob=${mobile}`)
+                                                                                    setLink(`${window.location.protocol}//${window.location.host}/meeting.html/?room_id=abc-123-fgh-456&cust_email_id=saurabhahlawat89@gmail.com&agent_id=1234&job_id=1`)//since we are not needing ny phone no i directly used the link we were using already 
    }
 
    function join(){

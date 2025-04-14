@@ -15,6 +15,8 @@ export function addNewUser(state: UsersType, action: PayloadAction<UserType>) {
    if (!userExist) {
      state.push(action.payload);
      console.log("[DEBUGGER]","USER ADDED");
+   }else{
+    console.log("[DEBUGGER]","USER ALREADY EXISTS");
    }
 }
 

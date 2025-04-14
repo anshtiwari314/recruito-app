@@ -20,7 +20,7 @@ export default function SocketWrapper({children}){
 
     const socket1Url='wss://recruitonodesocket.vitti.insure';
     const socket1Url2 = 'https://vitt-jarvis-node-production.up.railway.app/'
-    const socket1Url3 = 'http://localhost:3005'
+    const socket1Url3 = 'http://localhost:3002'
 
     const socket2Url='wss://recruito.vitti.insure';
     const socket2Url2 = null
@@ -33,13 +33,55 @@ export default function SocketWrapper({children}){
 
     const [isSocket1_Connected,socket1_emitEvent,socket1_onEvent,socket1_offEvent] = useSocket(socket1Url3,options,socketConnectedFirstTime)
     //const [isSocket2_Connected,socket2_emitEvent,socket2_onEvent,socket2_offEvent] = useSocket(socket2Url2)
+
+    //note***->need to do something memoization of it since it was giving error of rerendering.
     const [users,myState] = useAppSelector((state)=>[state.usersReducer,state.myStateReducer])
     const {CuesList,jobDescription,interviewGuide,jobTitle}=useAppSelector((state)=>state.cuesReducer)
 
     function socketConnectedFirstTime(){
         console.log('socketConnectedFirstTime')
-    // share details of myState to others participants only once
-     
+       // share details of myState to others participants only once
+        const roomId = myState?.roomId || "default-room";
+        const userId = myState?.id;
+        console.log("[Debug-user-id]",userId);
+    // if (!userId) {
+    //     console.error("User ID not found in myState!");
+    //     return;
+    // }
+
+  // Room join will be done as- iwll be listen on bckend on on-'join-room'.
+  //picked this from newUser fxn.
+    socket1_emitEvent("join-room", {roomId, userId});
+    if (users && Object.keys(users).length > 0) {
+        Object.keys(users).forEach((peerId) => {
+        if (peerId !== userId) {
+            const data = {
+            toPeer: peerId,
+            userData: {
+            ...myState,
+            stream: null,
+            videoStream: null,
+            audioStream: null,
+            toPeer:peerId,
+            peer2Id:myState?.peer2Id,
+            audioPeerId:myState?.audioPeerId,
+            isLoading:false,
+            count:1,
+            }
+            };
+            socket1_emitEvent("connected-user-data", data);
+        }
+        });
+    }
+    dispatch(addNewUserAction(myState));
+     //now if we want to gain knowldege about other users 
+    socket1_onEvent('receive-connected-user-data', (data,tarId) => {
+        if(tarId!==myState.id)return;//if this was not meant for me return;
+        console.log('got knowldege of already connected user:', data)
+        dispatch(addNewUserAction(data));
+    })
+    console.log("[DEBUG-Line]Is it reaching here??");
+    
     }
 
     function socket2_onEvent(){

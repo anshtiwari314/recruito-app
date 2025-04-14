@@ -61,7 +61,7 @@ export default function TestWrapper({children}){
             tempUser.isMicrophoneAvailable = false
         }
     }catch(err){
-        console.log('err in try catch block',err)
+        console.log('err in try catch block',err,err.message)
     }finally{
         dispatch(updateMyState(tempUser))
         dispatch(addNewUserAction(tempUser))
