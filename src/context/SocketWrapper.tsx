@@ -6,6 +6,7 @@ import { addNewUserAction, removeUserAction, toggleCameraAction, toggleMicrophon
 import { removeUser } from "../functions/users";
 import { addTranscription, initialTranscriptionObj, TranscriptionDataType, TranscriptionState } from "../reducers/transcriptionReducer";
 import { addCues, CuesDataType, initialCuesObj, setCues, updateCues } from "../reducers/cuesReducer";
+import queryparamReducer from "../reducers/queryparamReducer";
 
 
 
@@ -38,51 +39,51 @@ export default function SocketWrapper({children}){
     const [users,myState] = useAppSelector((state)=>[state.usersReducer,state.myStateReducer])
     const {CuesList,jobDescription,interviewGuide,jobTitle}=useAppSelector((state)=>state.cuesReducer)
 
-    function socketConnectedFirstTime(){
-        console.log('socketConnectedFirstTime')
-       // share details of myState to others participants only once
-        const roomId = myState?.roomId || "default-room";
-        const userId = myState?.id;
-        console.log("[Debug-user-id]",userId);
-    // if (!userId) {
-    //     console.error("User ID not found in myState!");
-    //     return;
-    // }
+   function socketConnectedFirstTime() {
+    console.log('socketConnectedFirstTime');
+    const roomId = myState?.roomId || "default-room";
+    const userId = myState?.id;
 
-  // Room join will be done as- iwll be listen on bckend on on-'join-room'.
-  //picked this from newUser fxn.
-    socket1_emitEvent("join-room", {roomId, userId});
-    if (users && Object.keys(users).length > 0) {
-        Object.keys(users).forEach((peerId) => {
-        if (peerId !== userId) {
-            const data = {
-            toPeer: peerId,
-            userData: {
+    socket1_emitEvent("join-room", { roomId, userId });
+    console.log(users);
+    if (!users || users.length === 0) {
+        console.log("users---->",users);
+        return;
+    }
+
+    users.forEach((userObj) => {
+    const peerId = userObj.id;
+    if (!peerId) {
+        console.log("[Debuuger-for-Invalid]");
+        return;
+    }
+    const data = {
+        toPeer: peerId,
+        userData: {
             ...myState,
+            id: myState.id,
             stream: null,
             videoStream: null,
             audioStream: null,
-            toPeer:peerId,
-            peer2Id:myState?.peer2Id,
-            audioPeerId:myState?.audioPeerId,
-            isLoading:false,
-            count:1,
-            }
-            };
-            socket1_emitEvent("connected-user-data", data);
+            toPeer: peerId,
+            peer2Id: myState?.peer2Id,
+            audioPeerId: myState?.audioPeerId,
+            isLoading: false,
+            count: 1,
         }
-        });
-    }
-    dispatch(addNewUserAction(myState));
-     //now if we want to gain knowldege about other users 
-    socket1_onEvent('receive-connected-user-data', (data,tarId) => {
-        if(tarId!==myState.id)return;//if this was not meant for me return;
-        console.log('got knowldege of already connected user:', data)
-        dispatch(addNewUserAction(data));
-    })
+    };
+    console.log("[DEBUUGERR-CONNECTED_USER]", data);
+    socket1_emitEvent("connected-user-data", data);
+   });
+    socket1_onEvent('receive-connected-user-data', (data) => 
+    {
+        console.log('receive-connected-user-data', data);
+        dispatch(addNewUserAction(data.userData));
+    });
+    console.log("user after this->",users)
     console.log("[DEBUG-Line]Is it reaching here??");
-    
-    }
+}
+
 
     function socket2_onEvent(){
 
@@ -94,7 +95,7 @@ export default function SocketWrapper({children}){
 
     useEffect(()=>{
             //socket 1 event handler 
-        function handleUserConnected(userId){
+        function handleUserConnected(userId:string){
                 console.log(`user connected ${userId}`)
                 if(myState.id){
                     socket1_emitEvent('connected-user-data',{
@@ -273,7 +274,7 @@ export default function SocketWrapper({children}){
             console.log("recruiter notes response event", data)
         }
 
-        // socket1_onEvent("user-connected", handleUserConnected)
+        socket1_onEvent("user-connected", handleUserConnected)
         // socket1_onEvent("user-disconnected", handleUserDisconected)
         // socket1_onEvent("tab-close-remove-video", handleTabCloseRemoveVideo)
         // socket1_onEvent("to-leave-page-receiver", handleToLeavePageReciver)
@@ -300,7 +301,7 @@ export default function SocketWrapper({children}){
         //     });
         // }
         // return () =>{
-        // socket1_offEvent("user-connected", handleUserConnected)
+        socket1_offEvent("user-connected", handleUserConnected)
         // socket1_offEvent("user-disconnected", handleUserDisconected)
         // socket1_offEvent("tab-close-remove-video", handleTabCloseRemoveVideo)
         // socket1_offEvent("to-leave-page-receiver", handleToLeavePageReciver)
@@ -319,7 +320,7 @@ export default function SocketWrapper({children}){
         // socket2_offEvent("ai_suggestion_res", handleLiveQna)
         // socket2_offEvent("recruiter_notes_res", handleRecruiterNotesRes)
         // }
-    },[socket1_onEvent,socket2_onEvent,socket1_emitEvent,isSocket1_Connected]);
+    },[isSocket1_Connected,socket1_emitEvent,socket1_onEvent,socket1_offEvent]);
     
    const handleToggleCamera=()=>{
     if(myState.videoStream instanceof MediaStream){
@@ -360,9 +361,9 @@ export default function SocketWrapper({children}){
   }
    let values =  {
         isSocket1_Connected,
-        //isSocket2_Connected,
+        // isSocket2_Connected,
         socket1_emitEvent,
-        //socket2_emitEvent,
+        // socket2_emitEvent,
         toggleCamera:handleToggleCamera,
         toggleMicrophone:handleToggleMicrophone,
     }

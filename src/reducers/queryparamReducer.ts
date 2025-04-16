@@ -10,7 +10,7 @@ type QPState = {
   meetingIsLegit: boolean,
 };
 
-const initialQPState = {
+export const initialQPState = {
   roomId: "",
   jobId: "",
   custEmailId: "",

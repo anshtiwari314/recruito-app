@@ -36,12 +36,10 @@ export default function TestWrapper({children}){
 
 
     async function init(id:string){
-    
     let tempUser = { ...UserTypeInitialLoadState };
     tempUser.id = id
     tempUser.audioPeerId = uuidv4();
     tempUser.peer2Id = uuidv4();
-    
     try{
         let videoStream = await gettingVideoStream()
         let audioStream = await gettingAudioStream()
@@ -67,20 +65,24 @@ export default function TestWrapper({children}){
         dispatch(addNewUserAction(tempUser))
     }   
     }
+   
+
+
     // initialise to myState 
-   useEffect(() => {
+    useEffect(() => {
+  const id = uuidv4();
+  
+  console.log("Unique ID for this tab", id); 
+  init(id);
+ 
+  return () => {
+    dispatch(removeUserAction({ id }));
+  };
+}, []);
 
-    let id:string = uuidv4()
-    
-    init(id)
-    
-    return ()=> {
-        dispatch(removeUserAction({id}))
-        //seems like its working now .
-    }
-    }, []);
  //this all is made in a sense that it will be stored in myState so dispatched to reducers meant in myState.
-
+    console.log(users);
+    
     
     const [cnt,setCnt]=useState(0);
     useEffect(()=>{
