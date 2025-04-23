@@ -4,7 +4,7 @@ import { RightPanelResource } from "./RightPanelResource";
 import { useData } from "../context/DataWrapper";
 import { useAppSelector } from "../store/store";
 import { UserType } from "../reducers/usersReducer";
-import {RightPanelVideo} from './AnujRightPanelVideo'
+import {AnujRightPanelVideo} from './AnujRightPanelVideo'
 
 export default function RightPanel() {
   const users=useAppSelector((state)=>state.usersReducer)
@@ -22,7 +22,7 @@ export default function RightPanel() {
         </h2>
         <div className="space-y-4">
           {users.map((e, i) => (
-            <RightPanelVideo e={e} key={i} muted={i === 0 ? true: false} />
+            <AnujRightPanelVideo e={e} key={i} muted={i === 0 ? true: false} />
           ))}
 
           {/* <video srcObj={users[0]?.videoStream}></video> */}

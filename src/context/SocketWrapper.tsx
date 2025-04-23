@@ -1,22 +1,24 @@
-import React, { useContext, useEffect } from "react"
+"use client"
+
+import React, { useContext, useEffect, useCallback, useMemo } from "react"
 import { useDispatch } from "react-redux"
-import { useAppSelector } from "../store/store";
-import useSocket from "../hooks/useSocket";
-import { addNewUserAction, removeUserAction, toggleCameraAction, toggleMicrophoneAction } from "../reducers/usersReducer";
-import { removeUser } from "../functions/users";
-import { addTranscription, initialTranscriptionObj, TranscriptionDataType, TranscriptionState } from "../reducers/transcriptionReducer";
-import { addCues, CuesDataType, initialCuesObj, setCues, updateCues } from "../reducers/cuesReducer";
-import queryparamReducer from "../reducers/queryparamReducer";
+import { useAppSelector } from "../store/store"
+import useSocket from "../hooks/useSocket"
+import {
+  addNewUserAction,
+  removeUserAction,
+  toggleCameraAction,
+  toggleMicrophoneAction,
+} from "../reducers/usersReducer"
 
+const SocketWrapperContext = React.createContext("socketWrapper")
 
-
-const SocketWrapperContext = React.createContext('socketWrapper')
-
-export function useSocketWrapper(){
-    return useContext(SocketWrapperContext)
+export function useSocketWrapper() {
+  return useContext(SocketWrapperContext)
 }
 
-export default function SocketWrapper({children}){
+export default function SocketWrapper({ children }) {
+    /*
     const dispatch=useDispatch();
 
     const socket1Url='wss://recruitonodesocket.vitti.insure';
@@ -26,74 +28,176 @@ export default function SocketWrapper({children}){
     const socket2Url='wss://recruito.vitti.insure';
     const socket2Url2 = null
     
-    const options = {
-        reconnection: false,
-        reconnectionAttempts: 5, // Number of retries before giving up
-        reconnectionDelay: 1000, // Time between retries (in ms)
-      };
+    */
+  const dispatch = useDispatch()
+  const socket1Url = "http://localhost:3002" 
+  const options = useMemo(
+    () => ({
+      reconnection: false,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+    }),
+    [],
+  ) 
 
-    const [isSocket1_Connected,socket1_emitEvent,socket1_onEvent,socket1_offEvent] = useSocket(socket1Url3,options,socketConnectedFirstTime)
-    //const [isSocket2_Connected,socket2_emitEvent,socket2_onEvent,socket2_offEvent] = useSocket(socket2Url2)
+  const [users, myState] = useAppSelector((state) => [state.usersReducer, state.myStateReducer])
+  const { CuesList, jobDescription, interviewGuide, jobTitle } = useAppSelector((state) => state.cuesReducer)
 
-    //note***->need to do something memoization of it since it was giving error of rerendering.
-    const [users,myState] = useAppSelector((state)=>[state.usersReducer,state.myStateReducer])
-    const {CuesList,jobDescription,interviewGuide,jobTitle}=useAppSelector((state)=>state.cuesReducer)
-
-   function socketConnectedFirstTime() {
-    console.log('socketConnectedFirstTime');
-    const roomId = myState?.roomId || "default-room";
-    const userId = myState?.id;
-
-    socket1_emitEvent("join-room", { roomId, userId });
-    console.log(users);
-    if (!users || users.length === 0) {
-        console.log("users---->",users);
-        return;
+  const socketConnectedFirstTime = useCallback(() => {
+    const roomId = myState?.roomId || "default-room"
+    const userId = myState.id
+    if (userId) {
+      socket1_emitEvent("join-room", { roomId, userId })
     }
+  }, [myState?.roomId, myState.id])
 
-    users.forEach((userObj) => {
-    const peerId = userObj.id;
-    if (!peerId) {
-        console.log("[Debuuger-for-Invalid]");
-        return;
-    }
-    const data = {
-        toPeer: peerId,
-        userData: {
+  const [isSocket1_Connected, socket1_emitEvent, socket1_onEvent, socket1_offEvent] = useSocket(
+    socket1Url,
+    options,
+    socketConnectedFirstTime,
+  )
+
+  const handleAllUsers = useCallback(
+    (existingUserIds) => {
+      existingUserIds.forEach((peerId) => {
+        const data = {
+          toPeer: peerId,
+          userData: {
             ...myState,
             id: myState.id,
             stream: null,
             videoStream: null,
             audioStream: null,
             toPeer: peerId,
-            peer2Id: myState?.peer2Id,
-            audioPeerId: myState?.audioPeerId,
-            isLoading: false,
             count: 1,
+          },
         }
-    };
-    console.log("[DEBUUGERR-CONNECTED_USER]", data);
-    socket1_emitEvent("connected-user-data", data);
-   });
-    socket1_onEvent('receive-connected-user-data', (data) => 
-    {
-        console.log('receive-connected-user-data', data);
-        dispatch(addNewUserAction(data.userData));
-    });
-    console.log("user after this->",users)
-    console.log("[DEBUG-Line]Is it reaching here??");
+        socket1_emitEvent("connected-user-data", data)
+      })
+    },
+    [myState, socket1_emitEvent],
+  )
+
+  const handleUserConnected = useCallback(
+    (newUserId) => {
+      const data = {
+        toPeer: newUserId,
+        userData: { ...myState, id: myState.id },
+      }
+      socket1_emitEvent("connected-user-data", data)
+    },
+    [myState, socket1_emitEvent],
+  )
+
+  const handleReceiveData = useCallback(
+    ({ userData }) => {
+      console.log("received userData:", userData)
+      dispatch(addNewUserAction(userData))
+    },
+    [dispatch],
+  )
+
+  const handleUserDisconnected = useCallback(
+    (id) => {
+      dispatch(removeUserAction({ id }))
+    },
+    [dispatch],
+  )
+
+  useEffect(() => {
+    console.log("[Debbug] Settied up socket event listeners")
+
+    socket1_onEvent("all-users", handleAllUsers)
+    socket1_onEvent("user-connected", handleUserConnected)
+    socket1_onEvent("receive-connected-user-data", handleReceiveData)
+    socket1_onEvent("user-disconnected", handleUserDisconnected)
+
+    socketConnectedFirstTime()
+
+    return () => {
+      console.log("Cleaning up socket event listeners")
+      socket1_offEvent("all-users", handleAllUsers)
+      socket1_offEvent("user-connected", handleUserConnected)
+      socket1_offEvent("receive-connected-user-data", handleReceiveData)
+      socket1_offEvent("user-disconnected", handleUserDisconnected)
+    }
+  }, [
+    socket1_onEvent,
+    socket1_offEvent,
+    handleAllUsers,
+    handleUserConnected,
+    handleReceiveData,
+    handleUserDisconnected,
+    socketConnectedFirstTime,
+  ])
+
+  
+  useEffect(() => {
+    console.log("Socket connection status:", isSocket1_Connected)
+  }, [isSocket1_Connected])
+
+  const handleToggleCamera = useCallback(() => {
+    if (myState.videoStream instanceof MediaStream) {
+      const vidTrack = myState.videoStream.getVideoTracks()
+      if (vidTrack.length > 0) {
+        const newValue = !myState.cameraStatus
+        vidTrack[0].enabled = newValue
+        dispatch(
+          toggleCameraAction({
+            id: myState.id,
+            enabled: newValue,
+          }),
+        )
+
+        if (isSocket1_Connected) {
+          socket1_emitEvent("camera-toggle-transmitter", {
+            cameraStatus: newValue,
+            id: myState.id,
+          })
+        }
+      }
+    }
+  }, [myState.videoStream, myState.cameraStatus, myState.id, dispatch, isSocket1_Connected, socket1_emitEvent])
+
+  const handleToggleMicrophone = useCallback(() => {
+    if (myState.audioStream instanceof MediaStream) {
+      const audioTracks = myState.audioStream.getAudioTracks()
+      if (audioTracks.length > 0) {
+        const newStatus = !myState.microphoneStatus
+        audioTracks[0].enabled = newStatus
+        dispatch(
+          toggleMicrophoneAction({
+            id: myState.id,
+            enabled: newStatus,
+          }),
+        )
+
+        if (isSocket1_Connected) {
+          socket1_emitEvent("microphone-toggle-transmitter", {
+            microphoneStatus: newStatus,
+            id: myState.id,
+          })
+        }
+      }
+    }
+  }, [myState.audioStream, myState.microphoneStatus, myState.id, dispatch, isSocket1_Connected, socket1_emitEvent])
+  //used memo for re-rendering went off the roof 
+  const contextValue = useMemo(
+    () => ({
+      isSocket1_Connected,
+      socket1_emitEvent,
+      toggleCamera: handleToggleCamera,
+      toggleMicrophone: handleToggleMicrophone,
+    }),
+    [isSocket1_Connected, socket1_emitEvent, handleToggleCamera, handleToggleMicrophone],
+  )
+//@ts-ignore
+  return <SocketWrapperContext.Provider value={contextValue}>{children}</SocketWrapperContext.Provider>
 }
 
-
-    function socket2_onEvent(){
-
-    }
-
-    useEffect(()=>{
-        console.log('socket1',isSocket1_Connected)
-    },[isSocket1_Connected])
-
-    useEffect(()=>{
+//if needed future 
+/*
+useEffect(()=>{
             //socket 1 event handler 
         function handleUserConnected(userId:string){
                 console.log(`user connected ${userId}`)
@@ -359,18 +463,4 @@ export default function SocketWrapper({children}){
       }
     }
   }
-   let values =  {
-        isSocket1_Connected,
-        // isSocket2_Connected,
-        socket1_emitEvent,
-        // socket2_emitEvent,
-        toggleCamera:handleToggleCamera,
-        toggleMicrophone:handleToggleMicrophone,
-    }
-     return (
-        //@ts-ignore
-        <SocketWrapperContext.Provider value={values}>
-            {children}
-        </SocketWrapperContext.Provider>
-    )
-}
+*/

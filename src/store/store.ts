@@ -8,25 +8,37 @@ import myStateReducer from "../reducers/myStateReducer"
 import { type TypedUseSelectorHook, useSelector, useDispatch } from "react-redux"
 
 export const store = configureStore({
+  reducer: {
+    cuesReducer: cuesReducer.cuesReducer,
+    qpReducer: queryparamReducer.qpReducer,
+    transcriptionReducer: transcriptionReducer.transcriptionReducer,
+    usersReducer: usersReducer.usersReducer,
+    nvReducer: navigationparamReducer.nvReducer,
+    myStateReducer: myStateReducer.myStateReducer,
+  },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        // Ignore these action types
-        ignoredActions: ["usersReducer/updateMyState","usersReducers/toggleCamera"],
-        // Ignore these field paths in all actions
-        ignoredActionPaths: ['meta.arg', 'payload.timestamp','payload.videoStream','usersReducer.1.videoStream'],
-        // Ignore these paths in the state
-        ignoredPaths: ['items.dates'],
+        ignoredActions: [
+          "usersReducer/addNewUser",
+          "usersReducer/updateMyState",
+          "usersReducer/toggleCamera",
+          "usersReducer/removeUser",
+        ],
+        ignoredActionPaths: [
+          'meta.arg',
+          'payload.timestamp',
+          'payload.videoStream',
+          'payload.audioStream',
+        ],
+        ignoredPaths: [
+          'usersReducer',
+          'myStateReducer.videoStream',
+          'myStateReducer.audioStream',
+        ],
       },
     }),
-  reducer: {
-    cuesReducer: cuesReducer.cuesReducer, 
-    qpReducer: queryparamReducer.qpReducer, 
-    transcriptionReducer: transcriptionReducer.transcriptionReducer, 
-    usersReducer: usersReducer.usersReducer,
-    nvReducer: navigationparamReducer.nvReducer,
-    myStateReducer:myStateReducer.myStateReducer
-}})
+})
 
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch
