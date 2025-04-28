@@ -10,69 +10,66 @@ import {addCues,setCues,updateCues,initialCuesObj} from "../reducers/cuesReducer
 // @ts-ignore 
 import vad from "voice-activity-detection";
 import { getTimestamp,processRecordedAudio,sendToServer,isUserAvailable,sendVideoToServer } from "./mettingsUtils";
+import { useMemo } from "react";
 
 
 export function createPeerOptions(){
-    return {
-        config:{
-            iceServers:[
-        { urls: "stun:stun.l.google.com:19302" },
-        { urls: "stun:stun1.l.google.com:19302" },
-        { urls: "stun:stun2.l.google.com:19302" },
-        { urls: "stun:stun3.l.google.com:19302" },
-        { urls: "stun:stun4.l.google.com:19302" },
-        {
-          urls: "stun:stun.relay.metered.ca:80",
-        },
-        {
-          urls: "turn:global.relay.metered.ca:80",
-          username: "9a68873a2f7a5c9a9755e52e",
-          credential: "2kG2qDdT1PESBuUQ",
-        },
-        {
-          urls: "turn:global.relay.metered.ca:80?transport=tcp",
-          username: "9a68873a2f7a5c9a9755e52e",
-          credential: "2kG2qDdT1PESBuUQ",
-        },
-        {
-          urls: "turn:global.relay.metered.ca:443",
-          username: "9a68873a2f7a5c9a9755e52e",
-          credential: "2kG2qDdT1PESBuUQ",
-        },
-        {
-          urls: "turns:global.relay.metered.ca:443?transport=tcp",
-          username: "9a68873a2f7a5c9a9755e52e",
-          credential: "2kG2qDdT1PESBuUQ",
-        },
-        {
-          url: "stun:global.stun.twilio.com:3478",
-          urls: "stun:global.stun.twilio.com:3478",
-        },
-        {
-          url: "turn:global.turn.twilio.com:3478?transport=udp",
-          username:
-            "81c1cec94e2e43736ac98b05d3d093f19919a3405b5686dd57e4525c795f8832",
-          urls: "turn:global.turn.twilio.com:3478?transport=udp",
-          credential: "uuaXnZ1XBD6pfyEiSC2owYcCMQkWhFI4sGvJQ+9yc3A=",
-        },
-        {
-          url: "turn:global.turn.twilio.com:3478?transport=tcp",
-          username:
-            "81c1cec94e2e43736ac98b05d3d093f19919a3405b5686dd57e4525c795f8832",
-          urls: "turn:global.turn.twilio.com:3478?transport=tcp",
-          credential: "uuaXnZ1XBD6pfyEiSC2owYcCMQkWhFI4sGvJQ+9yc3A=",
-        },
-        {
-          url: "turn:global.turn.twilio.com:443?transport=tcp",
-          username:
-            "81c1cec94e2e43736ac98b05d3d093f19919a3405b5686dd57e4525c795f8832",
-          urls: "turn:global.turn.twilio.com:443?transport=tcp",
-          credential: "uuaXnZ1XBD6pfyEiSC2owYcCMQkWhFI4sGvJQ+9yc3A=",
-        },
-            ]
-        }
+    const peerOptions = useMemo(() => {
+        return {
+          config: {
+            iceServers: [
+              { urls: "stun:stun.l.google.com:19302" },
+              { urls: "stun:stun1.l.google.com:19302" },
+              { urls: "stun:stun2.l.google.com:19302" },
+              { urls: "stun:stun3.l.google.com:19302" },
+              { urls: "stun:stun4.l.google.com:19302" },
+              { urls: "stun:stun.relay.metered.ca:80" },
+              {
+                urls: "turn:global.relay.metered.ca:80",
+                username: "9a68873a2f7a5c9a9755e52e",
+                credential: "2kG2qDdT1PESBuUQ",
+              },
+              {
+                urls: "turn:global.relay.metered.ca:80?transport=tcp",
+                username: "9a68873a2f7a5c9a9755e52e",
+                credential: "2kG2qDdT1PESBuUQ",
+              },
+              {
+                urls: "turn:global.relay.metered.ca:443",
+                username: "9a68873a2f7a5c9a9755e52e",
+                credential: "2kG2qDdT1PESBuUQ",
+              },
+              {
+                urls: "turns:global.relay.metered.ca:443?transport=tcp",
+                username: "9a68873a2f7a5c9a9755e52e",
+                credential: "2kG2qDdT1PESBuUQ",
+              },
+              {
+                urls: "stun:global.stun.twilio.com:3478",
+              },
+              {
+                urls: "turn:global.turn.twilio.com:3478?transport=udp",
+                username: "81c1cec94e2e43736ac98b05d3d093f19919a3405b5686dd57e4525c795f8832",
+                credential: "uuaXnZ1XBD6pfyEiSC2owYcCMQkWhFI4sGvJQ+9yc3A=",
+              },
+              {
+                urls: "turn:global.turn.twilio.com:3478?transport=tcp",
+                username: "81c1cec94e2e43736ac98b05d3d093f19919a3405b5686dd57e4525c795f8832",
+                credential: "uuaXnZ1XBD6pfyEiSC2owYcCMQkWhFI4sGvJQ+9yc3A=",
+              },
+              {
+                urls: "turn:global.turn.twilio.com:443?transport=tcp",
+                username: "81c1cec94e2e43736ac98b05d3d093f19919a3405b5686dd57e4525c795f8832",
+                credential: "uuaXnZ1XBD6pfyEiSC2owYcCMQkWhFI4sGvJQ+9yc3A=",
+              },
+            ],
+          },
+        };
+      }, []); 
+    
+      return peerOptions;
     }
-}
+
 
 export async function ShareScreenToUserIn(
     stream:MediaStream,

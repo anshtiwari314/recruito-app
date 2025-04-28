@@ -9,6 +9,7 @@ import Leave from "./pages/LeavePage";
 import TestWrapper from './context/TestWrapper'
 import SocketWrapper from "./context/SocketWrapper";
 import HomePage from "./pages/old-HomePage";
+import PeerWrapper from "./context/PeerWrapper";
 
 
 export default function App() {
@@ -25,12 +26,13 @@ export default function App() {
            {/* this is the home page maybe in fture desigen need to change of it [maybe asking for name or email] */}
            <Route path="/meeting.html"
                   element={
-                      <TestWrapper>
-
-                      <SocketWrapper>
+                    <TestWrapper>
+                    <SocketWrapper>
+                      <PeerWrapper>
                         <MainPage />
-                      </SocketWrapper>
-                      </TestWrapper>
+                      </PeerWrapper>
+                    </SocketWrapper>
+                  </TestWrapper>
                         }
                     />
             {/* 404 Page Route */}

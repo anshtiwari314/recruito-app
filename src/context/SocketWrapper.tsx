@@ -145,7 +145,6 @@ export default function SocketWrapper({ children }) {
         dispatch(
           toggleCameraAction({
             id: myState.id,
-            enabled: newValue,
           }),
         )
 
@@ -168,7 +167,6 @@ export default function SocketWrapper({ children }) {
         dispatch(
           toggleMicrophoneAction({
             id: myState.id,
-            enabled: newStatus,
           }),
         )
 

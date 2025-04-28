@@ -13,14 +13,19 @@ import {
   toggleCameraAction,
   toggleMicrophoneAction,
 } from "../reducers/usersReducer";
+import myStateReducer from "../reducers/myStateReducer";
+import { usePeerWrapper } from "../context/PeerWrapper";
 
 export default function MeetingPageHeader() {
   const dispatch = useDispatch();
-
+  const meUser=useAppSelector((state)=>state.myStateReducer);
+  console.log(meUser,"[[DEBUG]]");
+  
   const { jobTitle } = useAppSelector((state) => state.cuesReducer);
   const { isHost } = useAppSelector((state) => state.qpReducer);
 
   const { screenRecording, setScreenRecording }: any = useData();
+  const {}=usePeerWrapper()
   //@ts-ignore
 
   const { name, myId, setScreenSharing, stopVideoRecording }: any = useData();
@@ -29,13 +34,14 @@ export default function MeetingPageHeader() {
   const theCurrentUser = incomingUsers.find((user) => user.id === myId);
   async function handleCloseCall() {
     const confirmQuit = window.confirm("Are you sure you want to quit?");
+    console.log(confirmQuit);
     if (confirmQuit) {
       sessionStorage.setItem("exitdone", "true");
-      dispatch(toggleMicrophoneAction({ id: myId, enabled: false }));
-      dispatch(toggleCameraAction({ id: myId, enabled: false }));
+      dispatch(toggleMicrophoneAction({ id: myId }));
+      dispatch(toggleCameraAction({ id: myId }));
       dispatch(setNVclosecall(true));
       dispatch(setNVaudioUploadAnimation(true));
-      await stopVideoRecording();
+      // await stopVideoRecording();
       dispatch(clearAllUsersActions());
       console.log("Closing the call...");
     }
@@ -47,15 +53,15 @@ export default function MeetingPageHeader() {
   };
 
   const toggleAudio = () => {
-    const newStatus = !theCurrentUser?.microphoneStatus;
-    dispatch(toggleMicrophoneAction({ id: myId, enabled: newStatus }));
+    dispatch(toggleMicrophoneAction({ id: meUser.id }));
     console.log("Toggling The Audio");
+    console.log(incomingUsers)
   };
 
   const toggleVideo = () => {
-    const newStatus = !theCurrentUser?.cameraStatus;
-    dispatch(toggleCameraAction({ id: myId, enabled: newStatus }));
+    dispatch(toggleCameraAction({ id: meUser.id}));
     console.log("Toggling The Video");
+    console.log(incomingUsers)
   };
 
   const toggleScreenRecording = () => {
@@ -92,7 +98,7 @@ export default function MeetingPageHeader() {
           className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
           onClick={toggleVideo}
         >
-          {theCurrentUser?.cameraStatus ? (
+          {meUser?.cameraStatus ? (
             <i className="fa-solid fa-video fa-lg"></i>
           ) : (
             <i className="fa-solid fa-video-slash fa-lg"></i>
@@ -102,7 +108,7 @@ export default function MeetingPageHeader() {
           className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
           onClick={toggleAudio}
         >
-          {theCurrentUser?.microphoneStatus ? (
+          {meUser?.microphoneStatus ? (
             <i className="fa-solid fa-microphone fa-lg"></i>
           ) : (
             <i className="fa-solid fa-microphone-slash fa-lg"></i>

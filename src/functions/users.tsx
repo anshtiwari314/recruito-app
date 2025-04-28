@@ -3,20 +3,13 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 
 export function addNewUser(state: UsersType, action: PayloadAction<UserType>) {
    // Plan: First check if user is in state or not. If already present, do nothing; otherwise, add.
-   let userExist = false;
+   const userExist = state.find((user) => user.id === action.payload.id);
 
-   for (let i = 0; i < state.length; i++) {
-      if (state[i].id === action.payload.id) {
-         userExist = true;
-         break; 
-      }
-   }
-   
    if (!userExist) {
      state.push(action.payload);
-     console.log("[DEBUGGER]","USER ADDED");
-   }else{
-    console.log("[DEBUGGER]","USER ALREADY EXISTS");
+     console.log("[DEBUGGER] USER ADDED", action.payload);
+   } else {
+     console.log("[DEBUGGER] USER ALREADY EXISTS", action.payload);
    }
 }
 
@@ -39,43 +32,54 @@ export function updateUser(state: UsersType, action: PayloadAction<UserType>) {
   }
 }
 
+
+//changed  both toggles->>>>working now..
+
 export function toggleCamera(
-  state:  UsersType,
-  action: PayloadAction<{id: string; enabled: boolean }>,
+  state: UsersType,
+  action: PayloadAction<{ id: string }>
 ) {
-    //find the index of the id whose camera need to toggled and in payload action we are getting two things one is id to match and one is boolean value to set true/false if camera needs to be toggled or not 
-
+  console.log("TOGGLE ACTION CAME");
   
-const uIndex = state.findIndex((user) => user.id === action.payload.id)
+  const uIndex = state.findIndex((user) => user.id === action.payload.id);
   if (uIndex !== -1) {
-    state[uIndex].cameraStatus = action.payload.enabled
-
-    if (state[uIndex].videoStream instanceof MediaStream) {
-      const videoTracks = (state[uIndex].videoStream as MediaStream).getVideoTracks()
-      if (videoTracks?.length > 0) {
-        console.log("Setting Video Tracks Enabled",action.payload.enabled);
-        videoTracks[0].enabled = action.payload.enabled
+    const user = state[uIndex];
+    if (user.videoStream instanceof MediaStream) {
+      const videoTracks = user.videoStream.getVideoTracks();
+      if (videoTracks.length > 0) {
+        const track = videoTracks[0];
+        track.enabled = !track.enabled;
+        user.cameraStatus = track.enabled;
+        console.log(`[DEBUG-TOGGLE] Video is now ${track.enabled ? "ON" : "OFF"} and ${user.cameraStatus}`);
       }
     }
+    console.log("VTOGGLE ACTION ACIVATED");
   }
-}//[1300-1330 responsible for camera toggling]
+}
+//[1300-1330 responsible for camera toggling]
 
-export function toggleMicrophone(state:UsersType,action:PayloadAction<{id:string;enabled:boolean}>){
-   //idea:-first find the idx of the person whose microPhone needs to be toggled and need to toggle the state of the microphone and if the user has an audioStream update its enabled status
-   const uIndex = state.findIndex((user) => user.id === action.payload.id)
-   if (uIndex !== -1) {
-    //first enable for the ui
-    state[uIndex].microphoneStatus = action.payload.enabled
-    if (state[uIndex].audioStream instanceof MediaStream) {
-      const audioTracks = (state[uIndex].audioStream as MediaStream).getAudioTracks()
-      if (audioTracks?.length > 0) {
-        //for actually shutting off the mic
-          console.log("Toggling microphone:", action.payload.enabled);
-        audioTracks[0].enabled = action.payload.enabled
+export function toggleMicrophone(
+  state:UsersType,
+  action:PayloadAction<{id:string}>
+)
+{
+  const uIndex = state.findIndex((user) => user.id === action.payload.id);
+  if (uIndex !== -1) {
+    const user = state[uIndex];
+    if (user.audioStream instanceof MediaStream) {
+      const audioTracks = user.audioStream.getAudioTracks();
+      if (audioTracks.length > 0) {
+        const track = audioTracks[0];
+        track.enabled = !track.enabled;
+        user.microphoneStatus = track.enabled;
+        console.log(`[DEBUG-TOGGLE] Audio is now ${track.enabled ? "ON" : "OFF"}`);
       }
     }
-   }
-}//[1350 responsible for audio toglging](need to write sockets on it )
+    console.log("MTOGGLE ACTION ACIVATED");
+  }
+}
+
+//[1350 responsible for audio toglging](need to write sockets on it )
 
 export function setUserStream(state:UsersType,action:PayloadAction<{id:string;stream:MediaStream | null | boolean}>){
   const userIndex=state.findIndex((user)=>user.id===action.payload.id)
@@ -85,40 +89,46 @@ export function setUserStream(state:UsersType,action:PayloadAction<{id:string;st
   }
 }//[2115]
 
-export function setUserVideoStream(state:UsersType,action:PayloadAction<{id:string;videoStream:MediaStream | null | boolean}>){
-  console.log("hello there i am going to set user video stream:-")
-  const userIndex=state.findIndex((user)=>user.id===action.payload.id);
-  if (userIndex !== -1) {
-    const prevCamStatus=state[userIndex].cameraStatus
+export function setUserVideoStream(state: UsersType, action: PayloadAction<{ id: string; videoStream: MediaStream | null }>) {
+  console.log("[DEBUG-video-setter] Setting user video stream");
 
-    state[userIndex].videoStream = action.payload.videoStream
-    state[userIndex].isCameraAvailable=!!action.payload.videoStream
-    if(action.payload.videoStream instanceof MediaStream){
-      const videoTracks = (action.payload.videoStream as MediaStream).getVideoTracks()
-      if(videoTracks?.length>0){
-        console.log("Setting Video Tracks Enabled",prevCamStatus);
-        videoTracks[0].enabled = prevCamStatus
+  const userIndex = state.findIndex((user) => user.id === action.payload.id);
+  if (userIndex !== -1) {
+    const prevCamStatus = state[userIndex].cameraStatus;
+
+    state[userIndex].videoStream = action.payload.videoStream ? action.payload.videoStream : null;
+    state[userIndex].isCameraAvailable = !!action.payload.videoStream;
+
+    if (action.payload.videoStream instanceof MediaStream) {
+      const videoTracks = action.payload.videoStream.getVideoTracks();
+      if (videoTracks.length > 0) {
+        console.log("Setting video track enabled:", prevCamStatus);
+        videoTracks[0].enabled = prevCamStatus;
       }
     }
   }
-}//[1227....]
+}
 
-export function setUserAudioStream(state:UsersType,action:PayloadAction<{id:string;audioStream:MediaStream|null|boolean}>){
-  const userIndex=state.findIndex((user)=>user.id===action.payload.id);
+export function setUserAudioStream(state: UsersType, action: PayloadAction<{ id: string; audioStream: MediaStream | null }>) {
+  console.log('[DEBUGGER-OF_AUDIO-Setter] Setting user audio stream');
+
+  const userIndex = state.findIndex((user) => user.id === action.payload.id);
   if (userIndex !== -1) {
-    const prevMicStatus=state[userIndex].microphoneStatus
+    const prevMicStatus = state[userIndex].microphoneStatus;
 
-    state[userIndex].audioStream = action.payload.audioStream
-    state[userIndex].isMicrophoneAvailable=!!action.payload.audioStream
-    if(action.payload.audioStream instanceof MediaStream){
-      const audioTracks = (action.payload.audioStream as MediaStream).getAudioTracks()
-      if (audioTracks?.length > 0) {
-        //for actually shutting off the mic
-        console.log("Toggling microphone:", prevMicStatus);
-        audioTracks[0].enabled = prevMicStatus
+    state[userIndex].audioStream = action.payload.audioStream ? action.payload.audioStream : null;
+    state[userIndex].isMicrophoneAvailable = !!action.payload.audioStream;
+
+    if (action.payload.audioStream instanceof MediaStream) {
+      const audioTracks = action.payload.audioStream.getAudioTracks();
+      if (audioTracks.length > 0) {
+        console.log("Setting audio track enabled:", prevMicStatus);
+        audioTracks[0].enabled = prevMicStatus;
       }
+    }
   }
-}}//[1244]
+}
+//[1244]
 
 export function toggleScreenSharing(state:UsersType, action: PayloadAction<{ id: string; enabled: boolean; screenStream?: MediaStream }>){
   const userIndex = state.findIndex((user) => user.id === action.payload.id);

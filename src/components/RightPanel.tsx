@@ -8,9 +8,10 @@ import {AnujRightPanelVideo} from './AnujRightPanelVideo'
 
 export default function RightPanel() {
   const users=useAppSelector((state)=>state.usersReducer)
+  
 
-  console.log("Here is the UserDta",users)
-   const { isHost } = useAppSelector((state) => state.qpReducer);
+    console.log("Here is the UserDta->",users)
+    const { isHost } = useAppSelector((state) => state.qpReducer);
   return (
     <div
       id="right-panel"

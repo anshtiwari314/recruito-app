@@ -30,6 +30,7 @@ export const store = configureStore({
           'payload.timestamp',
           'payload.videoStream',
           'payload.audioStream',
+          'payload.stream'
         ],
         ignoredPaths: [
           'usersReducer',

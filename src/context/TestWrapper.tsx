@@ -1,3 +1,4 @@
+"use client"
 
 import React, { useContext, useEffect, useCallback, useMemo } from "react"
 import { v4 as uuidv4 } from "uuid"
@@ -16,10 +17,9 @@ export function useTestWrapper() {
 export default function TestWrapper({ children }) {
   const dispatch = useDispatch()
   const [users, myState] = useAppSelector((state) => [state.usersReducer, state.myStateReducer])
-  
-//const [videoPeer,isVideoPeer_Connected,videoPeer_Connections,videoPeer_connectToPeer,peer1_sendToPeer] = usePeer(myState.id)
-//const [audioPeer,isAudioPeer_Connected,audioPeer_Connections,audioPeer_connectToPeer,audioPeer_sendToPeer] = usePeer(myState.audioPeerId)
-//const [screenPeer,isScreenPeer_Connected,screenPeer_Connections,screenPeer_connectToPeer,screenPeer_sendToPeer] = usePeer(myState.peer2Id)
+  //const [videoPeer,isVideoPeer_Connected,videoPeer_Connections,videoPeer_connectToPeer,peer1_sendToPeer] = usePeer(myState.id)
+ //const [audioPeer,isAudioPeer_Connected,audioPeer_Connections,audioPeer_connectToPeer,audioPeer_sendToPeer] = usePeer(myState.audioPeerId)
+ //const [screenPeer,isScreenPeer_Connected,screenPeer_Connections,screenPeer_connectToPeer,screenPeer_sendToPeer] = usePeer(myState.peer2Id)
 
   const { CuesList, jobDescription, interviewGuide, jobTitle } = useAppSelector((state) => state.cuesReducer)
 
@@ -31,27 +31,40 @@ export default function TestWrapper({ children }) {
       tempUser.peer2Id = uuidv4()
 
       try {
+        console.log("Initializing media streams for user:", id)
         const videoStream = await gettingVideoStream()
-        const audioStream = await gettingAudioStream()
-
         if (videoStream) {
+          console.log("Video stream obtained successfully")
           tempUser.videoStream = videoStream
           tempUser.isCameraAvailable = true
+          tempUser.cameraStatus = true
         } else {
-          tempUser.videoStream = false
+          console.log("Failed to get video stream")
+          tempUser.videoStream = null
           tempUser.isCameraAvailable = false
+          tempUser.cameraStatus = false
         }
 
+        const audioStream = await gettingAudioStream()
         if (audioStream) {
+          console.log("Audio stream obtained successfully")
           tempUser.audioStream = audioStream
           tempUser.isMicrophoneAvailable = true
+          tempUser.microphoneStatus = true
         } else {
-          tempUser.audioStream = false
+          console.log("Failed to get audio stream")
+          tempUser.audioStream = null
           tempUser.isMicrophoneAvailable = false
+          tempUser.microphoneStatus = false
         }
       } catch (err) {
-        console.log("Error initializing media streams:", err.message)
+        console.error("Error initializing media streams:", err.message)
       } finally {
+        console.log("Updating user state with streams:", {
+          hasVideo: !!tempUser.videoStream,
+          hasAudio: !!tempUser.audioStream,
+        })
+
         dispatch(updateMyState(tempUser))
         dispatch(addNewUserAction(tempUser))
       }
@@ -65,20 +78,12 @@ export default function TestWrapper({ children }) {
     init(id)
 
     return () => {
-      console.log("Cleaning on umount, removing user:", id)
+      console.log("Cleaning whne dismount, removing user:", id)
       dispatch(removeUserAction({ id }))
     }
   }, [init, dispatch])
 
-  useEffect(() => {
-    console.log("Users count changed:", users.length)
-  }, [users.length])
-
-  useEffect(() => {
-    console.log("MyState updated")
-  }, [myState.id]) 
-
-  // for  unnecessary re-renders
+   // for  unnecessary re-renders
   const contextValue = useMemo(
     () => ({
       users,
@@ -86,6 +91,6 @@ export default function TestWrapper({ children }) {
     }),
     [users, myState],
   )
- //@ts-ignore
+  //@ts-ignore
   return <TestWrapperContext.Provider value={contextValue}>{children}</TestWrapperContext.Provider>
 }
