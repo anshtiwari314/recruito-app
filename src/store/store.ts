@@ -24,13 +24,15 @@ export const store = configureStore({
           "usersReducer/updateMyState",
           "usersReducer/toggleCamera",
           "usersReducer/removeUser",
+          "userReducer/setUserStream"
         ],
         ignoredActionPaths: [
           'meta.arg',
           'payload.timestamp',
           'payload.videoStream',
           'payload.audioStream',
-          'payload.stream'
+          'payload.stream',
+          'payload.screenStream'
         ],
         ignoredPaths: [
           'usersReducer',

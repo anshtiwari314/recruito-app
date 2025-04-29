@@ -32,7 +32,7 @@ export default function PeerWrapper({ children }: { children: React.ReactNode })
   const dispatch = useDispatch()
   const [users, myState] = useAppSelector((state) => [state.usersReducer, state.myStateReducer])
 
-  const connectionAttemptsRef = useRef<Record<string, boolean>>({})//for tracing already made cnntion or if tried already
+  const connectionAttemptsRef = useRef<Record<string, boolean>>({}) //for tracing already made cnntion or if tried already
 
   const [videoPeer, setVideoPeer] = useState<Peer | null>(null)
   const [screenPeer, setScreenPeer] = useState<Peer | null>(null)
@@ -46,7 +46,7 @@ export default function PeerWrapper({ children }: { children: React.ReactNode })
   const audioPeerArrRef = useRef<string[]>([])
 
   const peerOptions = createPeerOptions()
-//we will init the users 
+  //we will init the users
   useEffect(() => {
     if (!myState?.id) return
 
@@ -166,7 +166,7 @@ export default function PeerWrapper({ children }: { children: React.ReactNode })
 
   // Send audio stream to a user
   const sendAudioToUser = useCallback(
-    (stream: MediaStream, newUserId: string) => {
+    (stream, newUserId: string) => {
       if (!audioPeer || !stream) {
         console.log("Nothing to send: missing audioPeer or stream")
         return
@@ -259,7 +259,7 @@ export default function PeerWrapper({ children }: { children: React.ReactNode })
     const handleVidCall = (call) => {
       console.log("Incoming video call from:", call.peer)
 
-       call.answer()
+      call.answer()
 
       call.on("stream", (userVidStream) => {
         console.log("Received video stream from:", call.peer)
@@ -267,7 +267,6 @@ export default function PeerWrapper({ children }: { children: React.ReactNode })
         // Storing the call incoming
         videoPeerRef.current[call.peer] = call
 
-        
         const user = users.find((u) => u.id === call.peer)
         if (user) {
           console.log("Updating video stream for user:", user.id)
@@ -330,14 +329,6 @@ export default function PeerWrapper({ children }: { children: React.ReactNode })
                 stream: userScreenStream,
               }),
             )
-
-            dispatch(
-              setUserVideoStreamAction({
-                id: users[idx].id,
-                videoStream: userScreenStream,
-              }),
-            )
-
             dispatch(
               setUserLoadingAction({
                 id: users[idx].id,
@@ -526,58 +517,28 @@ export default function PeerWrapper({ children }: { children: React.ReactNode })
 
       console.log("Screen sharing started")
 
-      const screenUser: UserType = {
-        id: myState?.id || "screen-id",
-        peer2Id: screenPeer?.id || "screen-peer-id",
-        audioPeerId: "",
-        stream: screenStream,
-        videoStream: screenStream,
-        audioStream: null,
-        isCameraAvailable: true,
-        isMicrophoneAvailable: false,
-        cameraStatus: true,
-        microphoneStatus: false,
-        isAdmin: false,
-        isAudioStream: false,
-        isLoading: false,
-        roomId: myState?.roomId || "default-room",
-        custEmailId: myState?.custEmailId || "",
-        agentId: myState?.agentId || "",
-        remove: false,
-        name: myState?.name || "Screen Share",
-        isScreenSharingEnabled: false,
-        containsScreenStream: true,
-      }
-
-      dispatch(updateUserAction(screenUser))
-
-      if (isSocket1_Connected) {
-        socket1_emitEvent.emit("screen-share-transmitter", {
-          ...screenUser,
-          stream: null,
-          videoStream: null,
-          isLoading: true,
-        })
-      }
-
-      // Send screen share to all connected peers
-      screenPeersArrRef.current.forEach((peerId) => {
-        sendScreenToUser(screenStream, peerId)
+      users.forEach((user) => {
+        if (user.id !== myState.id) {
+          sendScreenToUser(screenStream, user.id)
+        }
       })
 
-      dispatch(addNewUserAction(screenUser))
+      // Add event listener to detect when screen sharing stops
+      screenStream.getVideoTracks()[0].onended = () => {
+        console.log("Screen sharing stopped by browser")
+        screenStream.getTracks().forEach((track) => track.stop())
+      }
+
       return screenStream
     } catch (error) {
       console.error("Error starting screen share:", error)
       return null
     }
-  }, [myState?.id, myState?.name, screenPeer, isSocket1_Connected, sendScreenToUser, dispatch])
+  }, [myState.id, users, sendScreenToUser])
 
-  // Stop screen sharing
   const stopScreenSharing = useCallback(() => {
     console.log("Stopping screen sharing")
 
-    // Find the screen sharing user
     const screenUser = users.find((u) => u.containsScreenStream)
 
     if (!screenUser) {
@@ -585,27 +546,26 @@ export default function PeerWrapper({ children }: { children: React.ReactNode })
       return
     }
 
-    // Update the current user's screen sharing status
-    const currUser = users.find((u) => u.id === myState.id)
-    if (currUser) {
-      currUser.isScreenSharingEnabled = false
+    const data:UserType={
+      ...myState,
+      isScreenSharingEnabled: false,
     }
+    dispatch(
+      updateUserAction(data),
+    )
 
-    // Stop all tracks in the screen stream
     if (screenUser.stream instanceof MediaStream) {
       screenUser.stream.getTracks().forEach((t) => t.stop())
     }
 
-    // Close all screen peer connections
     Object.keys(screenPeersRef.current).forEach((peerId) => {
       screenPeersRef.current[peerId].close()
     })
 
     screenPeersRef.current = {}
 
-    // Notify other users that screen sharing has ended
     if (isSocket1_Connected) {
-      socket1_emitEvent.emit("screen-share-end-transmitter", {
+      socket1_emitEvent("screen-share-end-transmitter", {
         videoId: screenUser.id,
         peerId: screenPeer?.id,
       })
@@ -613,7 +573,7 @@ export default function PeerWrapper({ children }: { children: React.ReactNode })
 
     dispatch(removeUserAction({ id: screenUser.id }))
     console.log("Screen sharing ended")
-  }, [myState.id, screenPeer, isSocket1_Connected, dispatch, users])
+  }, [myState, screenPeer, isSocket1_Connected, dispatch, users])
 
   // Create the context value
   const value = {
@@ -636,6 +596,6 @@ export default function PeerWrapper({ children }: { children: React.ReactNode })
       audioPeerInitialized: Boolean(audioPeer),
     }),
   }
-   //@ts-ignore
+  //@ts-ignore
   return <PeerWrapperContext.Provider value={value}>{children}</PeerWrapperContext.Provider>
 }

@@ -7,13 +7,13 @@ type UserType = {
     audioPeerId: string;
   
     stream: MediaStream | null | boolean;
-    videoStream: MediaStream | null ;
+    videoStream: MediaStream | null |boolean ;
     audioStream: MediaStream | null | boolean;
     isCameraAvailable: boolean;
     isMicrophoneAvailable: boolean;
     cameraStatus: boolean;
     microphoneStatus: boolean;
-  
+    previousStream?: MediaStream | null
     isAdmin: boolean;
     isAudioStream: boolean;
     isLoading: boolean;
