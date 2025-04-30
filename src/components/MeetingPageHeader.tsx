@@ -1,4 +1,5 @@
 import React from "react"
+import { useState } from "react"
 import { useDispatch } from "react-redux"
 //@ts-ignore
 import { useAppSelector } from "../store/store"
@@ -10,91 +11,106 @@ import {
   toggleMicrophoneAction,
   toggleScreenSharingAction,
 } from "../reducers/usersReducer"
+import { useSocketWrapper } from "../context/SocketWrapper"
 import { usePeerWrapper } from "../context/PeerWrapper"
+
 
 export default function MeetingPageHeader() {
   const dispatch = useDispatch()
   const meUser = useAppSelector((state) => state.myStateReducer)
-  const users=useAppSelector((state)=>state.usersReducer);
-  console.log(meUser, "[[DEBUG]]")
+  const users = useAppSelector((state) => state.usersReducer)
   const { jobTitle } = useAppSelector((state) => state.cuesReducer)
   const { isHost } = useAppSelector((state) => state.qpReducer)
-  //@ts-ignore
-  const incomingUsers = useAppSelector((state) => state.usersReducer)
-  console.log(incomingUsers)
+  const { isSocket1_Connected, socket1_emitEvent}:any = useSocketWrapper()
+  const { startScreenSharing, stopScreenSharing } = usePeerWrapper()
+  const [isScreenSharing, setIsScreenSharing] = useState(false)
+
+  const myUser = users.find((u) => u.id === meUser.id) || users[0]
+
   async function handleCloseCall() {
     const confirmQuit = window.confirm("Are you sure you want to quit?")
-    console.log(confirmQuit)
     if (confirmQuit) {
       sessionStorage.setItem("exitdone", "true")
       dispatch(toggleMicrophoneAction({ id: meUser.id }))
       dispatch(toggleCameraAction({ id: meUser.id }))
       dispatch(setNVclosecall(true))
       dispatch(setNVaudioUploadAnimation(true))
-      // await stopVideoRecording();
       dispatch(clearAllUsersActions())
       console.log("Closing the call...")
     }
   }
-  const RealUser=users.find((u)=>u.id===meUser.id)
-  console.log(RealUser);
-  const toggleScreenSharing = async () => {
-    if (users[0].isScreenSharingEnabled) {
-      console.log("Stopping screen sharing")
 
-      if (users[0].stream instanceof MediaStream) {
-        users[0].stream.getTracks().forEach((track) => track.stop())
-      }
-
-      dispatch(
-        toggleScreenSharingAction({
-          id: users[0].id,
-          enabled: false,
-        }),
-      )
-      return
-    }
-
+  const toggleScreenShare = async () => {
     try {
-      console.log("Starting screen sharing")
-      const screenStream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
-        audio: true,
-      })
+      if (!isScreenSharing) {
+        console.log("Starting screen sharing")
+        const screenStream = await startScreenSharing()
 
-      dispatch(
-        toggleScreenSharingAction({
-          id: meUser.id,
-          enabled: true,
-          screenStream: screenStream,
-        }),
-      )
+        if (screenStream) {
+          setIsScreenSharing(true)
 
-      screenStream.getVideoTracks()[0].onended = () => {
-        console.log("Screen sharing stopped via browser controls")
-        dispatch(
-          toggleScreenSharingAction({
-            id: meUser.id,
-            enabled: false,
-          }),
-        )
+          // Create a screen sharing user in the Redux store
+          dispatch(
+            toggleScreenSharingAction({
+              id: meUser.id,
+              enabled: true,
+              screenStream: screenStream,
+            }),
+          )
+
+          //through the brwoser we checking if the screen has been stopped or nt 
+          screenStream.getVideoTracks()[0].onended = () => {
+            console.log("Screen sharing stopped via browser controls")
+            handleStopScreenSharing()
+          }
+          if (isSocket1_Connected) {
+            socket1_emitEvent("screen-share-transmitter", {
+              id: meUser.id,
+              peer2Id: meUser.peer2Id,
+              containsScreenStream: true,
+              isScreenSharingEnabled: true,
+            })
+          }
+        }
+      } else {
+        handleStopScreenSharing()
       }
     } catch (error) {
-      console.error("Error starting screen share:", error)
+      console.error("Error toggling screen share:", error)
+      setIsScreenSharing(false)
+    }
+  }
+
+  const handleStopScreenSharing = () => {
+    stopScreenSharing()
+    setIsScreenSharing(false)
+
+    dispatch(
+      toggleScreenSharingAction({
+        id: meUser.id,
+        enabled: false,
+      }),
+    )
+
+    if (isSocket1_Connected) {
+      socket1_emitEvent("screen-share-end-transmitter", {
+        videoId: meUser.id,
+        peerId: meUser.peer2Id,
+      })
     }
   }
 
   const toggleAudio = () => {
     dispatch(toggleMicrophoneAction({ id: meUser.id }))
     console.log("Toggling The Audio")
-    console.log(incomingUsers)
   }
 
   const toggleVideo = () => {
     dispatch(toggleCameraAction({ id: meUser.id }))
     console.log("Toggling The Video")
-    console.log(incomingUsers)
   }
+  
+
   return (
     <header
       id="header"
@@ -119,7 +135,7 @@ export default function MeetingPageHeader() {
           className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
           onClick={toggleVideo}
         >
-          {users[0]?.cameraStatus ? (
+          {myUser?.cameraStatus ? (
             <i className="fa-solid fa-video fa-lg"></i>
           ) : (
             <i className="fa-solid fa-video-slash fa-lg"></i>
@@ -129,7 +145,7 @@ export default function MeetingPageHeader() {
           className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
           onClick={toggleAudio}
         >
-          {users[0]?.microphoneStatus ? (
+          {myUser?.microphoneStatus ? (
             <i className="fa-solid fa-microphone fa-lg"></i>
           ) : (
             <i className="fa-solid fa-microphone-slash fa-lg"></i>
@@ -137,9 +153,10 @@ export default function MeetingPageHeader() {
         </button>
         <button
           className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
-          onClick={toggleScreenSharing}
+          onClick={toggleScreenShare}
+          title="Share Screen"
         >
-          {users[0]?.isScreenSharingEnabled ? (
+          {isScreenSharing ? (
             <i className="fa-solid fa-circle-dot fa-lg text-red-500"></i>
           ) : (
             <i className="fa-solid fa-circle-dot fa-lg text-gray-500"></i>
@@ -154,7 +171,6 @@ export default function MeetingPageHeader() {
           End Call
         </button>
       </div>
-
       {isHost && <MeetingPageHeaderTimer />}
     </header>
   )
