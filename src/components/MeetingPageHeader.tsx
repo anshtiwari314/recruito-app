@@ -36,7 +36,7 @@ export default function MeetingPageHeader() {
       dispatch(setNVclosecall(true));
       dispatch(setNVaudioUploadAnimation(true));
 
-      await stopVideoRecording(); // Wait for recording to stop
+     // await stopVideoRecording(); // Wait for recording to stop
 
       // Include logic here to send audio out along with corresponding ui
       console.log("Closing the call...");

@@ -26,6 +26,7 @@ import {
   initialTranscriptionObj,
 } from "@/reducers/transcriptionReducer";
 import { PostReq } from "../functions/requests";
+import cuesReducer, { addCuesInTopic, updateCuesInTopic } from "../reducers/cuesReducer";
 //import * as ort from "onnxruntime-web";
 //import * as vad from "@ricky0123/vad-web";
 
@@ -104,9 +105,11 @@ export default function DataWrapper({
   ];
 
   const dispatch = useDispatch();
-  const { CuesList, jobDescription, interviewGuide, jobTitle } = useAppSelector(
+  const { CuesList, jobDescription, interviewGuide, jobTitle,selectedTopic } = useAppSelector(
     (state) => state.cuesReducer
   );
+
+  //const  [cuesState] = useAppSelector((state) => [state.cuesReducer]);
   const { jobId, roomId, custEmailId, agentId, isHost, meetingIsLegit } =
     useAppSelector((state) => state.qpReducer);
 
@@ -188,7 +191,8 @@ export default function DataWrapper({
     `https://qhpv9mvz1h.execute-api.ap-south-1.amazonaws.com/prod/recruiter-copilot`
   );
   
-  const [ngrokServerUrl,setNgrokServerUrl] = useState('https://wpv7kxos9g.execute-api.ap-south-1.amazonaws.com/test/recruito-upload-apis')
+  //https://wpv7kxos9g.execute-api.ap-south-1.amazonaws.com/test/recruito-upload-apis
+  const [ngrokServerUrl,setNgrokServerUrl] = useState('https://26e9-49-204-211-204.ngrok-free.app')
   //
   //https://19vnck5aw8.execute-api.ap-south-1.amazonaws.com/Prod/save-adminaudio
   const adminClientUrl = `http://localhost:5005/admin-client`;
@@ -213,54 +217,55 @@ export default function DataWrapper({
 
         // commenting some servers bcz it duplicating connections
          
-        { urls: 'stun:stun.l.google.com:19302' },
-        {urls:'stun:stun1.l.google.com:19302'},
-        {urls:'stun:stun2.l.google.com:19302'},
-        {urls:'stun:stun3.l.google.com:19302'},
-        {urls:'stun:stun4.l.google.com:19302'},
+        // { urls: 'stun:stun.l.google.com:19302' },
+        // {urls:'stun:stun1.l.google.com:19302'},
+        // {urls:'stun:stun2.l.google.com:19302'},
+        // {urls:'stun:stun3.l.google.com:19302'},
+        // {urls:'stun:stun4.l.google.com:19302'},
+        // {
+        //   urls: "stun:stun.relay.metered.ca:80",
+        // },
+        // {
+        //   urls: "turn:global.relay.metered.ca:80",
+        //   username: "9a68873a2f7a5c9a9755e52e",
+        //   credential: "2kG2qDdT1PESBuUQ",
+        // },
+        // {
+        //   urls: "turn:global.relay.metered.ca:80?transport=tcp",
+        //   username: "9a68873a2f7a5c9a9755e52e",
+        //   credential: "2kG2qDdT1PESBuUQ",
+        // },
+        // {
+        //   urls: "turn:global.relay.metered.ca:443",
+        //   username: "9a68873a2f7a5c9a9755e52e",
+        //   credential: "2kG2qDdT1PESBuUQ",
+        // },
+        // {
+        //   urls: "turns:global.relay.metered.ca:443?transport=tcp",
+        //   username: "9a68873a2f7a5c9a9755e52e",
+        //   credential: "2kG2qDdT1PESBuUQ",
+        // },
         {
-          urls: "stun:stun.relay.metered.ca:80",
-        },
-        {
-          urls: "turn:global.relay.metered.ca:80",
-          username: "9a68873a2f7a5c9a9755e52e",
-          credential: "2kG2qDdT1PESBuUQ",
-        },
-        {
-          urls: "turn:global.relay.metered.ca:80?transport=tcp",
-          username: "9a68873a2f7a5c9a9755e52e",
-          credential: "2kG2qDdT1PESBuUQ",
-        },
-        {
-          urls: "turn:global.relay.metered.ca:443",
-          username: "9a68873a2f7a5c9a9755e52e",
-          credential: "2kG2qDdT1PESBuUQ",
-        },
-        {
-          urls: "turns:global.relay.metered.ca:443?transport=tcp",
-          username: "9a68873a2f7a5c9a9755e52e",
-          credential: "2kG2qDdT1PESBuUQ",
-        },{
           url: 'stun:global.stun.twilio.com:3478',
           urls: 'stun:global.stun.twilio.com:3478'
         },
         {
+          credential: 'HfKcpoLwJrE9YDxR6i/hGbcrF4ok+KCbLKICgUx16/k=',
           url: 'turn:global.turn.twilio.com:3478?transport=udp',
-          username: '81c1cec94e2e43736ac98b05d3d093f19919a3405b5686dd57e4525c795f8832',
           urls: 'turn:global.turn.twilio.com:3478?transport=udp',
-          credential: 'uuaXnZ1XBD6pfyEiSC2owYcCMQkWhFI4sGvJQ+9yc3A='
+          username: '17e02ce71d7a64c2073b5531281d90eb0ad3adc4b03c8562f1381cc41ea020b7'
         },
         {
+          credential: 'HfKcpoLwJrE9YDxR6i/hGbcrF4ok+KCbLKICgUx16/k=',
           url: 'turn:global.turn.twilio.com:3478?transport=tcp',
-          username: '81c1cec94e2e43736ac98b05d3d093f19919a3405b5686dd57e4525c795f8832',
           urls: 'turn:global.turn.twilio.com:3478?transport=tcp',
-          credential: 'uuaXnZ1XBD6pfyEiSC2owYcCMQkWhFI4sGvJQ+9yc3A='
+          username: '17e02ce71d7a64c2073b5531281d90eb0ad3adc4b03c8562f1381cc41ea020b7'
         },
         {
+          credential: 'HfKcpoLwJrE9YDxR6i/hGbcrF4ok+KCbLKICgUx16/k=',
           url: 'turn:global.turn.twilio.com:443?transport=tcp',
-          username: '81c1cec94e2e43736ac98b05d3d093f19919a3405b5686dd57e4525c795f8832',
           urls: 'turn:global.turn.twilio.com:443?transport=tcp',
-          credential: 'uuaXnZ1XBD6pfyEiSC2owYcCMQkWhFI4sGvJQ+9yc3A='
+          username: '17e02ce71d7a64c2073b5531281d90eb0ad3adc4b03c8562f1381cc41ea020b7'
         }
       ]
     }
@@ -311,11 +316,13 @@ export default function DataWrapper({
         isHost: isHost,
         name: name,
         init: data.init,
+        //selected_topic:data.selected_topic,
+        speech_stop_time:data?.speech_stop_time,
         audiomessage: base64data?.split(",")[1],
         timeStamp: `${date.toLocaleDateString()} ${date.toLocaleTimeString()}:${date.getMilliseconds()}`,
       };
       console.log("from inside send to server", data);
-      socket2.emit("ai_suggestion_req", data);
+      socket2.emit("ai_suggestion_req_ins", data);
     };
     reader.readAsDataURL(blob);
   }
@@ -361,14 +368,18 @@ export default function DataWrapper({
         isHost: isHost,
         name: name,
         init: data.init,
-
+        video_stop_time:data.video_stop_time,
         mediamessage:base64data?.split(",")[1],
+        //mediamessage:'hello varun bayya',
         timeStamp: `${date.toLocaleDateString()} ${date.toLocaleTimeString()}:${date.getMilliseconds()}`,
       };
       console.log("from inside send video to server", data);
-      let result = await PostReq(url,data)
-      //console.log('video send result',result)
-      //socket2.emit("save_audio_chunks_req", data);
+      //socket2.emit("save_video_chunks_req", data);
+      
+      //socket2.emit("save_video_chunks_event", data);
+      let result = await PostReq(`${ngrokServerUrl}/save_video_chunks_req`,data)
+      console.log('video send result',result)
+      
     };
     reader.readAsDataURL(blob);
   }
@@ -598,6 +609,11 @@ export default function DataWrapper({
       video: {
         //@ts-ignore
         cursor: "always",
+        video: {
+          width: { ideal: 640 },
+          height: { ideal: 360 },
+          frameRate: { ideal: 15 },
+        },
       },
       audio: false,
     });
@@ -714,7 +730,7 @@ export default function DataWrapper({
       obj["audiofiletimestamp"] = data?.audiofiletimestamp;
 
       //arr.push(obj)
-      arr = [...arr, obj];
+      arr = [...arr,obj];
       //@ts-ignore
       obj = {};
     }
@@ -990,13 +1006,18 @@ export default function DataWrapper({
     let url3 = 'https://temp-meeting-server-production.up.railway.app/'
     let url4 = 'https://temp-meeting-server.vercel.app/'
     let url5 = 'https://temp-meeting-server.onrender.com'
+    let url6 = 'wss://recruitonodesocket.vitti.insure'
+    let url7 = 'https://be80-103-173-124-200.ngrok-free.app/'
 
-    let tempSocket = io("wss://recruitonodesocket.vitti.insure");
+    let tempSocket = io(url7);
 
     //This is a socket connection with backend server to handle cues specific requests or other api requests
     let tempSocket2 = io(
-      "wss://recruito.vitti.insure"
-     // 'https://7615-2409-40f0-2c-4693-7849-e792-7e8e-b8a0.ngrok-free.app'
+      'http://localhost:5000',
+      //"wss://recruito.vitti.insure",
+    // 'https://490f-49-204-211-204.ngrok-free.app',
+     //'https://a910-49-204-211-204.ngrok-free.app',
+     //{ transports: ["websocket"]}
     );
     // https://vitt-ai-request-broadcaster-production.up.railway.app
 
@@ -1082,7 +1103,13 @@ export default function DataWrapper({
           jobTitle: (jobTitle === "" ? null : jobTitle) ?? data?.jobTitle,
         })
       );
+
+      let newTopicsArr = data.topics.map((topic)=>{return {...topic,CuesList:[]}})
+
+      dispatch(updateCues({topics:newTopicsArr,selectedTopic:data.selected_topic}))
     }
+
+    
 
     socket2.on("live_transcriptions_res", handleLiveTranscriptions);
     socket2.on("questions_loader_res", handleJobDetails);
@@ -1097,45 +1124,51 @@ export default function DataWrapper({
 
     function handleLiveQna(data: CuesDataType) {
       console.log("handle qna", data);
+
+      
+
+
       if (data?.type === "cues-update") {
-        let filteredCues = CuesList?.map((e) => {
-          if (e.common_id === data?.common_id) {
-            return {
-              ...e,
-              //content: e.content + " " + (data.content ?? ""),
-              isanswered: data.isanswered,
-              match_score: data.match_score,
-              content: data.content ?? "",
-            };
-          }
-          return e;
-        });
+        // let filteredCues = CuesList?.map((e) => {
+        //   if (e.common_id === data?.common_id) {
+        //     return {
+        //       ...e,
+        //       //content: e.content + " " + (data.content ?? ""),
+        //       isanswered: data.isanswered,
+        //       match_score: data.match_score,
+        //       content: data.content ?? "",
+        //     };
+        //   }
+        //   return e;
+        // });
 
-        if (!filteredCues) {
-          return;
-        }
+        // if (!filteredCues) {
+        //   return;
+        // }
 
-        console.log("i am filtered cues", filteredCues, CuesList);
-        dispatch(
-          updateCues({
-            CuesList: filteredCues,
-          })
-        );
+        // console.log("i am filtered cues", filteredCues, CuesList);
+        // dispatch(
+        //   updateCues({
+        //     CuesList: filteredCues,
+        //   })
+        // );
+        dispatch( updateCuesInTopic(data) )
       } else {
-        let tempArr: Array<CuesDataType> = [];
+        // let tempArr: Array<CuesDataType> = [];
 
-        let obj: CuesDataType = { ...initialCuesObj };
-        obj.content = data.content;
-        obj.sessionid = data.sessionid;
-        obj.audiofiletimestamp = data.audiofiletimestamp;
-        obj.common_id = data.common_id;
-        obj.similarity_query = data.similarity_query;
-        obj.isanswered = data.isanswered;
-        //obj.type= data.type
-        obj.match_score = data.match_score;
-        tempArr.push(obj);
+        // let obj: CuesDataType = { ...initialCuesObj };
+        // obj.content = data.content;
+        // obj.sessionid = data.sessionid;
+        // obj.audiofiletimestamp = data.audiofiletimestamp;
+        // obj.common_id = data.common_id;
+        // obj.similarity_query = data.similarity_query;
+        // obj.isanswered = data.isanswered;
+        // //obj.type= data.type
+        // obj.match_score = data.match_score;
+        // tempArr.push(obj);
 
-        dispatch(addCues(tempArr));
+        dispatch( addCuesInTopic(data) )
+        //dispatch(addCues(tempArr));
       }
     }
     socket2.on("ai_suggestion_res", handleLiveQna);
@@ -1738,7 +1771,7 @@ export default function DataWrapper({
       name: name,
     };
     console.log("before emiiting questions_loader_req", socket2.connected);
-    socket2.emit("questions_loader_req", questionsApiReqPayload);
+    socket2.emit("questions_loader_req_ins", questionsApiReqPayload);
   }, [socket2, myStream, myId, isHost]);
   /* ========================================================================= */
   /* ========================================================================= */
@@ -2415,7 +2448,8 @@ export default function DataWrapper({
   function sendAudioStream(stream: MediaStream, time: number) {
     //let url = 'https://f6p70odi12.execute-api.ap-south-1.amazonaws.com'
     console.log('send screen stream hit',stream,time)
-    let url = `${ngrokServerUrl}/save_audio_chunks_req`
+    //let url = `${ngrokServerUrl}/save_audio_chunks_req`
+    let url = `https://recruito.vitti.insure/save_audio_chunks_req`
     let arrayofChunks: any = [];
     let mediaRecorder = new MediaRecorder(stream, {
       audioBitsPerSecond: 32000,
@@ -2456,12 +2490,19 @@ export default function DataWrapper({
 
   function sendScreenStream(stream: MediaStream, time: number) {
     //let url = 'https://f6p70odi12.execute-api.ap-south-1.amazonaws.com'
+
+    let videoStopDate = new Date()
     console.log('send screen stream hit',stream,time)
-    let url = `${ngrokServerUrl}/save_video_chunks_req`;
+    
+    //let url = `${ngrokServerUrl}/save_video_chunks_req`;
+    let url = `https://recruito.vitti.insure/save_video_chunks_req`
+    let url2 = `https://6a7e-49-204-211-204.ngrok-free.app/save_video_chunks_req`
     let arrayofChunks: any = [];
-    let mediaRecorder = new MediaRecorder(stream, {
-      audioBitsPerSecond: 32000,
-    });
+
+
+    //20kbps
+    const options = { mimeType: 'video/webm; codecs=vp8', videoBitsPerSecond: 20000 } 
+    let mediaRecorder = new MediaRecorder(stream, options);
 
     mediaRecorder.ondataavailable = (e) => {
       arrayofChunks.push(e.data);
@@ -2470,12 +2511,11 @@ export default function DataWrapper({
     mediaRecorder.onstop = async () => {
       setCueLoading(true);
 
-     
-
+      let video_stop_time=`${videoStopDate.toLocaleDateString()} ${videoStopDate.toLocaleTimeString()}:${videoStopDate.getMilliseconds()}`
       let videoBlob = new Blob(arrayofChunks, { type: "video/webm" })
       
 
-      sendVideoToServer(videoBlob, url, { ...usersArrRef.current[0], init: false });
+      sendVideoToServer(videoBlob, url, { ...usersArrRef.current[0],video_stop_time, init: false });
       
       console.log(
         `%c just after send to server executes ${new Date().toLocaleTimeString()}`,
@@ -2506,44 +2546,67 @@ export default function DataWrapper({
      
   }
 
+  //screen recording 
   useEffect(()=>{
     
-    if(screenRecording ===false|| users.length===0|| socket2===null){
-      globalRef.current.screenRecordingStatus =false
-      globalRef.current.audioRecordingStatus =false
-      return ;
+    // if(screenRecording ===false|| users.length===0|| socket2===null){
+    //   globalRef.current.screenRecordingStatus =false
+    //   globalRef.current.audioRecordingStatus =false
+    //   return ;
       
-    }
+    // }
 
-    globalRef.current.screenRecordingStatus =true
-    globalRef.current.audioRecordingStatus=true 
+    if(screenRecording === globalRef.current.screenRecordingStatus)
+      return ;
 
+    
     let intervalId 
     let audioIntervalId 
-    gettingScreenStream()
+
+    if(screenRecording===true){
+      globalRef.current.screenRecordingStatus =true
+
+      gettingScreenStream()
       .then((videoStream) => {
         console.log('videoStream',videoStream)
-        sendScreenStream(videoStream,10000)
+        sendScreenStream(videoStream,4000)
 
         intervalId = setInterval(()=>{
-          sendScreenStream(videoStream,10000)
-        },10000)
+          sendScreenStream(videoStream,4000)
+        },4000)
+      }).catch(err=>{
+        console.log('permission err',err)
+        setScreenRecording(false)
       })
-      gettingAudioStream()
-      .then((AudioStream) => {
-        console.log('videoStream',AudioStream)
-        sendAudioStream(AudioStream,10000)
 
-        audioIntervalId = setInterval(()=>{
-          sendAudioStream(AudioStream,10000)
-        },10000)
-      })
+      // gettingAudioStream()
+      // .then((AudioStream) => {
+      //   console.log('videoStream',AudioStream)
+      //   sendAudioStream(AudioStream,10000)
+
+      //   audioIntervalId = setInterval(()=>{
+      //     sendAudioStream(AudioStream,10000)
+      //   },10000)
+      // })
+
+    }else{
+        globalRef.current.screenRecordingStatus =false
+
+        intervalId && clearInterval(intervalId)
+        audioIntervalId && clearInterval(audioIntervalId)
+    }
+   
+    //globalRef.current.audioRecordingStatus=true 
+
+   
+    
+      
 
       return ()=>{
         intervalId && clearInterval(intervalId)
         audioIntervalId && clearInterval(audioIntervalId)
       }
-  },[screenRecording,users,socket2,ngrokServerUrl])
+  },[screenRecording,ngrokServerUrl])
   /* ========================================================================= */
   /* ========================================================================= */
   /* 12.3 Useeffect that calls startMediaRecorder as soon as VAD is turned on.  */
@@ -2578,11 +2641,32 @@ export default function DataWrapper({
     return () => clearInterval(id);
   }, [recordingOn, microphoneToggle, users]);
 
+
+  useEffect(()=>{
+    if(socket2===null || selectedTopic ==='' || name==='')
+      return ;
+
+    let date = new Date()
+
+    let data = {
+      name,
+      timeStamp:`${date.toLocaleDateString()} ${date.toLocaleTimeString()}:${date.getMilliseconds()}`,
+      selected_topic:selectedTopic,
+      roomid:roomId
+    }
+    
+    socket2.emit('selected_topic_req',data)
+    
+   // console.log('selected topic',cuesState)
+  },[selectedTopic,socket2,roomId,name])
+
   /* ========================================================================= */
   /* ========================================================================= */
   /* 13.1. Declaration of the VAD function here */
   useEffect(() => {
     if (myAudioStream === null || users.length === 0 || socket === null) return;
+
+    //console.log('i am selected topic from vad effect',selectedTopic)
     // if(vadEffectRender.current>0)
     // return ;
     vadEffectRender.current++;
@@ -2595,18 +2679,26 @@ export default function DataWrapper({
 
         init: true,
       });
+      //console.log('just before myvad' ,globalRef.current.myVad,vad)
 
-      const myvad = await vad.MicVAD.new({
-        onSpeechStart: cb1,
-        onSpeechEnd: cb2,
-        //positiveSpeechThreshold:0.9,
-        //negativeSpeechThreshold:0.85,
-        // positiveSpeechThreshold:0.5,
-        // negativeSpeechThreshold:0.3,
-        // redemptionFrames:100
-      });
-      // myvad.start()
-      globalRef.current.myVad = myvad;
+      try{
+
+        const myvad = await vad.MicVAD.new({
+          onSpeechStart: cb1,
+          onSpeechEnd: cb2,
+          //positiveSpeechThreshold:0.9,
+          //negativeSpeechThreshold:0.85,
+          // positiveSpeechThreshold:0.5,
+          // negativeSpeechThreshold:0.3,
+          // redemptionFrames:100
+        });
+        //console.log('myvad' ,myvad)
+         //myvad.start()
+        globalRef.current.myVad = myvad;
+      }catch(e){
+        console.log('err during calling vad',e)
+      }
+      
     }
 
     let stop;
@@ -2698,11 +2790,12 @@ export default function DataWrapper({
     function stop1(audio: any) {
       //inserted here to ensure that the audio is not processed if there's only one person in the meeting.
      // if (usersArrRef.current.length <= 1) return; 
+       
 
-      let date = new Date();
+      let speechStopDate = new Date();
       console.log(
         `%c vad stopped ${
-          date.toLocaleTimeString() + ":" + date.getMilliseconds()
+          speechStopDate.toLocaleTimeString() + ":" + speechStopDate.getMilliseconds()
         }`,
         "background-color:teal;color:white"
       );
@@ -2780,10 +2873,12 @@ export default function DataWrapper({
             toggle: true,
           });
         
-        
+        //console.log('just before send to server executes',selectedTopic)
         sendToServer(blob, adminUrl, {
           ...usersArrRef.current[0],
           init: false,
+         // selected_topic:selectedTopic,
+          speech_stop_time:`${speechStopDate.toLocaleDateString()} ${speechStopDate.toLocaleTimeString()}:${speechStopDate.getMilliseconds()}`
         });
       });
 
@@ -2823,6 +2918,7 @@ export default function DataWrapper({
       //console.log("myvad if",globalRef.current.myVad,globalRef.current.myVad?.listening,microphoneToggle)
 
       if (globalRef.current.myVad === null) {
+        console.log('just before calling vad')
         VAD(start, stop1);
       } else {
         globalRef.current.myVad?.start();
@@ -2832,9 +2928,10 @@ export default function DataWrapper({
 
       globalRef.current.myVad?.pause();
       // after pausing vad stop2 is not firing
-      stop2();
+      //stop1();
       // console.log("myvad else",globalRef.current.myVad,globalRef.current.myVad?.listening,microphoneToggle)
     }
+    //console.log('vad effect',globalRef.current.myVad)
 
     return () => {
       start2IntervalId ? clearInterval(start2IntervalId) : null;
@@ -2845,6 +2942,8 @@ export default function DataWrapper({
   console.log("MYID", myId);
 
   let values = {
+    
+
     validUrl,
     setValidUrl,
     myId,

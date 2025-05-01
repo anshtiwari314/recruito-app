@@ -27,7 +27,11 @@ type CuesDataType = {
   answer_quality?: string;
   isanswered: boolean;
 };
-
+type TopicsType={
+  topic_id?:string;
+  topic:string;
+  CuesList:Array<CuesDataType>;
+} 
 let initialCuesObj: CuesDataType = {
   id: null,
   color: "#7D11E9",
@@ -55,9 +59,12 @@ let initialCuesObj: CuesDataType = {
   isanswered: false,
 };
 
+
 // Define the initial state for the Cues
 type CuesState = {
-  CuesList: Array<CuesDataType>;
+  //CuesList: Array<CuesDataType>;
+  topics: Array<TopicsType>;
+  selectedTopic :string;
   jobDescription: string;
   interviewGuide: string;
   jobTitle: string;
@@ -70,227 +77,258 @@ type CuesState = {
 //   CuesList: []
 // };
 
-let initialCuesState={
-  CuesList: [],
+let initialCuesState:CuesState={
+ // CuesList: [],
   jobDescription: '',
   interviewGuide: '',
-  jobTitle: ""
+  jobTitle: "",
+  topics: [],
+  selectedTopic :''
 }
 
+let CuesListLoadState= [
+  // {
+  //   content: "Yes, you can configure asset-specific risk parameters under the 'Custom Risk Rules' section in the admin console. The setup typically requires defining factor models and setting exposure limits. Here’s a quick reference guide: <a style='text-decoration:underline; color:blue;'>Open Configuration Steps</a>.",
+  //   sessionid: "1",
+  //   audiofiletimestamp: "2022-01-01T00:00:00Z",
+  //   common_id: "1",
+  //   similarity_query: "Can we configure the system to include custom risk parameters for different asset classes?",
+  //   isanswered: true,
+  // },
+  // {
+  //   content: "Yes, the system supports scheduled reporting automation via API and pre-configured templates. You can set up rule-based triggers to generate and distribute monthly reports to stakeholders. Would you like to see a template example? <a style='text-decoration:underline; color:blue;'>Show Report Template </a>.",
+  //   sessionid: "1",
+  //   audiofiletimestamp: "2022-01-01T00:00:00Z",
+  //   common_id: "1",
+  //   similarity_query: "Can we automate monthly reporting for performance and exposure tracking?",
+  //   isanswered: true,
+  // },{
+  //   content: "Yes, Aladdin has native integrations with Bloomberg, Reuters, and ICE. API configurations allow direct data ingestion. Here’s an overview of the integration architecture: <a style='text-decoration:underline; color:blue;'>Show Integration Diagram</a>.",
+  //   sessionid: "1",
+  //   audiofiletimestamp: "2022-01-01T00:00:00Z",
+  //   common_id: "1",
+  //   similarity_query: "Can we integrate the system with Bloomberg and other market data providers?",
+  //   isanswered: true,
+  // },
+  {
+    content: `<strong>Changes Required in Implementation Checklist</strong>
+            <table style="width:100%;text-align:center">
+            <tr>
+              <th> header 1</th>
+              <th> i am header 2</th>
+            </tr>
+            <tr>
+              <td> col 1 </td>
+              <td> col 1</td>
+            </tr>
+            <tr>
+              <td> col 2</td>
+              <td> col 2</td>
+            </tr>
+            </table>
+            <br/>`,
+    sessionid: "1",
+    audiofiletimestamp: "2022-01-01T00:00:00Z",
+    common_id: "2",
+    similarity_query: "Changes Required in Implementation Checklist",
+    isanswered: true,
+  },
+  {
+    content: `
+      <strong>Action Items:</strong><br/><br/>1. 
+      <strong>Consultant:</strong> 
+      Provide a configuration document for risk parameter customization – 
+      <strong>Due: Feb 7</strong><br/>2. <strong>
+      Client Tech Team:</strong> 
+      Share API specifications for Bloomberg integration – 
+      <strong>Due: Feb 8</strong>
+      <br/>3. 
+      <strong>Consultant:</strong> 
+      Validate compliance requirements for SEC & ESMA standards – <strong>
+      Due: Feb 10</strong><br/>4. <strong>Client Business Team:</strong>
+       Approve automated reporting workflow – <strong>Due: Feb 12</strong>
+       </br><br/>
+       <strong>Next Steps:</strong> 
+       Follow-up scheduled for 
+       <strong>Feb 14, 2024,</strong> 
+       to review progress.
+       <br/>`,
+    sessionid: "1",
+    audiofiletimestamp: "2022-01-01T00:00:00Z",
+    common_id: "1",
+    similarity_query: "Meeting Summary & Action Items – Call with ABC Asset Management",
+    isanswered: true,
+  },
+  
+  {
+    content: `<strong>Changes Required in Implementation Checklist</strong>
+            <br/><br/>
+            <strong>Section: Portfolio Risk Parameter Configuration</strong>
+            <br/>
+            <strong>Add:</strong> Custom threshold settings for risk scoring models.
+            <br/>
+            <strong>Modify:</strong> 
+            Default parameter values for alternative asset classes.
+            <br/>
+            <strong>Remove:</strong> 
+            Unused predefined thresholds for standardized portfolios.
+            <br/><br/>
+            <strong>Section: API Integration & Market Data Feeds</strong>
+            <br/>
+            <strong>Add:</strong> 
+            Bloomberg API integration module.
+            <br/>
+            <strong>Modify:</strong> 
+            Scheduled data refresh frequency from weekly to daily.
+            <br/><br/>
+            <strong>Section: Compliance & Regulatory Updates</strong>
+            <br/>
+            <strong>Add:</strong> 
+            Automated audit logging per 
+            <strong>SEC 17a-4 compliance requirements.</strong>
+            <br/><strong>Modify:</strong> 
+            Encryption settings for data at rest per <strong>
+            ESMA guidelines.
+            </strong>
+            <br/>`,
+    sessionid: "1",
+    audiofiletimestamp: "2022-01-01T00:00:00Z",
+    common_id: "2",
+    similarity_query: "Changes Required in Implementation Checklist",
+    isanswered: true,
+  },
+  // {
+  //   content: `<strong>AI Navigator:</strong> 
+  //    Sure! Here’s the latest project status breakdown.
+  //   <br/>
+  //   <strong>Active Projects: 42</strong> 
+  //    (+12% increase from last month), 
+  //    <strong>Avg. Completion Time: 28 days, On-Time Delivery Rate: 94% ✅</strong> 
+     
+  //    <div style="text-align: left;">
+  //    <img src="./graph1.png" style="height:250px;width:80%;object-fit: contain;"/>
+  //    </div> 
+  //    <br/>
+    
+  //    Would you like me to highlight any specific project?
+  //   `,
+  //   sessionid: "1",
+  //   audiofiletimestamp: "2022-01-01T00:00:00Z",
+  //   common_id: "2",
+  //   similarity_query: "give me a quick update on project progress?",
+  //   isanswered: true,
+
+  // },
+  // {
+  //   content: `<strong>AI Navigator:</strong> 
+
+  //    John is a 130% workload capacity, at risk of burnout. Alex who is at 50% workload and available for new assignments. Sarah’s workload is optimum at 50% capacity.
+    
+  //   <div style="text-align: left;">
+  //   <img src="./graph2.png" style="height:250px;width:80%;object-fit: contain;"/>
+  //   </div>
+  //   `,
+  //   sessionid: "1",
+  //   audiofiletimestamp: "2022-01-01T00:00:00Z",
+  //   common_id: "2",
+  //   similarity_query: "How’s the workload on the team?",
+  //   isanswered: true,
+
+  // },
+  // {
+  //   content: `<strong>AI Navigator: Testing for Client ABC Investment Group starts on February 20, 2024. However, two configuration tasks are still pending, which may impact the start date. Dependencies Identified: Pending API validation</strong> 
+
+  //   for risk model integration
+  //   <br/>`,
+  //   sessionid: "1",
+  //   audiofiletimestamp: "2022-01-01T00:00:00Z",
+  //   common_id: "2",
+  //   similarity_query: "When is testing starting for ABC",
+  //   isanswered: true,
+
+  // },
+  // {
+  //   content: "",
+  //   sessionid: "1",
+  //   audiofiletimestamp: "2022-01-01T00:00:00Z",
+  //   common_id: "1",
+  //   similarity_query: "Ask about specific EDI protocols experience",
+  //   isanswered: true,
+  // },
+  // {
+  //   content: "",
+  //   sessionid: "1",
+  //   audiofiletimestamp: "2022-01-01T00:00:00Z",
+  //   common_id: "2",
+  //   similarity_query: "Discuss experience with mapping tools",
+  //   isanswered: false,
+  // },
+  // {
+  //   content: "",
+  //   sessionid: "1",
+  //   audiofiletimestamp: "2022-01-01T00:00:00Z",
+  //   common_id: "3",
+  //   similarity_query: "Probe cloud integration knowledge",
+  //   isanswered: false,
+  // },
+  // {
+  //   content: "<strong>Date:</strong> February 5, 2024 | 🕒 <strong>Time:</strong> 10:00 AM - 11:00 AM <br/><strong>Participants:</strong> [Consultant Name], [Client Business Lead], [Client Tech Team]<br/><strong>Key Discussion Points:</strong><br/><br/>• Custom risk parameter configurations for different asset classes.<br/>• API integration for real-time data feed from Bloomberg.<br/>• Compliance validation for SEC and ESMA guidelines.<br/>• Automated reporting setup for performance tracking.<br/><br/><strong>Action Items:</strong><br/><br/>1. <strong>Consultant:</strong> Provide a configuration document for risk parameter customization – <strong>Due: Feb 7</strong><br/>2. <strong>Client Tech Team:</strong> Share API specifications for Bloomberg integration – <strong>Due: Feb 8</strong><br/>3. <strong>Consultant:</strong> Validate compliance requirements for SEC & ESMA standards – <strong>Due: Feb 10</strong><br/>4. <strong>Client Business Team:</strong> Approve automated reporting workflow – <strong>Due: Feb 12</strong></br><br/><strong>Next Steps:</strong> Follow-up scheduled for <strong>Feb 14, 2024,</strong> to review progress.<br/>",
+  //   sessionid: "1",
+  //   audiofiletimestamp: "2022-01-01T00:00:00Z",
+  //   common_id: "1",
+  //   similarity_query: "Meeting Summary & Action Items – Call with ABC Asset Management",
+  //   isanswered: true,
+  // },
+  // {
+  //   content: "<strong>Aladdin Tech Stack Implementation Checklist – Updated Based on Client Meeting</strong><br/><br/><strong>Section: Portfolio Risk Parameter Configuration</strong><br/><strong>Add:</strong> Custom threshold settings for risk scoring models.<br/><strong>Modify:</strong> Default parameter values for alternative asset classes.<br/><strong>Remove:</strong> Unused predefined thresholds for standardized portfolios.<br/><br/><strong>Section: API Integration & Market Data Feeds</strong><br/><strong>Add:</strong> Bloomberg API integration module.<br/><strong>Modify:</strong> Scheduled data refresh frequency from weekly to daily.<br/><br/><strong>Section: Compliance & Regulatory Updates</strong><br/><strong>Add:</strong> Automated audit logging per <strong>SEC 17a-4 compliance requirements.</strong><br/><strong>Modify:</strong> Encryption settings for data at rest per <strong>ESMA guidelines.</strong><br/>",
+  //   sessionid: "1",
+  //   audiofiletimestamp: "2022-01-01T00:00:00Z",
+  //   common_id: "2",
+  //   similarity_query: "Changes Required in Implementation Checklist",
+  //   isanswered: true,
+  // },
+  // {
+  //   content: "<strong>Date:</strong> February 5, 2024 | 🕒 <strong>Time:</strong> 10:00 AM - 11:00 AM <br/><strong>Participants:</strong> [Consultant Name], [Client Business Lead], [Client Tech Team]<br/><strong>Key Discussion Points:</strong><br/><br/>• Custom risk parameter configurations for different asset classes.<br/>• API integration for real-time data feed from Bloomberg.<br/>• Compliance validation for SEC and ESMA guidelines.<br/>• Automated reporting setup for performance tracking.<br/><br/><strong>Action Items:</strong><br/><br/>1. <strong>Consultant:</strong> Provide a configuration document for risk parameter customization – <strong>Due: Feb 7</strong><br/>2. <strong>Client Tech Team:</strong> Share API specifications for Bloomberg integration – <strong>Due: Feb 8</strong><br/>3. <strong>Consultant:</strong> Validate compliance requirements for SEC & ESMA standards – <strong>Due: Feb 10</strong><br/>4. <strong>Client Business Team:</strong> Approve automated reporting workflow – <strong>Due: Feb 12</strong></br><br/><strong>Next Steps:</strong> Follow-up scheduled for <strong>Feb 14, 2024,</strong> to review progress.<br/>",
+  //   sessionid: "1",
+  //   audiofiletimestamp: "2022-01-01T00:00:00Z",
+  //   common_id: "1",
+  //   similarity_query: "Meeting Summary & Action Items – Call with ABC Asset Management",
+  //   isanswered: true,
+  // },
+  // {
+  //   content: "<strong>Aladdin Tech Stack Implementation Checklist – Updated Based on Client Meeting</strong><br/><br/><strong>Section: Portfolio Risk Parameter Configuration</strong><br/><strong>Add:</strong> Custom threshold settings for risk scoring models.<br/><strong>Modify:</strong> Default parameter values for alternative asset classes.<br/><strong>Remove:</strong> Unused predefined thresholds for standardized portfolios.<br/><br/><strong>Section: API Integration & Market Data Feeds</strong><br/><strong>Add:</strong> Bloomberg API integration module.<br/><strong>Modify:</strong> Scheduled data refresh frequency from weekly to daily.<br/><br/><strong>Section: Compliance & Regulatory Updates</strong><br/><strong>Add:</strong> Automated audit logging per <strong>SEC 17a-4 compliance requirements.</strong><br/><strong>Modify:</strong> Encryption settings for data at rest per <strong>ESMA guidelines.</strong><br/>",
+  //   sessionid: "1",
+  //   audiofiletimestamp: "2022-01-01T00:00:00Z",
+  //   common_id: "2",
+  //   similarity_query: "Changes Required in Implementation Checklist",
+  //   isanswered: true,
+  // },
+  // {
+  //   content: "<strong>Date:</strong> February 5, 2024 | 🕒 <strong>Time:</strong> 10:00 AM - 11:00 AM <br/><strong>Participants:</strong> [Consultant Name], [Client Business Lead], [Client Tech Team]<br/><strong>Key Discussion Points:</strong><br/><br/>• Custom risk parameter configurations for different asset classes.<br/>• API integration for real-time data feed from Bloomberg.<br/>• Compliance validation for SEC and ESMA guidelines.<br/>• Automated reporting setup for performance tracking.<br/><br/><strong>Action Items:</strong><br/><br/>1. <strong>Consultant:</strong> Provide a configuration document for risk parameter customization – <strong>Due: Feb 7</strong><br/>2. <strong>Client Tech Team:</strong> Share API specifications for Bloomberg integration – <strong>Due: Feb 8</strong><br/>3. <strong>Consultant:</strong> Validate compliance requirements for SEC & ESMA standards – <strong>Due: Feb 10</strong><br/>4. <strong>Client Business Team:</strong> Approve automated reporting workflow – <strong>Due: Feb 12</strong></br><br/><strong>Next Steps:</strong> Follow-up scheduled for <strong>Feb 14, 2024,</strong> to review progress.<br/>",
+  //   sessionid: "1",
+  //   audiofiletimestamp: "2022-01-01T00:00:00Z",
+  //   common_id: "1",
+  //   similarity_query: "Meeting Summary & Action Items – Call with ABC Asset Management",
+  //   isanswered: true,
+  // },
+  // {
+  //   content: "<strong>Aladdin Tech Stack Implementation Checklist – Updated Based on Client Meeting</strong><br/><br/><strong>Section: Portfolio Risk Parameter Configuration</strong><br/><strong>Add:</strong> Custom threshold settings for risk scoring models.<br/><strong>Modify:</strong> Default parameter values for alternative asset classes.<br/><strong>Remove:</strong> Unused predefined thresholds for standardized portfolios.<br/><br/><strong>Section: API Integration & Market Data Feeds</strong><br/><strong>Add:</strong> Bloomberg API integration module.<br/><strong>Modify:</strong> Scheduled data refresh frequency from weekly to daily.<br/><br/><strong>Section: Compliance & Regulatory Updates</strong><br/><strong>Add:</strong> Automated audit logging per <strong>SEC 17a-4 compliance requirements.</strong><br/><strong>Modify:</strong> Encryption settings for data at rest per <strong>ESMA guidelines.</strong><br/>",
+  //   sessionid: "1",
+  //   audiofiletimestamp: "2022-01-01T00:00:00Z",
+  //   common_id: "2",
+  //   similarity_query: "Changes Required in Implementation Checklist",
+  //   isanswered: true,
+  // }
+]
 let initialCuesLoadState: CuesState = {
   jobTitle: "EDI Developer",
   jobDescription: "https://arxiv.org/pdf/2301.12652", //pdf
   interviewGuide: "https://arxiv.org/pdf/2410.08174", //pdf
-  CuesList: [
-    // {
-    //   content: "Yes, you can configure asset-specific risk parameters under the 'Custom Risk Rules' section in the admin console. The setup typically requires defining factor models and setting exposure limits. Here’s a quick reference guide: <a style='text-decoration:underline; color:blue;'>Open Configuration Steps</a>.",
-    //   sessionid: "1",
-    //   audiofiletimestamp: "2022-01-01T00:00:00Z",
-    //   common_id: "1",
-    //   similarity_query: "Can we configure the system to include custom risk parameters for different asset classes?",
-    //   isanswered: true,
-    // },
-    // {
-    //   content: "Yes, the system supports scheduled reporting automation via API and pre-configured templates. You can set up rule-based triggers to generate and distribute monthly reports to stakeholders. Would you like to see a template example? <a style='text-decoration:underline; color:blue;'>Show Report Template </a>.",
-    //   sessionid: "1",
-    //   audiofiletimestamp: "2022-01-01T00:00:00Z",
-    //   common_id: "1",
-    //   similarity_query: "Can we automate monthly reporting for performance and exposure tracking?",
-    //   isanswered: true,
-    // },{
-    //   content: "Yes, Aladdin has native integrations with Bloomberg, Reuters, and ICE. API configurations allow direct data ingestion. Here’s an overview of the integration architecture: <a style='text-decoration:underline; color:blue;'>Show Integration Diagram</a>.",
-    //   sessionid: "1",
-    //   audiofiletimestamp: "2022-01-01T00:00:00Z",
-    //   common_id: "1",
-    //   similarity_query: "Can we integrate the system with Bloomberg and other market data providers?",
-    //   isanswered: true,
-    // },
-    {
-      content: `
-        <strong>Action Items:</strong><br/><br/>1. 
-        <strong>Consultant:</strong> 
-        Provide a configuration document for risk parameter customization – 
-        <strong>Due: Feb 7</strong><br/>2. <strong>
-        Client Tech Team:</strong> 
-        Share API specifications for Bloomberg integration – 
-        <strong>Due: Feb 8</strong>
-        <br/>3. 
-        <strong>Consultant:</strong> 
-        Validate compliance requirements for SEC & ESMA standards – <strong>
-        Due: Feb 10</strong><br/>4. <strong>Client Business Team:</strong>
-         Approve automated reporting workflow – <strong>Due: Feb 12</strong>
-         </br><br/>
-         <strong>Next Steps:</strong> 
-         Follow-up scheduled for 
-         <strong>Feb 14, 2024,</strong> 
-         to review progress.
-         <br/>`,
-      sessionid: "1",
-      audiofiletimestamp: "2022-01-01T00:00:00Z",
-      common_id: "1",
-      similarity_query: "Meeting Summary & Action Items – Call with ABC Asset Management",
-      isanswered: true,
-    },
-    {
-      content: `<strong>Changes Required in Implementation Checklist</strong>
-              <br/><br/>
-              <strong>Section: Portfolio Risk Parameter Configuration</strong>
-              <br/>
-              <strong>Add:</strong> Custom threshold settings for risk scoring models.
-              <br/>
-              <strong>Modify:</strong> 
-              Default parameter values for alternative asset classes.
-              <br/>
-              <strong>Remove:</strong> 
-              Unused predefined thresholds for standardized portfolios.
-              <br/><br/>
-              <strong>Section: API Integration & Market Data Feeds</strong>
-              <br/>
-              <strong>Add:</strong> 
-              Bloomberg API integration module.
-              <br/>
-              <strong>Modify:</strong> 
-              Scheduled data refresh frequency from weekly to daily.
-              <br/><br/>
-              <strong>Section: Compliance & Regulatory Updates</strong>
-              <br/>
-              <strong>Add:</strong> 
-              Automated audit logging per 
-              <strong>SEC 17a-4 compliance requirements.</strong>
-              <br/><strong>Modify:</strong> 
-              Encryption settings for data at rest per <strong>
-              ESMA guidelines.
-              </strong>
-              <br/>`,
-      sessionid: "1",
-      audiofiletimestamp: "2022-01-01T00:00:00Z",
-      common_id: "2",
-      similarity_query: "Changes Required in Implementation Checklist",
-      isanswered: true,
-    },
-    // {
-    //   content: `<strong>AI Navigator:</strong> 
-    //    Sure! Here’s the latest project status breakdown.
-    //   <br/>
-    //   <strong>Active Projects: 42</strong> 
-    //    (+12% increase from last month), 
-    //    <strong>Avg. Completion Time: 28 days, On-Time Delivery Rate: 94% ✅</strong> 
-       
-    //    <div style="text-align: left;">
-    //    <img src="./graph1.png" style="height:250px;width:80%;object-fit: contain;"/>
-    //    </div> 
-    //    <br/>
-      
-    //    Would you like me to highlight any specific project?
-    //   `,
-    //   sessionid: "1",
-    //   audiofiletimestamp: "2022-01-01T00:00:00Z",
-    //   common_id: "2",
-    //   similarity_query: "give me a quick update on project progress?",
-    //   isanswered: true,
-
-    // },
-    // {
-    //   content: `<strong>AI Navigator:</strong> 
-
-    //    John is a 130% workload capacity, at risk of burnout. Alex who is at 50% workload and available for new assignments. Sarah’s workload is optimum at 50% capacity.
-      
-    //   <div style="text-align: left;">
-    //   <img src="./graph2.png" style="height:250px;width:80%;object-fit: contain;"/>
-    //   </div>
-    //   `,
-    //   sessionid: "1",
-    //   audiofiletimestamp: "2022-01-01T00:00:00Z",
-    //   common_id: "2",
-    //   similarity_query: "How’s the workload on the team?",
-    //   isanswered: true,
-
-    // },
-    // {
-    //   content: `<strong>AI Navigator: Testing for Client ABC Investment Group starts on February 20, 2024. However, two configuration tasks are still pending, which may impact the start date. Dependencies Identified: Pending API validation</strong> 
-
-    //   for risk model integration
-    //   <br/>`,
-    //   sessionid: "1",
-    //   audiofiletimestamp: "2022-01-01T00:00:00Z",
-    //   common_id: "2",
-    //   similarity_query: "When is testing starting for ABC",
-    //   isanswered: true,
-
-    // },
-    // {
-    //   content: "",
-    //   sessionid: "1",
-    //   audiofiletimestamp: "2022-01-01T00:00:00Z",
-    //   common_id: "1",
-    //   similarity_query: "Ask about specific EDI protocols experience",
-    //   isanswered: true,
-    // },
-    // {
-    //   content: "",
-    //   sessionid: "1",
-    //   audiofiletimestamp: "2022-01-01T00:00:00Z",
-    //   common_id: "2",
-    //   similarity_query: "Discuss experience with mapping tools",
-    //   isanswered: false,
-    // },
-    // {
-    //   content: "",
-    //   sessionid: "1",
-    //   audiofiletimestamp: "2022-01-01T00:00:00Z",
-    //   common_id: "3",
-    //   similarity_query: "Probe cloud integration knowledge",
-    //   isanswered: false,
-    // },
-    // {
-    //   content: "<strong>Date:</strong> February 5, 2024 | 🕒 <strong>Time:</strong> 10:00 AM - 11:00 AM <br/><strong>Participants:</strong> [Consultant Name], [Client Business Lead], [Client Tech Team]<br/><strong>Key Discussion Points:</strong><br/><br/>• Custom risk parameter configurations for different asset classes.<br/>• API integration for real-time data feed from Bloomberg.<br/>• Compliance validation for SEC and ESMA guidelines.<br/>• Automated reporting setup for performance tracking.<br/><br/><strong>Action Items:</strong><br/><br/>1. <strong>Consultant:</strong> Provide a configuration document for risk parameter customization – <strong>Due: Feb 7</strong><br/>2. <strong>Client Tech Team:</strong> Share API specifications for Bloomberg integration – <strong>Due: Feb 8</strong><br/>3. <strong>Consultant:</strong> Validate compliance requirements for SEC & ESMA standards – <strong>Due: Feb 10</strong><br/>4. <strong>Client Business Team:</strong> Approve automated reporting workflow – <strong>Due: Feb 12</strong></br><br/><strong>Next Steps:</strong> Follow-up scheduled for <strong>Feb 14, 2024,</strong> to review progress.<br/>",
-    //   sessionid: "1",
-    //   audiofiletimestamp: "2022-01-01T00:00:00Z",
-    //   common_id: "1",
-    //   similarity_query: "Meeting Summary & Action Items – Call with ABC Asset Management",
-    //   isanswered: true,
-    // },
-    // {
-    //   content: "<strong>Aladdin Tech Stack Implementation Checklist – Updated Based on Client Meeting</strong><br/><br/><strong>Section: Portfolio Risk Parameter Configuration</strong><br/><strong>Add:</strong> Custom threshold settings for risk scoring models.<br/><strong>Modify:</strong> Default parameter values for alternative asset classes.<br/><strong>Remove:</strong> Unused predefined thresholds for standardized portfolios.<br/><br/><strong>Section: API Integration & Market Data Feeds</strong><br/><strong>Add:</strong> Bloomberg API integration module.<br/><strong>Modify:</strong> Scheduled data refresh frequency from weekly to daily.<br/><br/><strong>Section: Compliance & Regulatory Updates</strong><br/><strong>Add:</strong> Automated audit logging per <strong>SEC 17a-4 compliance requirements.</strong><br/><strong>Modify:</strong> Encryption settings for data at rest per <strong>ESMA guidelines.</strong><br/>",
-    //   sessionid: "1",
-    //   audiofiletimestamp: "2022-01-01T00:00:00Z",
-    //   common_id: "2",
-    //   similarity_query: "Changes Required in Implementation Checklist",
-    //   isanswered: true,
-    // },
-    // {
-    //   content: "<strong>Date:</strong> February 5, 2024 | 🕒 <strong>Time:</strong> 10:00 AM - 11:00 AM <br/><strong>Participants:</strong> [Consultant Name], [Client Business Lead], [Client Tech Team]<br/><strong>Key Discussion Points:</strong><br/><br/>• Custom risk parameter configurations for different asset classes.<br/>• API integration for real-time data feed from Bloomberg.<br/>• Compliance validation for SEC and ESMA guidelines.<br/>• Automated reporting setup for performance tracking.<br/><br/><strong>Action Items:</strong><br/><br/>1. <strong>Consultant:</strong> Provide a configuration document for risk parameter customization – <strong>Due: Feb 7</strong><br/>2. <strong>Client Tech Team:</strong> Share API specifications for Bloomberg integration – <strong>Due: Feb 8</strong><br/>3. <strong>Consultant:</strong> Validate compliance requirements for SEC & ESMA standards – <strong>Due: Feb 10</strong><br/>4. <strong>Client Business Team:</strong> Approve automated reporting workflow – <strong>Due: Feb 12</strong></br><br/><strong>Next Steps:</strong> Follow-up scheduled for <strong>Feb 14, 2024,</strong> to review progress.<br/>",
-    //   sessionid: "1",
-    //   audiofiletimestamp: "2022-01-01T00:00:00Z",
-    //   common_id: "1",
-    //   similarity_query: "Meeting Summary & Action Items – Call with ABC Asset Management",
-    //   isanswered: true,
-    // },
-    // {
-    //   content: "<strong>Aladdin Tech Stack Implementation Checklist – Updated Based on Client Meeting</strong><br/><br/><strong>Section: Portfolio Risk Parameter Configuration</strong><br/><strong>Add:</strong> Custom threshold settings for risk scoring models.<br/><strong>Modify:</strong> Default parameter values for alternative asset classes.<br/><strong>Remove:</strong> Unused predefined thresholds for standardized portfolios.<br/><br/><strong>Section: API Integration & Market Data Feeds</strong><br/><strong>Add:</strong> Bloomberg API integration module.<br/><strong>Modify:</strong> Scheduled data refresh frequency from weekly to daily.<br/><br/><strong>Section: Compliance & Regulatory Updates</strong><br/><strong>Add:</strong> Automated audit logging per <strong>SEC 17a-4 compliance requirements.</strong><br/><strong>Modify:</strong> Encryption settings for data at rest per <strong>ESMA guidelines.</strong><br/>",
-    //   sessionid: "1",
-    //   audiofiletimestamp: "2022-01-01T00:00:00Z",
-    //   common_id: "2",
-    //   similarity_query: "Changes Required in Implementation Checklist",
-    //   isanswered: true,
-    // },
-    // {
-    //   content: "<strong>Date:</strong> February 5, 2024 | 🕒 <strong>Time:</strong> 10:00 AM - 11:00 AM <br/><strong>Participants:</strong> [Consultant Name], [Client Business Lead], [Client Tech Team]<br/><strong>Key Discussion Points:</strong><br/><br/>• Custom risk parameter configurations for different asset classes.<br/>• API integration for real-time data feed from Bloomberg.<br/>• Compliance validation for SEC and ESMA guidelines.<br/>• Automated reporting setup for performance tracking.<br/><br/><strong>Action Items:</strong><br/><br/>1. <strong>Consultant:</strong> Provide a configuration document for risk parameter customization – <strong>Due: Feb 7</strong><br/>2. <strong>Client Tech Team:</strong> Share API specifications for Bloomberg integration – <strong>Due: Feb 8</strong><br/>3. <strong>Consultant:</strong> Validate compliance requirements for SEC & ESMA standards – <strong>Due: Feb 10</strong><br/>4. <strong>Client Business Team:</strong> Approve automated reporting workflow – <strong>Due: Feb 12</strong></br><br/><strong>Next Steps:</strong> Follow-up scheduled for <strong>Feb 14, 2024,</strong> to review progress.<br/>",
-    //   sessionid: "1",
-    //   audiofiletimestamp: "2022-01-01T00:00:00Z",
-    //   common_id: "1",
-    //   similarity_query: "Meeting Summary & Action Items – Call with ABC Asset Management",
-    //   isanswered: true,
-    // },
-    // {
-    //   content: "<strong>Aladdin Tech Stack Implementation Checklist – Updated Based on Client Meeting</strong><br/><br/><strong>Section: Portfolio Risk Parameter Configuration</strong><br/><strong>Add:</strong> Custom threshold settings for risk scoring models.<br/><strong>Modify:</strong> Default parameter values for alternative asset classes.<br/><strong>Remove:</strong> Unused predefined thresholds for standardized portfolios.<br/><br/><strong>Section: API Integration & Market Data Feeds</strong><br/><strong>Add:</strong> Bloomberg API integration module.<br/><strong>Modify:</strong> Scheduled data refresh frequency from weekly to daily.<br/><br/><strong>Section: Compliance & Regulatory Updates</strong><br/><strong>Add:</strong> Automated audit logging per <strong>SEC 17a-4 compliance requirements.</strong><br/><strong>Modify:</strong> Encryption settings for data at rest per <strong>ESMA guidelines.</strong><br/>",
-    //   sessionid: "1",
-    //   audiofiletimestamp: "2022-01-01T00:00:00Z",
-    //   common_id: "2",
-    //   similarity_query: "Changes Required in Implementation Checklist",
-    //   isanswered: true,
-    // }
-  ],
+  topics: [{id:'1',topic:'insurance',CuesList:CuesListLoadState},
+    {id:'2',topic:'covers',CuesList:CuesListLoadState},
+    {id:'3',topic:'benefits',CuesList:CuesListLoadState}],
+  selectedTopic :'insurance',
+  
 };
 
 /*
@@ -326,6 +364,7 @@ const cuesSlice = createSlice({
   initialState: {...initialCuesState},
   reducers: {
     addCues: (state, action: PayloadAction<CuesDataType[]>) => {
+      console.log('add cues called',action)
       // Declare default value for state.CuesList
       let data: CuesDataType = { ...initialCuesObj };
 
@@ -335,12 +374,14 @@ const cuesSlice = createSlice({
           passedState["id"] ?? (data["id"] = uuidv4());
           return { ...data, ...passedState };
         });
-        state.CuesList = [...(state.CuesList ?? []), ...newState];
+        state.CuesList = [ ...(state.CuesList ?? []),...newState];
       }
+    //console.log('state cuelist',[...state.CuesList])
       return state;
     },
 
     // Optionally, you can add actions like reset
+
     resetCue: (state) => {
       Object.assign(state, initialCuesLoadState);
     },
@@ -370,12 +411,70 @@ const cuesSlice = createSlice({
 
       return {...state,...action.payload}
     },
+    updateSelectedTopic:(state,action)=>{
+      let tempTopic = action.payload
+      console.log('tempTopic at updadteSelectedTopic',tempTopic)
+      return {...state,selectedTopic:tempTopic}
+    },
+    addCuesInTopic :(state,action)=>{
+      console.log('add cues in topic',action.payload)
+      let topicId = action.payload.topic_id
+
+      //search topic 
+      let updatedTopics=state.topics.map((topic)=>{
+        let tempTopic = {...topic}
+        if(topic.topic_id ===topicId){
+          let tempCuesList = [...tempTopic.CuesList]
+          tempCuesList.push(action.payload)
+          tempTopic.CuesList = tempCuesList
+        }
+        return tempTopic
+      })
+
+      console.log('updated topics in reducer',updatedTopics)
+      return {...state,topics:updatedTopics}
+    },
+    updateCuesInTopic :(state,action)=>{
+      console.log('add cues in topic',action.payload)
+      // let id = action.payload.common_id
+       let topicId = action.payload.topic_id
+       let msgId = action.payload.message_id
+      
+       //search topic 
+
+      // find particular topic 
+      let updatedTopics=state.topics.map((topic)=>{
+
+
+        if(topic.topic_id !== topicId)
+          return {...topic} 
+
+        // if topic found
+        let tempTopic = {...topic}
+
+        let updatedCuesList = tempTopic.CuesList.map((cue)=>{
+
+          if(cue.message_id !== msgId)
+            return {...cue} 
+          
+          return {...action.payload}
+          
+          //let temp= {...cue}
+        })
+
+        tempTopic.CuesList = updatedCuesList
+        return tempTopic
+      })
+      //let updatedTopics = []
+       console.log('updated topics in reducer',updatedTopics)
+      return {...state,topics:updatedTopics}
+    }
   },
 });
 
 export type { CuesState, CuesDataType };
 // Export actions so they can be dispatched from components
-export const { addCues, resetCue, setCues,updateCues } = cuesSlice.actions;
+export const { addCues, resetCue, setCues,updateCues,updateSelectedTopic,addCuesInTopic,updateCuesInTopic } = cuesSlice.actions;
 
 export { initialCuesObj };
 
