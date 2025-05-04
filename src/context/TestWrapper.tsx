@@ -29,6 +29,7 @@ export default function TestWrapper({ children }) {
       tempUser.id = id
       tempUser.audioPeerId = uuidv4()
       tempUser.peer2Id = uuidv4()
+      tempUser.name=sessionStorage.getItem("userName")
 
       try {
         console.log("Initializing media streams for user:", id)

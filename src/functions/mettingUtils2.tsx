@@ -1,14 +1,15 @@
 import type React from "react";
 import { v4 as uuidv4 } from "uuid";
 import type { UserType } from "../reducers/usersReducer";
-import { io } from "socket.io-client";
-import Peer from "peerjs";
+import { utils } from "@ricky0123/vad-react"
 
 //@ts-ignore
 import vad from "voice-activity-detection";
 import { getTimestamp, processRecordedAudio } from "./mettingsUtils";
+import WavToMp3 from "./wavToMp3";
+import { PostReq } from "./requests";
 
-export function downsampleToWav(file: Blob, callback: CallableFunction): void {
+export  function downsampleToWav(file: Blob, callback: CallableFunction): void {
   //@ts-ignore
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   const audioContext = new AudioContext();
@@ -116,7 +117,7 @@ export function bufferToWav(abuffer: ArrayBuffer, len: number): ArrayBuffer {
 
 //recruiter_notes_sending is failing although that fxn is not associated with any above stuff
 
-export function encodeMp3(arrayBuffer: ArrayBuffer) {
+export  function encodeMp3(arrayBuffer: ArrayBuffer) {
   // @ts-ignore
   const wav = lamejs.WavHeader.readHeader(new DataView(arrayBuffer));
   const dataView = new Int16Array(arrayBuffer, wav.dataOffset, wav.dataLen / 2);
@@ -238,6 +239,140 @@ export function uploadFile(
   }
   uploadChunk(0);
 }
+
+
+function writeString(dataview: DataView, offset: number, str: string) {
+  for (let i = 0; i < str.length; i++) {
+    dataview.setUint8(offset + i, str.charCodeAt(i));
+  }
+}
+
+
+ function audioBufferToWavBlob(buffer: AudioBuffer): Blob {
+  
+  const numChannels = buffer.numberOfChannels;
+  const sampleRate = buffer.sampleRate;
+  const bitsPerSample = 16;
+  const blockAlign = numChannels * (bitsPerSample / 8);
+  const byteRate = sampleRate * blockAlign;
+  const dataLength = buffer.length * blockAlign;
+  const bufferLength = 44 + dataLength;
+  const wavBuffer = new ArrayBuffer(bufferLength);
+  const view = new DataView(wavBuffer);
+
+  // RIFF header
+  writeString(view, 0, 'RIFF');
+  view.setUint32(4, 36 + dataLength, true);
+  writeString(view, 8, 'WAVE');
+
+  // fmt chunk
+  writeString(view, 12, 'fmt ');
+  view.setUint32(16, 16, true);           // subchunk1Size
+  view.setUint16(20, 1, true);            // audioFormat = PCM
+  view.setUint16(22, numChannels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, byteRate, true);
+  view.setUint16(32, blockAlign, true);
+  view.setUint16(34, bitsPerSample, true);
+
+  // data chunk
+  writeString(view, 36, 'data');
+  view.setUint32(40, dataLength, true);
+
+  // PCM samples
+  let offset = 44;
+  for (let channel = 0; channel < numChannels; channel++) {
+    const channelData = buffer.getChannelData(channel);
+    for (let i = 0; i < channelData.length; i++) {
+      // clamp and convert to 16-bit PCM
+      let sample = Math.max(-1, Math.min(1, channelData[i]));
+      sample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+      view.setInt16(offset, sample, true);
+      offset += 2;
+    }
+  }
+
+  return new Blob([view], { type: 'audio/wav' });
+}
+
+/**
+ * Ensure that the input becomes a Blob.
+ * Supports Blob, URL (string), ArrayBuffer, AudioBuffer and Float32Array.
+ */
+async function ensureBlob(
+  input: Blob | string | ArrayBuffer | AudioBuffer | Float32Array
+): Promise<Blob> {
+  if (input instanceof Blob) {
+    return input;
+  }
+  if (typeof input === 'string') {
+    const resp = await fetch(input);
+    return resp.blob();
+  }
+  if (input instanceof ArrayBuffer) {
+    return new Blob([input], { type: 'application/octet-stream' });
+  }
+  if (typeof AudioBuffer !== 'undefined' && input instanceof AudioBuffer) {
+    return audioBufferToWavBlob(input);
+  }
+  if (input instanceof Float32Array) {
+    const sampleRate = 16000;
+    const audioCtx = new (window.OfflineAudioContext ||
+                           window.AudioContext)(1, input.length, sampleRate);
+    const buffer = audioCtx.createBuffer(1, input.length, sampleRate);
+    buffer.copyToChannel(input, 0);
+    return audioBufferToWavBlob(buffer);
+  }
+  console.error('Unsupported audio type:', input);
+  throw new Error(
+    'Unsupported audio type, expected Blob, URL, ArrayBuffer, AudioBuffer, or Float32Array.'
+  );
+}
+
+
+export function generateBase64(blob: Blob): Promise<string | ArrayBuffer | null> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error('Error reading blob'));
+    reader.readAsDataURL(blob);
+  });
+}
+
+
+export async function processAudioToBase64(
+  audio: Blob | string | ArrayBuffer | AudioBuffer | Float32Array,
+  url: string,
+  data: Record<string, any>,
+  handleCors = false
+): Promise<any> {
+  try {
+    // console.log('Raw audio input:', audio);
+    const audioBlob = await ensureBlob(audio);
+    const base64data = (await generateBase64(audioBlob)) as string;
+
+    const payload = { ...data, audio: base64data };
+    const options: RequestInit = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    };
+    if (handleCors) {
+      options.mode = 'no-cors';
+      console.warn('Using no-cors mode—response will be opaque.');
+    }
+
+    const resp = await fetch(url, options);
+    if (options.mode === 'no-cors') {
+      return { success: true, message: 'Request sent (no-cors mode)' };
+    }
+    return await resp.json();
+  } catch (err) {
+    console.error('processAudioToBase64 error:', err);
+    throw err;
+  }
+}
+
 
 export function handleRecordings(
   stream: MediaStream,

@@ -13,6 +13,8 @@ import {
 } from "../reducers/usersReducer"
 import { useSocketWrapper } from "../context/SocketWrapper"
 import { usePeerWrapper } from "../context/PeerWrapper"
+import { useNavigate } from 'react-router-dom';
+import VadStatusIndicator from "./VadIndicator"
 
 
 export default function MeetingPageHeader() {
@@ -24,7 +26,7 @@ export default function MeetingPageHeader() {
   const { isSocket1_Connected, socket1_emitEvent}:any = useSocketWrapper()
   const { startScreenSharing, stopScreenSharing } = usePeerWrapper()
   const [isScreenSharing, setIsScreenSharing] = useState(false)
-
+  const navigate=useNavigate()
   const myUser = users.find((u) => u.id === meUser.id) || users[0]
 
   async function handleCloseCall() {
@@ -36,7 +38,10 @@ export default function MeetingPageHeader() {
       dispatch(setNVclosecall(true))
       dispatch(setNVaudioUploadAnimation(true))
       dispatch(clearAllUsersActions())
+      //i can take help of socket to inform the other users that someone leftwith thier id
+      
       console.log("Closing the call...")
+      navigate('/leave');
     }
   }
 
@@ -112,11 +117,15 @@ export default function MeetingPageHeader() {
   
 
   return (
+    <div>
+     <div className="mb-2px">
+     <VadStatusIndicator/>
+     </div>
     <header
       id="header"
       className="w-full bg-white border-b border-neutral-200 px-4 py-3 flex place-items-center justify-between shadow-sm"
       style={{ height: "10vh" }}
-    >
+      >
       <div className="flex place-items-center space-x-4">
         <div className="h-8 w-[2px] bg-neutral-200"></div>
         <img src="https://api.dicebear.com/7.x/notionists/svg?scale=200&amp;seed=Logo" className="h-8" alt="Logo" />
@@ -134,7 +143,7 @@ export default function MeetingPageHeader() {
         <button
           className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
           onClick={toggleVideo}
-        >
+          >
           {myUser?.cameraStatus ? (
             <i className="fa-solid fa-video fa-lg"></i>
           ) : (
@@ -144,7 +153,7 @@ export default function MeetingPageHeader() {
         <button
           className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
           onClick={toggleAudio}
-        >
+          >
           {myUser?.microphoneStatus ? (
             <i className="fa-solid fa-microphone fa-lg"></i>
           ) : (
@@ -155,7 +164,7 @@ export default function MeetingPageHeader() {
           className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
           onClick={toggleScreenShare}
           title="Share Screen"
-        >
+          >
           {isScreenSharing ? (
             <i className="fa-solid fa-circle-dot fa-lg text-red-500"></i>
           ) : (
@@ -166,12 +175,13 @@ export default function MeetingPageHeader() {
         <button
           className="px-8 py-2 bg-neutral-600 hover:bg-neutral-700 text-white rounded-lg flex items-center text-lg"
           onClick={handleCloseCall}
-        >
+          >
           <i className="fa-solid fa-xmark mr-4 fa-lg"></i>
           End Call
         </button>
       </div>
       {isHost && <MeetingPageHeaderTimer />}
     </header>
+  </div>
   )
 }

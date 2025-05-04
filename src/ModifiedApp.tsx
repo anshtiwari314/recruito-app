@@ -1,7 +1,6 @@
 import React from "react";
 import MainPage from "./pages/MainPage";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import DataWrapper from "./context/DataWrapper";
 import ReduxProvider from "./store/Providers";
 import NotFoundPage from "./pages/NotFoundPage";
 import TempPage from './pages/TempPage'
@@ -10,6 +9,7 @@ import TestWrapper from './context/TestWrapper'
 import SocketWrapper from "./context/SocketWrapper";
 import HomePage from "./pages/old-HomePage";
 import PeerWrapper from "./context/PeerWrapper";
+import VadWrapper from "./context/VadWrapper";
 
 
 export default function App() {
@@ -29,11 +29,13 @@ export default function App() {
                     <TestWrapper>
                     <SocketWrapper>
                       <PeerWrapper>
+                        <VadWrapper>
                         <MainPage />
+                        </VadWrapper>
                       </PeerWrapper>
                     </SocketWrapper>
                   </TestWrapper>
-                        }
+                      }
                     />
             {/* 404 Page Route */}
             

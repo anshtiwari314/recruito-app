@@ -11,14 +11,14 @@ import RightPanel from "../components/RightPanel";
 import NotFound from "./NotFoundPage";
 import Leave from "./LeavePage";
 import MeetingPageHeader from "../components/MeetingPageHeader";
+import { setNameAction } from "../reducers/usersReducer";
 
-export function MainPage() {
+export default function MainPage() {
   //@ts-ignore
-  const { setMyId, setName } = useData();
   const { isHost, meetingIsLegit } = useAppSelector((state) => state.qpReducer);
   const { jobTitle } = useAppSelector((state) => state.cuesReducer);
   const { closeCall } = useAppSelector((state) => state.nvReducer);
-
+  const myState=useAppSelector((state)=>state.myStateReducer)
   const dispatch = useDispatch();
   const [meetingIsLegitMain, setMeetingIsLegitMain] = useState<boolean>(true);
 
@@ -73,7 +73,7 @@ export function MainPage() {
       // Check if the user's name is already stored in sessionStorage
       if (myName.length > 2) {
         // If the name is found, set it using setName function
-        setName(myName);
+        // setName(myName);
       } else {
         // If the name is not found, prompt the user to enter their name
         while (myName.length < 2) {
@@ -83,7 +83,10 @@ export function MainPage() {
           if (myName.length < 2) alert("Name must have 2 letters long");
         }
         // Set the entered name using setName function
-        setName(myName);
+      //  setNameAction({
+      //   id:myState.id,
+      //   name:myName
+      //  });
         // Store the entered name in sessionStorage
         sessionStorage.setItem("userName", myName);
       }
@@ -151,7 +154,7 @@ export function MainPage() {
           dispatch(setQP(qParams));
           
           // Set the myId state variable to the temporary ID
-          setMyId(uuidv4());
+          // setMyId(uuidv4());
         }
       };
 
@@ -182,6 +185,8 @@ export function MainPage() {
   }, []);
 
     //http://localhost:5173/?room_id=abc-123-fgh-456&cust_email_id=saurabhahlawat89@gmail.com&agent_id=1234&job_id=1
+  
+
   return (
     <>
       {tempIsHost === null ? (
@@ -203,7 +208,7 @@ export function MainPage() {
               <div
                 id="content-panel"
                 className="relative grow w-10/12 p-6 overflow-y-hidden"
-                style={{border:'0.1rem solid red'}}
+                //style={{border:'0.1rem solid red'}}
               >
                 
                 <ContentPanel isMobile={isMobile} />
@@ -220,37 +225,4 @@ export function MainPage() {
       )}
     </>
   );
-}
-
-
-
-export default function TempMainPage(){
-
-  const [isMobile, setIsMobile] = useState(false);
-  return (
-    <div className="overflow-y-auto w-screen min-h-screen relative bg-neutral-50" style={{height:'100vh',width:'100vw',overflow:'hidden'}}>
-            {/* App header */}
-            
-            <MeetingPageHeader/>
-
-            {/* Main Content */}
-            <main id="main-content" className="flex h-[calc(100vh-120px)]" 
-            style={{height:'90vh'}}
-            >
-              {/* Content Panel */}
-              <div
-                id="content-panel"
-                className="relative grow w-10/12 p-6 overflow-y-hidden"
-                style={{border:'0.1rem solid red'}}
-              >
-                
-                {/* <ContentPanel isMobile={isMobile} /> */}
-                {/**/}
-              </div>
-
-              {/* Right Panel */}
-              <RightPanel />
-            </main>
-          </div>
-  )
 }

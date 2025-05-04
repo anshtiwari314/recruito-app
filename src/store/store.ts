@@ -11,7 +11,7 @@ export const store = configureStore({
   reducer: {
     cuesReducer: cuesReducer.cuesReducer,
     qpReducer: queryparamReducer.qpReducer,
-    transcriptionReducer: transcriptionReducer.transcriptionReducer,
+    trcpReducer: transcriptionReducer.transcriptionReducer,
     usersReducer: usersReducer.usersReducer,
     nvReducer: navigationparamReducer.nvReducer,
     myStateReducer: myStateReducer.myStateReducer,

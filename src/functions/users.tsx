@@ -12,6 +12,13 @@ export function addNewUser(state: UsersType, action: PayloadAction<UserType>) {
     console.log("[DEBUGGER] USER ALREADY EXISTS", action.payload)
   }
 }
+export function setName(state:UsersType,action:PayloadAction<{id:string,name:string}>){
+  const idx=state.findIndex((user) => user.id === action.payload.id);
+  if(idx!==-1){
+    state[idx].name=action.payload.name;
+    console.log("Name has been updated");
+  }
+}
 
 export function removeUser(state: UsersType, action: PayloadAction<{ id: string }>) {
   //with the extracted id provided to me i will match and exclude it from the state of UserType array

@@ -1,17 +1,29 @@
-import React, {useState} from 'react'
-import { useAppSelector } from "@/store/store";
-import "./leavepage.css";
-import FeedbackModel from '../components/FeedbackModel';
+import React from "react"
+import { useState, useEffect } from "react"
+import { useAppSelector } from "../store/store"
+import { setNVaudioUploadAnimation } from "../reducers/navigationparamReducer"
+import "./leavepage.css"
+import FeedbackModel from "../components/FeedbackModel"
+import { useDispatch } from "react-redux"
 
 export default function Leave() {
+  const [isOpen, setIsOpen] = useState(true)
+  const dispatch = useDispatch()
+  console.log("Leave Page")
+  const { audioUploadAnimation } = useAppSelector((state) => state.nvReducer)
+  console.log(audioUploadAnimation)
+  console.log(!audioUploadAnimation)
 
-  const [isOpen, setIsOpen] = useState(true);
-  console.log("Leave Page");
-  const { audioUploadAnimation } = useAppSelector((state) => state.nvReducer);
-  console.log(audioUploadAnimation);
-  console.log(!audioUploadAnimation);
+  useEffect(() => {
+    if (audioUploadAnimation) {
+      const timer = setTimeout(() => {
+        dispatch(setNVaudioUploadAnimation(false))
+      }, 3000)
 
-  
+      return () => clearTimeout(timer)
+    }
+  }, [audioUploadAnimation, dispatch])
+
   return (
     <>
       {audioUploadAnimation ? (
@@ -37,31 +49,23 @@ export default function Leave() {
               </svg>
               <span className="sr-only">Loading...</span>
             </div>
-            <p className="text-center text-white w-full text-[2.5rem]">
-              Your interview is currently being processed.
-            </p>
+            <p className="text-center text-white w-full text-[2.5rem]">Your interview is currently being processed.</p>
             <div className="mt-12 flex justify-center flex-wrap text-center text-white">
-              Thank you for participating in the interview. Please wait while we
-              process your interview.
+              Thank you for participating in the interview. Please wait while we process your interview.
             </div>
           </div>
         </div>
       ) : (
         <div className="flex justify-center items-center h-[98vh] w-full">
-          <FeedbackModel isOpen={isOpen} setIsOpen={setIsOpen}/>
+          <FeedbackModel isOpen={isOpen} setIsOpen={setIsOpen} />
           <div className="w-[80%] h-[20vh] -translate-y-1/2 transform">
-            
-            <p className="text-center text-white w-full text-[2.5rem]">
-              You have completed the interview.
-            </p>
+            <p className="text-center text-white w-full text-[2.5rem]">You have completed the interview.</p>
             <div className="mt-12 flex justify-center flex-wrap text-center text-white">
-              Thank you for participating in the interview. You have
-              completed the interview.
+              Thank you for participating in the interview. You have completed the interview.
             </div>
           </div>
         </div>
       )}
     </>
-  );
+  )
 }
-
