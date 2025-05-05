@@ -169,9 +169,9 @@ const trcpSlice = createSlice({
       // Add if condition to check if state.CuesList exists and append to array in that case
       if (action.payload) {
         state.TranscriptionList = [
-          ...action.payload,
-          ...state.TranscriptionList,
           
+          ...state.TranscriptionList,
+          ...action.payload
         ];
       }
       return state;

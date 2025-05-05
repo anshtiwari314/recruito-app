@@ -111,19 +111,31 @@ let CuesListLoadState= [
   //   isanswered: true,
   // },
   {
-    content: `<strong>Changes Required in Implementation Checklist</strong>
-            <table style="width:100%;text-align:center">
+    content: `
+            <table style="width:100%;text-align:left">
             <tr>
-              <th> header 1</th>
-              <th> i am header 2</th>
+              <th> Field </th>
+              <th> Value</th>
+              <th>Field</th>
+              <th> Value</th>
             </tr>
             <tr>
-              <td> col 1 </td>
-              <td> col 1</td>
+              <td> Age </td>
+              <td> 28</td>
+              <td> Occupation </td>
+              <td> Software developer</td>
             </tr>
             <tr>
-              <td> col 2</td>
-              <td> col 2</td>
+              <td> No of dependents</td>
+              <td> 5 </td>
+              <td> address</td>
+              <td>  ghaziabad up india </td>
+            </tr>
+            <tr>
+              <td> Family</td>
+              <td> mother  </td>
+              <td> address</td>
+              <td>  ghaziabad up india </td>
             </tr>
             </table>
             <br/>`,
@@ -161,7 +173,7 @@ let CuesListLoadState= [
   },
   
   {
-    content: `<strong>Changes Required in Implementation Checklist</strong>
+    content: `
             <br/><br/>
             <strong>Section: Portfolio Risk Parameter Configuration</strong>
             <br/>

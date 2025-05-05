@@ -99,7 +99,7 @@ export default function MeetingPageHeader() {
         />
         {jobTitle ? (
           <div className="text-md text-neutral-500">
-            <div>Interview: {jobTitle}</div>
+            <div>{jobTitle}</div>
             <div style={{ textTransform: "capitalize" }}>{name}</div>
           </div>
         ) : (

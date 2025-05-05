@@ -21,7 +21,7 @@ export function RightPanelResource() {
             <div className="text-sm text-neutral-600 mt-1">
               {/* {jobTitle} Position Details */}
               {/* Traya Health Position Details */}
-              Ecommerce-Manager Position Details
+              HDFC Life
             </div>
           </div>
           <button className="p-2 hover:bg-neutral-100 rounded-lg text-neutral-600">

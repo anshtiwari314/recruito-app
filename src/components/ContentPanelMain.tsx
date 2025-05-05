@@ -19,8 +19,8 @@ export function SingleCue({
   const [toggleDetails, setToggleDetails] = useState(true);
 
   return (
-    <div className="p-3 bg-neutral-50 rounded-lg border border-neutral-200" style={{backgroundColor:'#f2f2f2'}}>
-      <div className="flex items-center justify-between mb-2">
+    <div className="p-3 bg-neutral-50 rounded-lg border border-neutral-200 w-[95%]" style={{backgroundColor:'#f2f2f2'}}>
+      <div className="flex items-center justify-between mb-2" style={{}}>
         <div className="flex items-center space-x-3">
           {/* {isAnswered ? (
             <i className="fa-solid fa-circle-check text-neutral-600"></i>
@@ -69,15 +69,17 @@ export function ClickableTopic({topic,selectedTopic,isAnswered=false}){
   const dispatch = useDispatch();
   //const [selectedTopic] = useAppSelector(state=>[state.cuesReducer.selectedTopic])
  // console.log(typeof dispatch(updateSelectedTopic('hellow')))
-  const cuesList = topic.CuesList
- 
+  const cuesList = topic.CuesList;
+
+  
+
   return (
     <div 
-    className="px-3 py-2 bg-neutral-50 rounded-lg border border-neutral-200 w-fit mx-3 my-5 w-full" 
+    className="px-3 py-2 bg-neutral-50 rounded-lg border border-neutral-200 mx-3 my-5 w-full" 
     //style={{border:'0.1rem solid red'}}
     onClick={()=>{dispatch(updateSelectedTopic(topic.topic))}}
     >
-      <div className="flex items-center justify-between mb-2" >
+      <div className="flex items-center justify-between mb-2 " >
         <div className="flex items-center space-x-3">
           {selectedTopic===topic.topic ? (
             <i className="fa-solid fa-circle-check text-neutral-600"></i>
@@ -120,9 +122,9 @@ export function ClickableTopic({topic,selectedTopic,isAnswered=false}){
           </div>
         </div>
       )} */}
-      <div className="space-y-3 mx-0" style={{overflowY:'scroll',height:'35vh',
+      <div className="space-y-3 mx-0 w-full" style={{overflowY:'scroll',height:'35vh',
         //border:'0.1rem solid red'
-        }}>
+        }} >
           {/* Details of each suggestion to be fetched from API server ; for loop */}
           {cuesList &&
             cuesList.map((question: CuesDataType, index: number) => (
@@ -136,6 +138,89 @@ export function ClickableTopic({topic,selectedTopic,isAnswered=false}){
     </div>
   );
 }
+
+
+export function QnaTopic({topic,selectedTopic,isAnswered=false}){
+  const dispatch = useDispatch();
+  //const [selectedTopic] = useAppSelector(state=>[state.cuesReducer.selectedTopic])
+ // console.log(typeof dispatch(updateSelectedTopic('hellow')))
+  const cuesList = topic.CuesList;
+
+  const QnaRef = useRef(null)
+  
+  useEffect(() => {
+    if (QnaRef.current) {
+      //console.log('transcriptions inside content panel is changed')
+        QnaRef.current.scrollTop = QnaRef.current.scrollHeight;
+    }
+  }, [cuesList]);
+
+  return (
+    <div 
+    className="px-3 py-2 bg-neutral-50 rounded-lg border border-neutral-200 mx-3 my-5 w-full" 
+    //style={{border:'0.1rem solid red'}}
+    onClick={()=>{dispatch(updateSelectedTopic(topic.topic))}}
+    >
+      <div className="flex items-center justify-between mb-2 " >
+        <div className="flex items-center space-x-3">
+          {selectedTopic===topic.topic ? (
+            <i className="fa-solid fa-circle-check text-neutral-600"></i>
+          ) : (
+            <i className="fa-regular fa-circle text-neutral-600"></i>
+          )}
+
+          <span className="text-neutral-900" style={{textTransform:'capitalize',fontWeight:'bold'}}>{parse(topic?.topic)}</span>
+        </div>
+        {/* {isAnswered ? (
+          <span className="px-2 py-1 bg-neutral-200 rounded text-sm">
+            {question?.match_score ? `${question.match_score} match` : ""}
+          </span>
+        ) : null} */}
+      </div>
+{/*       
+      {!isAnswered ? (
+        <div className="ml-8">
+        </div>
+      ) : (
+        <div className="ml-8 text-sm text-neutral-600">
+          {/* <button
+            className="mt-2 text-neutral-700 hover:text-neutral-900"
+            onClick={() => setToggleDetails((p) => !p)}
+          >
+            {toggleDetails ? (
+              <i className="fa-solid fa-chevron-down mr-1" />
+            ) : (
+              <i className="fa-solid fa-chevron-right mr-1" />
+            )}
+            View Details
+          </button> 
+
+          <div>
+            {toggleDetails && (
+              <p className="mt-2 pl-2 pr-2" >
+                {parse(question?.content)}
+              </p>
+            )}
+          </div>
+        </div>
+      )} */}
+      <div className="space-y-3 mx-0 w-full" style={{overflowY:'scroll',height:'35vh',
+        //border:'0.1rem solid red'
+        }} ref={QnaRef}>
+          {/* Details of each suggestion to be fetched from API server ; for loop */}
+          {cuesList &&
+            cuesList.map((question: CuesDataType, index: number) => (
+              <SingleCue
+                question={question}
+                key={index}
+                isAnswered={question.isanswered}
+              />
+            ))}
+        </div>
+    </div>
+  );
+}
+
 export function SingleTranscription({ data }: { data: TranscriptionDataType }) {
   return (
     <div className="flex w-full flex-shrink-0">
@@ -179,10 +264,12 @@ export default function ContentPanelMain() {
 
   useEffect(() => {
     if (transcriptionRef.current) {
-      transcriptionRef.current.scrollTop = transcriptionRef.current.scrollHeight;
+      console.log('transcriptions inside content panel is changed')
+        transcriptionRef.current.scrollTop = transcriptionRef.current.scrollHeight;
     }
   }, [transcriptions]); // Runs when transcriptions update
 
+  
   
 
   return (
@@ -192,7 +279,7 @@ export default function ContentPanelMain() {
     >
       <div
         id="transcription"
-        ref={transcriptionRef}
+       
         style={{overflowY:'hidden',height:'100%',padding:'0 0.8rem'}}
         className={`${!isExpanded ? "flex-grow-0 flex-shrink-0 w-1/4 min-h-96 max-h-lvh mr-6" : "max-h-96 w-full"} mb-6 bg-white rounded-lg shadow-sm border-2 border-zinc-500 `}
       >
@@ -210,7 +297,7 @@ export default function ContentPanelMain() {
         </div>
 
         {/* Details of transcripts to be fetched from API server ; for loop */}
-        <div className="space-y-8 flex-1" style={{overflowY:'scroll',height:'85%'}}>
+        <div className="space-y-8 flex-1" style={{overflowY:'scroll',height:'85%'}}  ref={transcriptionRef}>
           {transcriptions.map((transcription, i) => (
             <SingleTranscription data={transcription} key={i} />
           ))}
@@ -237,7 +324,7 @@ export default function ContentPanelMain() {
       {/* AI Suggestions section */}
       <div
         id="ai-suggestions"
-        style={{overflowY:'hidden',height:'100%',padding:'0 0.8rem'}}
+        style={{overflowY:'hidden',height:'100%',padding:'0 0.8rem',paddingBottom:'5rem'}}
         className={`${!isExpanded ? "flex-grow-0 w-3/4 min-h-96 max-h-lvh" : "w-full max-h-96"} mb-6 bg-white rounded-lg shadow-sm border-2 border-zinc-500 overflow-y-auto`}
       >
         {/* AI Suggestions section header */}
@@ -251,7 +338,7 @@ export default function ContentPanelMain() {
         <div className="space-y-3 py-2 w-full" 
         style={{
           overflowY:'scroll',
-          height:'60vh',
+          height:'100%',
           //border:'0.1rem solid red',
           display:'flex',
           alignItems:'center',
@@ -260,14 +347,25 @@ export default function ContentPanelMain() {
         }}>
           {/* Details of each suggestion to be fetched from API server ; for loop */}
           {cuesState &&
-            cuesState.topics.map((topic: CuesDataType, index: number) => (
-              <ClickableTopic
+            cuesState.topics.map((topic: CuesDataType, index: number) => {
+              if(index!==cuesState.topics.length-1)
+              return <ClickableTopic
                 topic={topic}
                 selectedTopic ={cuesState.selectedTopic}
                 key={index}
                 isAnswered={false}
               />
-            ))}
+              })}
+
+            {cuesState.topics.length>0 &&
+            <QnaTopic
+            topic={cuesState.topics[cuesState.topics.length-1]}
+            selectedTopic ={cuesState.selectedTopic}
+            key={2399}
+            isAnswered={false}
+          />
+            }   
+            
         </div>
 
         {/* <div className="space-y-3" style={{overflowY:'scroll',height:'85%'}}>

@@ -1008,13 +1008,16 @@ export default function DataWrapper({
     let url5 = 'https://temp-meeting-server.onrender.com'
     let url6 = 'wss://recruitonodesocket.vitti.insure'
     let url7 = 'https://be80-103-173-124-200.ngrok-free.app/'
+    let url8 = 'http://192.168.1.10:5000'
 
-    let tempSocket = io(url7);
+    //let url9 = 'http://192.168.1.10:3000'
+
+    let tempSocket = io(url6);
 
     //This is a socket connection with backend server to handle cues specific requests or other api requests
     let tempSocket2 = io(
-      'http://localhost:5000',
-      //"wss://recruito.vitti.insure",
+     // 'http://localhost:5000',
+      "wss://recruito.vitti.insure",
     // 'https://490f-49-204-211-204.ngrok-free.app',
      //'https://a910-49-204-211-204.ngrok-free.app',
      //{ transports: ["websocket"]}
