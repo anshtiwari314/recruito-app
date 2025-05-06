@@ -35,7 +35,6 @@ export default function NewJobForm() {
       if (!res.ok) {
         throw new Error(`Server error: ${res.status}`);
       }
-
       const data = await res.json();
       console.log("Job Created:", data);
       setJobId("");
@@ -47,9 +46,7 @@ export default function NewJobForm() {
       console.error(err);
       alert("Error creating job, check console.");
     }finally{
-      // Optionally, you can dispatch an action to update the Redux store here
       dispatch(addJob({id: jobId, title: jobTitle, description: jobDesc, criteria: jobCriteria})); // Assuming you have an action creator for adding a job
-      //  // Assuming you have an action creator for adding a job
     }
   };
 

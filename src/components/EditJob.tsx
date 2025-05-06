@@ -5,6 +5,8 @@ import { Input } from "./ui/Input"
 import Button from "./ui/Button"
 import { Textarea } from "./ui/Textarea"
 import { DialogTitle,DialogHeader } from "./ui/Dailog"
+import { useDispatch } from "react-redux"
+import { editJob } from "../reducers/jobSlices"
 
 interface EditJobFormProps {
   jobId: string
@@ -26,6 +28,7 @@ export default function EditJobForm({
   const [title, setTitle] = useState(initialData.title)
   const [description, setDescription] = useState(initialData.description)
   const [criteria, setCriteria] = useState(initialData.criteria)
+  const dispatch=useDispatch()
 
   const handleSave = () => {
     onSave({
@@ -34,6 +37,7 @@ export default function EditJobForm({
       description,
       criteria,
     })
+    dispatch(editJob({ id: jobId, title, description, criteria }))
     onClose()
   }
 

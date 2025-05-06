@@ -116,8 +116,15 @@ const jobSlice = createSlice({
     },
 
     
-    editJob: (state, action: PayloadAction<string>) => {
-      state.selectedJob = state.jobs.find((job) => job.id === action.payload) || null
+    editJob: (state, action: PayloadAction<{id:string,title:string,description:string,criteria:string}>) => {
+      // state.selectedJob = state.jobs.find((job) => job.id === action.payload.id) || null
+      const index = state.jobs.findIndex((job) => job.id === action.payload.id)
+      if (index !== -1) {
+        state.jobs[index] = { ...state.jobs[index], ...action.payload }
+      } else {
+        state.error = "Job not found."
+      }
+      console.log("Job edited successfully!");
     },
 
     addResumes: (state, action: PayloadAction<{ jobId: string; file: string }>) => {
@@ -136,7 +143,7 @@ const jobSlice = createSlice({
         }
         job?.candidates?.push(newCandidate)
         // job.status = "Reviewing"
-        console.log("Resumes added successfully!");
+        console.log("Resumes added successfully!",newCandidate);
         
       }
     },

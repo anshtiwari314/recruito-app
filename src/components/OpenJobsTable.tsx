@@ -41,6 +41,8 @@ const dummyCandidates = [
 export default function OpenJobTables({jobG}:Job[]) {
   const dispatch = useDispatch()
   const jobs = useAppSelector((state) => state.jobReducer.jobs)
+  console.log("Jobs from Redux:", jobs)
+  // console.log("Jobs from props:", jobG)
 
   const [showCandidatesModal, setShowCandidatesModal] = useState(false)
   const [showResumesModal, setShowResumesModal] = useState(false)
@@ -48,15 +50,15 @@ export default function OpenJobTables({jobG}:Job[]) {
   const [showQuestionsModal, setShowQuestionsModal] = useState(false)
   const [selectedJobId, setSelectedJobId] = useState("")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-
-  const filteredCandidates = dummyCandidates.filter((candidate) => candidate.jobId === selectedJobId)
-
+  
+  // const filteredCandidates = dummyCandidates.filter((candidate) => candidate.jobId === selectedJobId)
   const selectedJob = jobs.find((job) => job.id === selectedJobId)
+  const filteredCandidates = selectedJob?.candidates ?? [];
 
   const handleEditJob = (jobId: string) => {
     setSelectedJobId(jobId)
     setShowEditModal(true)
-    dispatch(editJob(jobId))
+    // dispatch(editJob(jobId))
   }
 
   const handleAddResumes = (jobId: string) => {
@@ -145,56 +147,60 @@ export default function OpenJobTables({jobG}:Job[]) {
         </Table>
 
         <Dialog open={showCandidatesModal} onOpenChange={setShowCandidatesModal}>
-          <DialogContent>
-            <DialogHeader onClose={() => setShowCandidatesModal(false)}>
-              <DialogTitle>View Candidates for Job {selectedJobId}</DialogTitle>
-            </DialogHeader>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Score</TableHead>
-                  <TableHead>Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredCandidates.length > 0 ? (
-                  filteredCandidates.map((candidate) => (
-                    <TableRow key={candidate.id}>
-                      <TableCell>{candidate.name}</TableCell>
-                      <TableCell>{candidate.status}</TableCell>
-                      <TableCell>{candidate.score}</TableCell>
-                      <TableCell>
-                        <Button
-                          className="bg-blue-500 hover:bg-blue-600"
-                          onClick={() => handleScheduleMeeting(candidate.name)}
-                        >
-                          Schedule Meeting
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell  className="text-center py-4">
-                      No candidates found for this job
+        <DialogContent>
+          <DialogHeader onClose={() => setShowCandidatesModal(false)}>
+            <DialogTitle>View Candidates for Job {selectedJobId}</DialogTitle>
+          </DialogHeader>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Score</TableHead>
+                <TableHead>Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredCandidates.length > 0 ? (
+                filteredCandidates.map((candidate) => (
+                  <TableRow key={candidate.id}>
+                    <TableCell>{candidate.name}</TableCell>
+                    <TableCell>{candidate.status}</TableCell>
+                    <TableCell>{candidate.score}</TableCell>
+                    <TableCell>
+                      <Button
+                        className="bg-blue-500 hover:bg-blue-600"
+                        onClick={() => handleScheduleMeeting(candidate.name)}
+                      >
+                        Schedule Meeting
+                      </Button>
                     </TableCell>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
-            <div className="mt-4">
-              <DialogClose asChild>
-                <Button className="bg-blue-500 hover:bg-blue-600" onClick={() => setShowCandidatesModal(false)}>
-                  Close
-                </Button>
-              </DialogClose>
-            </div>
-          </DialogContent>
-        </Dialog>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center py-4">
+                    No candidates found for this job
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+          <div className="mt-4">
+            <DialogClose asChild>
+              <Button
+                className="bg-blue-500 hover:bg-blue-600"
+                onClick={() => setShowCandidatesModal(false)}
+              >
+                Close
+              </Button>
+            </DialogClose>
+          </div>
+        </DialogContent>
+      </Dialog>
 
-        <Dialog open={showResumesModal} onOpenChange={setShowResumesModal}>
+
+      <Dialog open={showResumesModal} onOpenChange={setShowResumesModal}>
           <DialogContent>
             <DialogHeader onClose={() => setShowResumesModal(false)}>
               <DialogTitle>Add Resumes</DialogTitle>
