@@ -57,7 +57,6 @@ export function PostReq(url,data){
               // }
               resolve(result)
             })
-        
     })
     
   }

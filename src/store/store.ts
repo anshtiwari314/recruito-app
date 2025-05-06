@@ -1,12 +1,14 @@
 //import {createStore } from 'redux';
 import { configureStore } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useSelector } from "react-redux";
+import jobSlices from "../reducers/jobSlices";
+
 
 
 // Create and configure the Redux store
 export const store = configureStore({
   reducer: {
-   
+    jobReducer: jobSlices.jobReducer,
   },
 });
 
