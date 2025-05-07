@@ -86,7 +86,7 @@ export default function Login() {
                     </div>
 
                     <button
-                        className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-300 text-lg"
+                        className="w-full bg-zinc-950 text-white py-2 rounded-md hover:bg-zinc-700 transition duration-300 text-lg"
                         onClick={handleChecks}
                         disabled={loading}
                     >
