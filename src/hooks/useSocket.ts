@@ -55,8 +55,13 @@ const useSocket = (
         console.log("Socket disconnected:", socket.id)
         setIsConnected(false)
       })
+      socket.on("reconnect", (attempt) => {
+        console.log("Socket reconnected, attempt:", attempt)
+        setIsConnected(true)
+        socketConnectedFirstTime()
+      })
     }
-
+    
     // Cleanup function to disconnect the socket
     return () => {
       if (socketRef.current) {

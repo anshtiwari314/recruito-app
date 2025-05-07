@@ -1,5 +1,3 @@
-"use client"
-
 import React, { useContext, useEffect, useCallback, useMemo } from "react"
 import { useDispatch } from "react-redux"
 import { useAppSelector } from "../store/store"
@@ -18,7 +16,7 @@ export function useSocketWrapper() {
 }
 
 export default function SocketWrapper({ children }) {
-    /*
+  /*
     const dispatch=useDispatch();
 
     const socket1Url='wss://recruitonodesocket.vitti.insure';
@@ -30,15 +28,24 @@ export default function SocketWrapper({ children }) {
     
     */
   const dispatch = useDispatch()
-  const socket1Url = "http://localhost:3002" 
+  let url1 = 'https://vitt-jarvis-node-production.up.railway.app/'
+  let url2 = 'http://localhost:3002'
+  let url3 = 'https://temp-meeting-server-production.up.railway.app/'
+  let url4 = 'https://temp-meeting-server.vercel.app/'
+  let url5 = 'https://temp-meeting-server.onrender.com'
+  let url6 = 'wss://recruitonodesocket.vitti.insure'
+  let url7 = 'https://be80-103-173-124-200.ngrok-free.app/'
+  let url8 = 'http://192.168.1.10:5000'
+  let cuesRelatedUrl="wss://recruito.vitti.insure"
   const options = useMemo(
     () => ({
-      reconnection: false,
+      reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
+      transports: ["websocket"],
     }),
     [],
-  ) 
+  )
 
   const [users, myState] = useAppSelector((state) => [state.usersReducer, state.myStateReducer])
   const { CuesList, jobDescription, interviewGuide, jobTitle } = useAppSelector((state) => state.cuesReducer)
@@ -50,9 +57,22 @@ export default function SocketWrapper({ children }) {
       socket1_emitEvent("join-room", { roomId, userId })
     }
   }, [myState?.roomId, myState.id])
-
+  const socketConnectedFirstTimeS2=useCallback(()=>{
+    if(isHost && myState.id)
+    {
+      const questionApiReqPayload={
+        roomid:"abc-123-fgh-456",
+        jobid: "1",
+        agentid: "1234",
+        custemailid: custEmailId,
+        name: name || myState.name,
+      }
+      console.log("socket connected triggered",questionApiReqPayload);
+      socket2_emitEvent("questions_loader_req_ins", questionsApiReqPayload)
+    }
+  },[])
   const [isSocket1_Connected, socket1_emitEvent, socket1_onEvent, socket1_offEvent] = useSocket(
-    socket1Url,
+    url2,
     options,
     socketConnectedFirstTime,
   )
@@ -106,7 +126,7 @@ export default function SocketWrapper({ children }) {
 
   useEffect(() => {
     console.log("[Debbug] Settied up socket event listeners")
-
+    
     socket1_onEvent("all-users", handleAllUsers)
     socket1_onEvent("user-connected", handleUserConnected)
     socket1_onEvent("receive-connected-user-data", handleReceiveData)
@@ -131,7 +151,56 @@ export default function SocketWrapper({ children }) {
     socketConnectedFirstTime,
   ])
 
-  
+  useEffect(() => {
+    const handleOnline = () => {
+      console.log("Internet connection restored")
+
+      if (!isSocket1_Connected) {
+        console.log("Attempting to reconnect socket")
+        socketConnectedFirstTime()
+      }
+ 
+      users.forEach((user) => {
+        if (user.id !== myState.id) {
+          socket1_emitEvent("user-reconnected", {
+            userId: myState.id,
+            roomId: myState.roomId || "default-room",
+          })
+        }
+      })
+    }
+
+    const handleOffline = () => {
+      console.log("Internet connection lost")
+    }
+
+    window.addEventListener("online", handleOnline)
+    window.addEventListener("offline", handleOffline)
+
+    return () => {
+      window.removeEventListener("online", handleOnline)
+      window.removeEventListener("offline", handleOffline)
+    }
+  }, [isSocket1_Connected, myState.id, myState.roomId, users, socket1_emitEvent, socketConnectedFirstTime])
+
+  useEffect(() => {
+    const handleUserReconnected = (data) => {
+      console.log("User reconnected:", data)
+
+      if (myState.videoStream instanceof MediaStream && myState.cameraStatus) {
+        socket1_emitEvent("connected-user-data", {
+          toPeer: data.userId,
+          userData: { ...myState, id: myState.id },
+        })
+      }
+    }
+    socket1_onEvent("user-reconnected", handleUserReconnected)
+
+    return () => {
+      socket1_offEvent("user-reconnected", handleUserReconnected)
+    }
+  }, [myState, socket1_emitEvent, socket1_onEvent, socket1_offEvent])
+
   useEffect(() => {
     console.log("Socket connection status:", isSocket1_Connected)
   }, [isSocket1_Connected])
@@ -179,7 +248,7 @@ export default function SocketWrapper({ children }) {
       }
     }
   }, [myState.audioStream, myState.microphoneStatus, myState.id, dispatch, isSocket1_Connected, socket1_emitEvent])
-  //used memo for re-rendering went off the roof 
+  //used memo for re-rendering went off the roof
   const contextValue = useMemo(
     () => ({
       isSocket1_Connected,
@@ -189,11 +258,11 @@ export default function SocketWrapper({ children }) {
     }),
     [isSocket1_Connected, socket1_emitEvent, handleToggleCamera, handleToggleMicrophone],
   )
-//@ts-ignore
+  //@ts-ignore
   return <SocketWrapperContext.Provider value={contextValue}>{children}</SocketWrapperContext.Provider>
 }
 
-//if needed future 
+//if needed future
 /*
 useEffect(()=>{
             //socket 1 event handler 

@@ -62,8 +62,33 @@ export default function PeerWrapper({ children }: { children: React.ReactNode })
     setScreenPeer(newScreenPeer)
     setAudioPeer(newAudioPeer)
 
+    // Store current peer connections for cleanup
+    const currentVideoPeerRef = { ...videoPeerRef.current }
+    const currentScreenPeersRef = { ...screenPeersRef.current }
+    const currentAudioPeerRef = { ...audioPeerRef.current }
+
     return () => {
       console.log("Destroying peers")
+
+      // Close all peer connections before destroying peers
+      Object.values(currentVideoPeerRef).forEach((conn) => {
+        if (conn) conn.close()
+      })
+
+      Object.values(currentScreenPeersRef).forEach((conn) => {
+        if (conn) conn.close()
+      })
+
+      Object.values(currentAudioPeerRef).forEach((conn) => {
+        if (conn) conn.close()
+      })
+
+      // Clear connection arrays
+      videoPeerArrRef.current = []
+      screenPeersArrRef.current = []
+      audioPeerArrRef.current = []
+
+      // Destroy peers
       newAudioPeer.destroy()
       newScreenPeer.destroy()
       newVideoPeer.destroy()
@@ -546,13 +571,11 @@ export default function PeerWrapper({ children }: { children: React.ReactNode })
       return
     }
 
-    const data:UserType={
+    const data: UserType = {
       ...myState,
       isScreenSharingEnabled: false,
     }
-    dispatch(
-      updateUserAction(data),
-    )
+    dispatch(updateUserAction(data))
 
     if (screenUser.stream instanceof MediaStream) {
       screenUser.stream.getTracks().forEach((t) => t.stop())
