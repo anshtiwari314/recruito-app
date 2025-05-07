@@ -40,6 +40,12 @@ const initialState: JobState = {
       status: "Open",
       dateCreated: "2025-05-01",
       candidates: [],
+      sampleQuestions: [
+        "What is your experience with data analysis?",
+        "How do you handle missing data?",
+        "Explain the difference between supervised and unsupervised learning.",
+        "What is overfitting and how can you prevent it?",
+      ]
     },
     {
       id: "J002",
@@ -49,6 +55,12 @@ const initialState: JobState = {
       status: "Open",
       dateCreated: "2025-05-02",
       candidates: [],
+      sampleQuestions: [
+        "What is your experience with React?",
+        "How do you manage state in a React application?",
+        "Explain the concept of virtual DOM.",
+        "What are hooks in React?",
+      ]
     },
     {
       id: "J003",
@@ -153,14 +165,16 @@ const jobSlice = createSlice({
     },
 
     // Add sample questions to a job
-    addSampleQuestions: (state, action: PayloadAction<string>) => {
-      const job = state.jobs.find((job) => job.id === action.payload)
+    addSampleQuestions: (state, action: PayloadAction<{id:string,qs:string}>) => {
+      const job = state.jobs.find((job) => job.id === action.payload.id)
       if (job) {
-        job.sampleQuestions = [
-          "Tell us about your experience with the required technologies.",
-          "Describe a challenging project you worked on.",
-          "How do you stay updated with industry trends?",
-        ]
+        // job.sampleQuestions = [
+        //   "Tell us about your experience with the required technologies.",
+        //   "Describe a challenging project you worked on.",
+        //   "How do you stay updated with industry trends?",
+        // ]
+        job?.sampleQuestions?.push(action.payload.qs)
+        console.log("Sample questions added successfully!",job.sampleQuestions);
       }
     },
 
@@ -199,6 +213,13 @@ const jobSlice = createSlice({
       const job = state.jobs.find((job) => job.id === action.payload)
       if (job) {
         job.status = "Closed"
+      }
+    },
+    //deleete a job
+    deleteJob: (state, action: PayloadAction<string>) => {
+      const index = state.jobs.findIndex((job) => job.id === action.payload)
+      if (index !== -1) {
+        state.jobs.splice(index, 1)
       }
     },
 

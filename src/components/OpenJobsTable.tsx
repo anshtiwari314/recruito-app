@@ -1,7 +1,7 @@
 import  React from "react"
 import { useState } from "react"
 import { useDispatch } from "react-redux"
-import { editJob, addResumes, viewCandidates, addSampleQuestions, Job } from "../reducers/jobSlices"
+import {  addResumes, viewCandidates, addSampleQuestions, Job } from "../reducers/jobSlices"
 import Button from "./ui/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/Card"
 import { Dialog, DialogContent, DialogTitle, DialogClose,DialogHeader } from "./ui/Dailog"
@@ -98,14 +98,12 @@ export default function OpenJobTables({jobG}:Job[]) {
 
   const handleSaveJobEdit = (data: any) => {
     console.log("Saving job edit:", data)
-    // Here you  dispatch to update the job
     // dispatch(updateJob(data))
   }
 
   const handleSaveQuestions = (data: any) => {
     console.log("Saving questions:", data)
-    // Here you dispatch  to save the questions
-    // dispatch(saveQuestions(data))
+    dispatch(addSampleQuestions(data))
   }
 
   return (

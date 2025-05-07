@@ -1,13 +1,8 @@
-import React, { useState, useRef } from 'react'
-import { Link } from 'react-router-dom'
-
+import React, { useState } from 'react'
 export default function Login() {
     const [loading, setLoading] = useState(false)
     const [email, setEmail] = useState('')
     const [pass, setPass] = useState('')
-    const ref = useRef({})
-    //@ts-ignore
-    // const { setCurrentUser } = useAuth()
     const [error, setError] = useState<string | null>(null)
 
     function handleChecks() {
@@ -25,7 +20,7 @@ export default function Login() {
 
     function handleAuth() {
         setLoading(true)
-        const url = `${process.env.REACT_APP_API_URL}/login`
+       const url = `${import.meta.env.VITE_API_URL}/login`
         fetch(url, {
             method: 'POST',
             headers: {
@@ -37,6 +32,9 @@ export default function Login() {
                 password: pass
             }),
             cache: 'default',
+            credentials: 'include',
+            mode: 'cors'
+
         })
             .then(res => res.json())
             .then(result => {
@@ -49,42 +47,46 @@ export default function Login() {
     }
 
     return (
-        <div className="h-screen w-screen flex justify-center items-center bg-white">
-            <div className="border border-red-500 px-12 py-10 text-center transform -translate-y-1/4 bg-white shadow-xl rounded-xl">
-                <h1 className="text-3xl text-red-500 mb-4 underline">{error}</h1>
-                <h2 className="text-3xl text-black font-semibold mb-6">Login</h2>
+        <div className="min-h-screen flex justify-center items-center bg-gray-50 px-4">
+            <div className="w-full max-w-md bg-white border border-gray-300 shadow-lg rounded-xl p-8">
+                {error && (
+                    <div className="mb-4 text-red-600 bg-red-100 px-4 py-2 rounded-lg text-center text-sm font-semibold">
+                        {error}
+                    </div>
+                )}
+                <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Login</h2>
 
                 <div className="space-y-4">
-                    <div className="flex items-center justify-center space-x-4">
-                        <label htmlFor="login-email" className="w-52 px-6 py-4 rounded-3xl text-black text-lg font-medium">
-                            Email:
+                    <div>
+                        <label htmlFor="login-email" className="block text-gray-700 font-medium mb-1">
+                            Email
                         </label>
                         <input
                             type="email"
                             id="login-email"
-                            placeholder="please enter your email"
-                            className="w-80 border border-black rounded px-2 py-2 text-lg"
+                            placeholder="Enter your email"
+                            className="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                             value={email}
                             onChange={(e) => setEmail(e.target.value.trim())}
                         />
                     </div>
 
-                    <div className="flex items-center justify-center space-x-4">
-                        <label htmlFor="login-pass" className="w-52 px-6 py-4 rounded-3xl text-black text-lg font-medium">
-                            Password:
+                    <div>
+                        <label htmlFor="login-pass" className="block text-gray-700 font-medium mb-1">
+                            Password
                         </label>
                         <input
                             type="password"
                             id="login-pass"
-                            placeholder="please enter your password"
-                            className="w-80 border border-black rounded px-2 py-2 text-lg"
+                            placeholder="Enter your password"
+                            className="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                             value={pass}
                             onChange={(e) => setPass(e.target.value.trim())}
                         />
                     </div>
 
                     <button
-                        className="text-white text-2xl bg-blue-600 px-10 py-2 rounded-lg hover:bg-blue-700 transition"
+                        className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-300 text-lg"
                         onClick={handleChecks}
                         disabled={loading}
                     >
