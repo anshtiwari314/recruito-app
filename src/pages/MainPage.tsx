@@ -44,19 +44,20 @@ export default function MainPage() {
       </Button>
     </div>
     {active==="newJob" && <NewJobForm/>}
-    {active==="openJobs" && <OpenJobsTable jobs={jobs}/>}
+    {active==="openJobs" && <OpenJobsTable state={setActive} />}
     {active==="scheduleMeeting" && <ScheduleMeetingForm/>}
    </div>
   </>
   );
 }
+
 //job id remove->call from backend to get id ->done
 //nothing can be empty ->third can be empty ->done
 //ensure saftey of ates and times stuff 
 //candidate-id ,job id,customer emai and candidate email 
-//cna-backend
-//jobid  i have 
-//email id of person who logged in
-//agent id of person who logged in->backend 
+//cna-backend->done
+//jobid  i have ->done
+//email id of person who logged in->done
+//agent id of person who logged in->backend->done 
 
 

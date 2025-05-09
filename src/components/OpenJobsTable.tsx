@@ -1,48 +1,22 @@
-import  React from "react"
+//All the imports
+import React from "react"
 import { useState } from "react"
 import { useDispatch } from "react-redux"
-import {  addResumes, viewCandidates, addSampleQuestions, Job } from "../reducers/jobSlices"
+import { addResumes, viewCandidates, addSampleQuestions, Job } from "../reducers/jobSlices"
 import Button from "./ui/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/Card"
-import { Dialog, DialogContent, DialogTitle, DialogClose,DialogHeader } from "./ui/Dailog"
+import { Dialog, DialogContent, DialogTitle, DialogClose, DialogHeader } from "./ui/Dailog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/Table"
 import { Input } from "./ui/Input"
 import { useAppSelector } from "../store/store"
 import EditJobForm from "./EditJob"
 import SampleQuestionsForm from "./SampleQuestion"
 
-const dummyCandidates = [
-  {
-    id: "C001",
-    name: "Sneha Roy",
-    status: "Shortlisted",
-    score: 8.9,
-    jobId: "J001",
-    email: "sneha@example.com",
-  },
-  {
-    id: "C002",
-    name: "Rahul Sharma",
-    status: "New",
-    score: 7.5,
-    jobId: "J001",
-    email: "rahul@example.com",
-  },
-  {
-    id: "C003",
-    name: "Priya Patel",
-    status: "Reviewing",
-    score: 8.2,
-    jobId: "J002",
-    email: "priya@example.com",
-  },
-]
-
-export default function OpenJobTables({jobG}:Job[]) {
+//Main fxn 
+export default function OpenJobTables({state}:any) {
   const dispatch = useDispatch()
   const jobs = useAppSelector((state) => state.jobReducer.jobs)
   console.log("Jobs from Redux:", jobs)
-  // console.log("Jobs from props:", jobG)
 
   const [showCandidatesModal, setShowCandidatesModal] = useState(false)
   const [showResumesModal, setShowResumesModal] = useState(false)
@@ -50,15 +24,13 @@ export default function OpenJobTables({jobG}:Job[]) {
   const [showQuestionsModal, setShowQuestionsModal] = useState(false)
   const [selectedJobId, setSelectedJobId] = useState("")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  
-  // const filteredCandidates = dummyCandidates.filter((candidate) => candidate.jobId === selectedJobId)
+
   const selectedJob = jobs.find((job) => job.id === selectedJobId)
-  const filteredCandidates = selectedJob?.candidates ?? [];
+  const filteredCandidates = selectedJob?.candidates ?? []
 
   const handleEditJob = (jobId: string) => {
     setSelectedJobId(jobId)
     setShowEditModal(true)
-    // dispatch(editJob(jobId))
   }
 
   const handleAddResumes = (jobId: string) => {
@@ -75,7 +47,14 @@ export default function OpenJobTables({jobG}:Job[]) {
   const handleAddSampleQuestions = (jobId: string) => {
     setSelectedJobId(jobId)
     setShowQuestionsModal(true)
-    dispatch(addSampleQuestions(jobId))
+    // dispatch(addSampleQuestions(jobId))
+  }
+
+  // New: Schedule meeting for a job
+  const handleScheduleJobMeeting = (jobId: string) => {
+    // TODO: implement
+    alert(`Scheduling meeting for job ${jobId}`)
+    state("scheduleMeeting")
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,13 +71,8 @@ export default function OpenJobTables({jobG}:Job[]) {
     }
   }
 
-  const handleScheduleMeeting = (candidateName: string) => {
-    setShowCandidatesModal(false)
-  }
-
   const handleSaveJobEdit = (data: any) => {
     console.log("Saving job edit:", data)
-    // dispatch(updateJob(data))
   }
 
   const handleSaveQuestions = (data: any) => {
@@ -138,67 +112,72 @@ export default function OpenJobTables({jobG}:Job[]) {
                   <Button variant="outline" onClick={() => handleAddSampleQuestions(job.id)}>
                     Add Sample Questions
                   </Button>
+                  {/* New: Schedule Meeting button */}
+                  <Button variant="outline" onClick={() => handleScheduleJobMeeting(job.id)}>
+                    Schedule Meeting
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
 
+        {/* Candidates Modal */}
         <Dialog open={showCandidatesModal} onOpenChange={setShowCandidatesModal}>
-        <DialogContent>
-          <DialogHeader onClose={() => setShowCandidatesModal(false)}>
-            <DialogTitle>View Candidates for Job {selectedJobId}</DialogTitle>
-          </DialogHeader>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Score</TableHead>
-                <TableHead>Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredCandidates.length > 0 ? (
-                filteredCandidates.map((candidate) => (
-                  <TableRow key={candidate.id}>
-                    <TableCell>{candidate.name}</TableCell>
-                    <TableCell>{candidate.status}</TableCell>
-                    <TableCell>{candidate.score}</TableCell>
-                    <TableCell>
-                      <Button
-                        className="bg-blue-500 hover:bg-blue-600"
-                        onClick={() => handleScheduleMeeting(candidate.name)}
-                      >
-                        Schedule Meeting
-                      </Button>
+          <DialogContent>
+            <DialogHeader onClose={() => setShowCandidatesModal(false)}>
+              <DialogTitle>View Candidates for Job {selectedJobId}</DialogTitle>
+            </DialogHeader>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Score</TableHead>
+                  <TableHead>Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredCandidates.length > 0 ? (
+                  filteredCandidates.map((candidate) => (
+                    <TableRow key={candidate.id}>
+                      <TableCell>{candidate.name}</TableCell>
+                      <TableCell>{candidate.status}</TableCell>
+                      <TableCell>{candidate.score}</TableCell>
+                      <TableCell>
+                        <Button
+                          className="bg-blue-500 hover:bg-blue-600"
+                          onClick={() => alert(`Schedule meeting with ${candidate.name}`)}
+                        >
+                          Schedule Meeting
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell className="text-center py-4">
+                      No candidates found for this job
                     </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center py-4">
-                    No candidates found for this job
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-          <div className="mt-4">
-            <DialogClose asChild>
-              <Button
-                className="bg-blue-500 hover:bg-blue-600"
-                onClick={() => setShowCandidatesModal(false)}
-              >
-                Close
-              </Button>
-            </DialogClose>
-          </div>
-        </DialogContent>
-      </Dialog>
+                )}
+              </TableBody>
+            </Table>
+            <div className="mt-4">
+              <DialogClose asChild>
+                <Button
+                  className="bg-blue-500 hover:bg-blue-600"
+                  onClick={() => setShowCandidatesModal(false)}
+                >
+                  Close
+                </Button>
+              </DialogClose>
+            </div>
+          </DialogContent>
+        </Dialog>
 
-
-      <Dialog open={showResumesModal} onOpenChange={setShowResumesModal}>
+        {/* Resumes Modal */}
+        <Dialog open={showResumesModal} onOpenChange={setShowResumesModal}>
           <DialogContent>
             <DialogHeader onClose={() => setShowResumesModal(false)}>
               <DialogTitle>Add Resumes</DialogTitle>
@@ -212,6 +191,7 @@ export default function OpenJobTables({jobG}:Job[]) {
           </DialogContent>
         </Dialog>
 
+        {/* Edit Job Modal */}
         <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
           <DialogContent>
             <EditJobForm
@@ -231,6 +211,7 @@ export default function OpenJobTables({jobG}:Job[]) {
           </DialogContent>
         </Dialog>
 
+        {/* Sample Questions Modal */}
         <Dialog open={showQuestionsModal} onOpenChange={setShowQuestionsModal}>
           <DialogContent>
             <SampleQuestionsForm
