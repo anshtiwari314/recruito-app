@@ -10,7 +10,7 @@ export default function MainPage() {
 
   const [active,setActive]=useState<string>("newJob");
   const [jobs, setJobs] = useState<Job[]>([]);
-
+  
   const fetchJobs = async () => {
     try {
       const res = await request("/api/jobs");  
@@ -50,5 +50,13 @@ export default function MainPage() {
   </>
   );
 }
+//job id remove->call from backend to get id ->done
+//nothing can be empty ->third can be empty ->done
+//ensure saftey of ates and times stuff 
+//candidate-id ,job id,customer emai and candidate email 
+//cna-backend
+//jobid  i have 
+//email id of person who logged in
+//agent id of person who logged in->backend 
 
 
