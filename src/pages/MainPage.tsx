@@ -7,7 +7,11 @@ import { Job } from "../reducers/jobSlices.ts";
 import { request } from "../functions/reqFn.ts";
 
 export default function MainPage() {
-
+  const getFromSTorage=sessionStorage.getItem("userEmail");
+  if(getFromSTorage===null){
+    alert("Please login to continue")
+    window.location.href="/login"
+  }
   const [active,setActive]=useState<string>("newJob");
   const [jobs, setJobs] = useState<Job[]>([]);
   

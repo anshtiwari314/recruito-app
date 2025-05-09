@@ -19,74 +19,53 @@ export default function ScheduleMeetingForm() {
   const [participants, setParticipants] = useState("");
   const [date, setDate] = useState("");
   const [isValid, setIsValid] = useState(false);
+  const [meetingLink, setMeetingLink] = useState("");
 
   const jobsAv: Job[] = useAppSelector((state) => state.jobReducer.jobs);
-  console.log("Jobs from Redux:", jobsAv);
 
   const currDate = new Date();
   const formattedDate = currDate.toISOString().split("T")[0];
-  console.log("Formatted current date:", formattedDate);
 
   // Get the userEmail from sessionStorage
   useEffect(() => {
     const userEmail = sessionStorage.getItem("userEmail") || "";
-    console.log("User Email:", userEmail);
     setCandidate(userEmail);
   }, []);
 
   // Update isValid when form fields change
   useEffect(() => {
     const isDateValid = date && checkDate(date, formattedDate);
-    if (
-      jobId &&
-      candidate &&
-      participants.trim().length > 0 &&
-      isDateValid
-    ) {
-      setIsValid(true);
-    } else {
-      setIsValid(false);
-    }
+    setIsValid(!!(jobId && candidate && participants.trim().length > 0 && isDateValid));
   }, [jobId, candidate, participants, date]);
 
   const onSchedule = async () => {
-    if (!jobId || !participants || !date) {
-      alert("Please fill in all fields.");
-      return;
-    }
-    if (checkDate(date, formattedDate) === false) {
-      alert("Please select a date that is not in the past.");
-      return;
-    }
+    if (!isValid) return;
 
-    const params = new URLSearchParams({ jobId, candidate, participants, date });
+    // Replace them with bcend values
+    const agentId = "1234";
+    const roomId = "abc-123-fgh-456";
+    const customerId = candidate;
+    const jobno = jobId;
 
-    try {
-      const res = await fetch(`/api/schedule?${params.toString()}`, { method: "GET" });
-      const contentType = res.headers.get("content-type") || "";
+    const params = new URLSearchParams({
+      room_id: roomId,
+      cust_email_id: customerId,
+      agent_id: agentId,
+      job_id: jobno,
+    });
 
-      if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(`Server error ${res.status}: ${errText}`);
-      }
+    const link = `https://app-domain-eg?${params.toString()}`;
+    setMeetingLink(link);
+    setJobId("")
+    setParticipants("");
+    setDate("");
+    setIsValid(false);
+  };
 
-      if (!contentType.includes("application/json")) {
-        const text = await res.text();
-        console.error("Expected JSON, got:", text);
-        throw new Error("Non-JSON response");
-      }
-
-      const data = await res.json();
-      console.log("Scheduled:", data);
-      alert("Meeting scheduled: " + data.scheduledFor);
-
-      // Reset fields (except candidate)
-      setJobId("");
-      setParticipants("");
-      setDate("");
-    } catch (err: any) {
-      console.error(err);
-      alert(`Error: ${err.message}`);
+  const copyLink = () => {
+    if (meetingLink) {
+      navigator.clipboard.writeText(meetingLink);
+      alert("Meeting link copied to clipboard!");
     }
   };
 
@@ -102,8 +81,7 @@ export default function ScheduleMeetingForm() {
           <select
             value={jobId}
             onChange={(e) => setJobId(e.target.value)}
-            className="mt-1 block w-full border-gray-600 
-            rounded-md shadow-sm border h-10"
+            className="mt-1 block w-full border-gray-600 rounded-md shadow-sm border h-10"
           >
             <option value="">Select a job</option>
             {jobsAv.map((job) => (
@@ -140,6 +118,25 @@ export default function ScheduleMeetingForm() {
         >
           Schedule Meeting
         </Button>
+
+        {meetingLink && (
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Your Meeting Link
+            </label>
+            <div className="flex items-center">
+              <Input
+                type="text"
+                value={meetingLink}
+                readOnly
+                className="flex-1 bg-gray-100 cursor-not-allowed"
+              />
+              <Button onClick={copyLink} className="ml-2">
+                Copy Link
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
