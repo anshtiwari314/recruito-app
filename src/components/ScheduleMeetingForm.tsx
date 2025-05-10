@@ -5,6 +5,7 @@ import { Input } from "./ui/Input";
 import { Textarea } from "./ui/Textarea";
 import { useAppSelector } from "../store/store";
 import { Job } from "../reducers/jobSlices";
+import { useTestWrapper } from "../context/TestWrapper";
 
 // Date checker function
 const checkDate = (date: string, currDate: string) => {
@@ -14,7 +15,10 @@ const checkDate = (date: string, currDate: string) => {
 };
 
 export default function ScheduleMeetingForm() {
-  const [jobId, setJobId] = useState("");
+  const jobIdRef=useTestWrapper().jobIdRef;
+  const [jobId, setJobId] = useState(jobIdRef.current || "");
+  console.log("Job ID from ref:", jobIdRef.current);
+  
   const [candidate, setCandidate] = useState("example@example.com");
   const [participants, setParticipants] = useState("");
   const [date, setDate] = useState("");

@@ -11,13 +11,16 @@ import { Input } from "./ui/Input"
 import { useAppSelector } from "../store/store"
 import EditJobForm from "./EditJob"
 import SampleQuestionsForm from "./SampleQuestion"
+import { useTestWrapper } from "../context/TestWrapper"
+
 
 //Main fxn 
 export default function OpenJobTables({state}:any) {
   const dispatch = useDispatch()
   const jobs = useAppSelector((state) => state.jobReducer.jobs)
   console.log("Jobs from Redux:", jobs)
-
+    const jobIdRef=useTestWrapper().jobIdRef;
+  console.log("Job ID Ref:", jobIdRef)
   const [showCandidatesModal, setShowCandidatesModal] = useState(false)
   const [showResumesModal, setShowResumesModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -54,6 +57,7 @@ export default function OpenJobTables({state}:any) {
   const handleScheduleJobMeeting = (jobId: string) => {
     // TODO: implement
     alert(`Scheduling meeting for job ${jobId}`)
+    jobIdRef.current = jobId
     state("scheduleMeeting")
   }
 
@@ -79,6 +83,7 @@ export default function OpenJobTables({state}:any) {
     console.log("Saving questions:", data)
     dispatch(addSampleQuestions(data))
   }
+  
 
   return (
     <Card className="w-full">
@@ -147,7 +152,7 @@ export default function OpenJobTables({state}:any) {
                       <TableCell>
                         <Button
                           className="bg-blue-500 hover:bg-blue-600"
-                          onClick={() => alert(`Schedule meeting with ${candidate.name}`)}
+                          onClick={() =>handleScheduleJobMeeting(selectedJobId)}
                         >
                           Schedule Meeting
                         </Button>
