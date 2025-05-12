@@ -3,8 +3,7 @@ import NewJobForm from "../components/NewJobForm.tsx";
 import OpenJobsTable from "../components/OpenJobsTable.tsx"
 import ScheduleMeetingForm from "../components/ScheduleMeetingForm.tsx"
 import Button from "../components/ui/Button.tsx";
-import { Job } from "../reducers/jobSlices.ts";
-import { request } from "../functions/reqFn.ts";
+import axios from "axios";
 
 export default function MainPage() {
   const getFromSTorage=sessionStorage.getItem("userEmail");
@@ -13,22 +12,17 @@ export default function MainPage() {
     window.location.href="/login"
   }
   const [active,setActive]=useState<string>("newJob");
-  const [jobs, setJobs] = useState<Job[]>([]);
+  const [jobId,setJobId]=useState<string>("");
+  const ngrokL="https://2b42-49-204-210-210.ngrok-free.app";
+ 
+ 
   
-  const fetchJobs = async () => {
-    try {
-      const res = await request("/api/jobs");  
-      setJobs(res.data);
-    } catch (err) {
-      console.error("Error fetching jobs:", err);
-    }
-  };
   const onBtnClick1=(val:string)=>{
     setActive(val);
+    getJobId();
   }
   const onBtnClick2=(val:string)=>{
     setActive(val);
-    fetchJobs()
   }
   const onBtnClick3=(val:string)=>{
      setActive(val);
@@ -47,7 +41,7 @@ export default function MainPage() {
       Schedule Meeting
       </Button>
     </div>
-    {active==="newJob" && <NewJobForm/>}
+    {active==="newJob" && <NewJobForm jobId={jobId} />}
     {active==="openJobs" && <OpenJobsTable state={setActive} />}
     {active==="scheduleMeeting" && <ScheduleMeetingForm/>}
    </div>

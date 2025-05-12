@@ -5,36 +5,38 @@ import Button from "./ui/Button";
 import { Textarea } from "./ui/Textarea";
 import { useDispatch } from "react-redux";
 import { addJob } from "../reducers/jobSlices";
+import axios from "axios";
 
 
-export default function NewJobForm() {
+export default function NewJobForm(jobID:string) {
   const dispatch = useDispatch();
-  const [jobId, setJobId] = useState("123456"); 
   const [jobTitle, setJobTitle] = useState("");
   const [jobDesc, setJobDesc] = useState("");
   const [jobCriteria, setJobCriteria] = useState("");
   const [isValid, setIsValid] = useState(false);
+  const ngrokL="https://2b42-49-204-210-210.ngrok-free.app";
+   const [jobId, setJobId] = useState(""); 
+   const getJobId=async()=>{
+    try {
+    const res = await axios.post(`${ngrokL}/create_new_jobid`);
+    
+    const newJobId = res.data?.new_job_id;
 
- 
+    if (newJobId) {
+      setJobId(newJobId); 
+    } else {
+      console.error("new_job_id not found in response", res.data);
+    }
+  } catch (error) {
+    console.error("Error fetching job ID:", error);
+   }
+  }
   useEffect(() => {
-    const fetchJobId = async () => {
-      try {
-        const res = await fetch("/api/jobs/new-id"); 
-        if (!res.ok) {
-          throw new Error(`Error fetching job ID: ${res.status}`);
-        }
-        const data = await res.json();
-        setJobId(data.id); 
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchJobId();
+    getJobId();
   }, []);
-
+  
   useEffect(() => {
     if (
-      jobId &&
       jobTitle.trim().length >= 8 &&
       jobDesc.trim().length > 15
     ) {
@@ -44,44 +46,52 @@ export default function NewJobForm() {
     }
   }, [jobId, jobTitle, jobDesc, jobCriteria]);
 
-  const onBtnClick = async () => {
-    if (!isValid) {
-      alert("Please fill all fields with valid values.");
-      return;
-    }
+ const onBtnClick = async () => {
+  if (!isValid) {
+    alert("Please fill all fields with valid values.");
+    return;
+  }
 
-    const payload = {
-      id: jobId,
-      title: jobTitle,
-      description: jobDesc,
-      criteria: jobCriteria,
-    };
+  const payload = {
+    id: jobId,
+    title: jobTitle,
+    description: jobDesc,
+    criteria: jobCriteria,
+  };
 
-    try {
-      const res = await fetch("/api/jobs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+  try {
+    const res = await axios.post(`${ngrokL}/add_new_job`, {
+      job_id: jobId,
+      job_title: jobTitle,
+      job_description: jobDesc,
+      key_criteria: jobCriteria,
+    },{
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-      if (!res.ok) {
-        throw new Error(`Server error: ${res.status}`);
-      }
-
-      const data = await res.json();
-      console.log("Job Created:", data);
+    if (res.status === 200 && res.data.created_newjob === "Success") {
+      console.log("Job Created:", res.data);
 
       setJobTitle("");
+      setJobId("");
       setJobDesc("");
       setJobCriteria("");
+
       alert("Job created successfully!");
-    } catch (err) {
-      console.error(err);
-      alert("Error creating job, check console.");
-    } finally {
-      dispatch(addJob(payload));
+    } else {
+      alert("Failed to create job.");
     }
-  };
+
+  } catch (err) {
+    console.error("Error while creating job:", err);
+    alert("Failed to create job.");
+  } finally {
+    dispatch(addJob(payload));
+  }
+};
+
 
   return (
     <Card>
