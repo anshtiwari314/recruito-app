@@ -30,7 +30,7 @@ export default function ScheduleMeetingForm() {
   const currDate = new Date();
   const formattedDate = currDate.toISOString().split("T")[0];
 
-  // Get the userEmail from sessionStorage
+ 
   useEffect(() => {
     const userEmail = sessionStorage.getItem("userEmail") || "";
     setCandidate(userEmail);
@@ -45,7 +45,7 @@ export default function ScheduleMeetingForm() {
   const onSchedule = async () => {
     if (!isValid) return;
 
-    // Replace them with bcend values
+  
     const agentId = "1234";
     const roomId = "abc-123-fgh-456";
     const customerId = candidate;
@@ -112,6 +112,7 @@ export default function ScheduleMeetingForm() {
         <Input
           type="date"
           value={date}
+          min={formattedDate}
           onChange={(e) => setDate(e.target.value)}
         />
 

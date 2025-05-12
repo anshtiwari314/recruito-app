@@ -1,4 +1,3 @@
-//All the imports
 import React from "react"
 import { useState } from "react"
 import { useDispatch } from "react-redux"
@@ -12,7 +11,6 @@ import { useAppSelector } from "../store/store"
 import EditJobForm from "./EditJob"
 import SampleQuestionsForm from "./SampleQuestion"
 import { useTestWrapper } from "../context/TestWrapper"
-
 
 //Main fxn 
 export default function OpenJobTables({state}:any) {
@@ -57,6 +55,7 @@ export default function OpenJobTables({state}:any) {
   const handleScheduleJobMeeting = (jobId: string) => {
     // TODO: implement
     alert(`Scheduling meeting for job ${jobId}`)
+    //@ts-ignore
     jobIdRef.current = jobId
     state("scheduleMeeting")
   }
@@ -151,7 +150,7 @@ export default function OpenJobTables({state}:any) {
                       <TableCell>{candidate.score}</TableCell>
                       <TableCell>
                         <Button
-                          className="bg-blue-500 hover:bg-blue-600"
+                          className=" bg-gray-500 hover:bg-zinc-900"
                           onClick={() =>handleScheduleJobMeeting(selectedJobId)}
                         >
                           Schedule Meeting
@@ -171,7 +170,7 @@ export default function OpenJobTables({state}:any) {
             <div className="mt-4">
               <DialogClose asChild>
                 <Button
-                  className="bg-blue-500 hover:bg-blue-600"
+                  className=" hover:bg-gray-600"
                   onClick={() => setShowCandidatesModal(false)}
                 >
                   Close
@@ -189,7 +188,7 @@ export default function OpenJobTables({state}:any) {
             </DialogHeader>
             <div className="flex items-center gap-4 mt-4">
               <Input type="file" onChange={handleFileChange} className="flex-1" />
-              <Button className="bg-blue-500 hover:bg-blue-600" onClick={handleUploadResume} disabled={!selectedFile}>
+              <Button className="bg-gray-500 hover:bg-zinc-950" onClick={handleUploadResume} disabled={!selectedFile}>
                 Upload
               </Button>
             </div>
