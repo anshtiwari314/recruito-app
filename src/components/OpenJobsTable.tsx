@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect } from "react"
 import { useState } from "react"
 import { useDispatch } from "react-redux"
 import { addResumes, viewCandidates, addSampleQuestions, Job } from "../reducers/jobSlices"
@@ -11,9 +11,34 @@ import { useAppSelector } from "../store/store"
 import EditJobForm from "./EditJob"
 import SampleQuestionsForm from "./SampleQuestion"
 import { useTestWrapper } from "../context/TestWrapper"
+import axios from "axios"
 
 //Main fxn 
 export default function OpenJobTables({state}:any) {
+  const ngRokL="https://e3a8-49-204-210-210.ngrok-free.app";
+  const getAllJobs=async()=>{
+    try {
+      const res = await axios.post(`${ngRokL}/jobs-list`,{
+        agent_id:"1234",
+      },{
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+     if (res.status === 200 && res.data.created_newjob === "Success") {
+      console.log("Job Created:", res.data);
+      // setJobTitle("");
+     }
+      console.log("Jobs from API:",res.data);
+    }
+    catch (error) {
+      console.error("Error fetching jobs:", error);
+    }
+  }
+  useEffect(()=>{
+    getAllJobs();
+  },[]);
+
   const dispatch = useDispatch()
   const jobs = useAppSelector((state) => state.jobReducer.jobs)
   console.log("Jobs from Redux:", jobs)
@@ -32,10 +57,44 @@ export default function OpenJobTables({state}:any) {
   const handleEditJob = (jobId: string) => {
     setSelectedJobId(jobId)
     setShowEditModal(true)
+    
   }
-
+   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedFile(e.target.files[0])
+    }
+  }
+   const resumeUploader=async(jobIdx)=>{
+    if(!jobIdx || selectedFile===null){
+      alert("Please select a job and a file to upload")
+      return
+    }
+    try {
+      const formData = new FormData();
+      // console.log("filename[Debugger]",selectedFile);
+      formData.append("file", selectedFile);
+      formData.append("filename", selectedFile.name);
+      formData.append("job_id", jobIdx);
+      console.log("FormData[Debugger]",formData);
+      
+      const res = await axios.post(`${ngRokL}/cv-upload`,formData,{
+      // headers: {
+      //   "Content-Type": "multipart/form-data",
+      // },
+    });
+     if (res.status === 200) {
+      console.log("Resume Uplaoded for :",jobIdx, res.data);
+      // setJobTitle("");
+     }
+      console.log("Resume  API:",res.data);
+    }
+    catch (error) {
+      console.error("Error uploading resume ", error);
+    }
+   }
   const handleAddResumes = (jobId: string) => {
     setSelectedJobId(jobId)
+   
     setShowResumesModal(true)
   }
 
@@ -60,15 +119,12 @@ export default function OpenJobTables({state}:any) {
     state("scheduleMeeting")
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setSelectedFile(e.target.files[0])
-    }
-  }
+  
 
   const handleUploadResume = () => {
     if (selectedFile && selectedJobId) {
       dispatch(addResumes({ jobId: selectedJobId, file: selectedFile.name }))
+      resumeUploader(selectedJobId);
       setShowResumesModal(false)
       setSelectedFile(null)
     }
@@ -187,7 +243,12 @@ export default function OpenJobTables({state}:any) {
               <DialogTitle>Add Resumes</DialogTitle>
             </DialogHeader>
             <div className="flex items-center gap-4 mt-4">
-              <Input type="file" onChange={handleFileChange} className="flex-1" />
+              <Input 
+              type="file"
+              accept="application/pdf"
+               onChange={handleFileChange} 
+               className="flex-1"
+                />
               <Button className="bg-gray-500 hover:bg-zinc-950" onClick={handleUploadResume} disabled={!selectedFile}>
                 Upload
               </Button>

@@ -1,9 +1,8 @@
-import React from "react"
-import { useState } from "react"
+import React, { useState } from "react"
+import axios from "axios"
 import { Textarea } from "./ui/Textarea"
 import Button from "./ui/Button"
-// import { DialogHeader } from "./ui/DialogHeader"
-import { DialogTitle,DialogHeader } from "./ui/Dailog"
+import { DialogTitle, DialogHeader } from "./ui/Dailog"
 
 interface SampleQuestionsFormProps {
   jobId: string
@@ -19,13 +18,35 @@ export default function SampleQuestionsForm({
   onSave,
 }: SampleQuestionsFormProps) {
   const [questions, setQuestions] = useState(initialQuestions)
+  const ngrokL = "https://e3a8-49-204-210-210.ngrok-free.app" 
 
-  const handleSave = () => {
-    onSave({
-      jobId,
+  const handleSave = async () => {
+    const payload = {
+      agent_id: "1234", 
+      job_id: "jb_3578",
       questions,
-    })
-    onClose()
+    }
+    console.log("Payload:", payload)
+
+    try {
+      const response = await axios.post(`${ngrokL}/sample_questions`, payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      if (response.status !== 200) {
+        throw new Error("Failed to save questions")
+      }
+      console.log("Saved successfully:", response.data)
+
+      onSave(payload) 
+      onClose()      
+    } catch (error) {
+      console.error("Error saving questions:", error)
+      alert(" check console") 
+    }
   }
 
   return (

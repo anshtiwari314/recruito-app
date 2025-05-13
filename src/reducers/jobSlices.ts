@@ -2,11 +2,11 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
 // import type { RootState } from "../store/store"
 
 export interface Candidate {
-  id: string
-  name: string
-  status: "New" | "Reviewing" | "Shortlisted" | "Rejected" | "Hired"
-  score: number
-  jobId: string
+  id?: string
+  name?: string
+  status?:  "Pending" | "Shortlisted" 
+  score?: number
+  jobId?: string
   email?: string
   phone?: string
   resumeUrl?: string
@@ -56,10 +56,7 @@ const initialState: JobState = {
       dateCreated: "2025-05-02",
       candidates: [],
       sampleQuestions: [
-        "What is your experience with React?",
-        "How do you manage state in a React application?",
-        "Explain the concept of virtual DOM.",
-        "What are hooks in React?",
+      " what is azure \n what is dev \n tell me about yourself\n Q4"//expecting
       ]
     },
     {
@@ -148,7 +145,7 @@ const jobSlice = createSlice({
             .toString()
             .padStart(3, "0")}`,
           name: file.split(".")[0],
-          status: "New",
+          status: "Pending",
           score: 0,
           jobId,
           resumeUrl: `/resumes/${file}`,

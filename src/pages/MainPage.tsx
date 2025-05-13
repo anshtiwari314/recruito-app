@@ -13,13 +13,13 @@ export default function MainPage() {
   }
   const [active,setActive]=useState<string>("newJob");
   const [jobId,setJobId]=useState<string>("");
-  const ngrokL="https://2b42-49-204-210-210.ngrok-free.app";
+  const ngrokL="https://e3a8-49-204-210-210.ngrok-free.app";
  
  
   
   const onBtnClick1=(val:string)=>{
     setActive(val);
-    getJobId();
+    
   }
   const onBtnClick2=(val:string)=>{
     setActive(val);
