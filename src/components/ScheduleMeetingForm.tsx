@@ -6,6 +6,7 @@ import { Textarea } from "./ui/Textarea";
 import { useAppSelector } from "../store/store";
 import { Job } from "../reducers/jobSlices";
 import { useTestWrapper } from "../context/TestWrapper";
+import axios from "axios";
 
 // Date checker function
 const checkDate = (date: string, currDate: string) => {
@@ -13,11 +14,40 @@ const checkDate = (date: string, currDate: string) => {
   const currentDate = new Date(currDate);
   return selectedDate >= currentDate;
 };
+interface ApiJob {
+  jobid: string
+  title: string
+  job_description: string
+  key_criteria: string
+  sample_questions: string[]
+  candidate_data: { email: string; name: string; status: string; score: number }[]
+}
 
 export default function ScheduleMeetingForm() {
   const jobIdRef=useTestWrapper().jobIdRef;
+  const ngRokL = "https://bbbf-49-204-210-210.ngrok-free.app"
   const [jobId, setJobId] = useState(jobIdRef.current || "");
+  const [apiJobs, setApiJobs] = useState<ApiJob[]>([])
   console.log("Job ID from ref:", jobIdRef.current);
+   const getAllJobs = async () => {
+    try {
+      const res = await axios.post(
+        `${ngRokL}/jobs-list`,
+        { agent_id: "1234" },
+        { headers: { "Content-Type": "application/json" } }
+      )
+      if (res.status === 200) {
+        setApiJobs(res.data.job_data)
+      }
+      console.log("Jobs from API:", res.data.job_data)
+    } catch (error) {
+      console.error("Error fetching jobs:", error)
+    }
+  }
+
+  useEffect(() => {
+    getAllJobs()
+  }, [])
   
   const [candidate, setCandidate] = useState("example@example.com");
   const [participants, setParticipants] = useState("");
@@ -88,9 +118,9 @@ export default function ScheduleMeetingForm() {
             className="mt-1 block w-full border-gray-600 rounded-md shadow-sm border h-10"
           >
             <option value="">Select a job</option>
-            {jobsAv.map((job) => (
-              <option key={job.id} value={job.id}>
-                {job.id}
+            {apiJobs.map((job) => (
+              <option key={job.jobid} value={job.jobid}>
+                {job.jobid}
               </option>
             ))}
           </select>

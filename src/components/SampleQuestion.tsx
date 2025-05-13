@@ -18,7 +18,7 @@ export default function SampleQuestionsForm({
   onSave,
 }: SampleQuestionsFormProps) {
   const [questions, setQuestions] = useState(initialQuestions)
-  const ngrokL = "https://e3a8-49-204-210-210.ngrok-free.app" 
+  const ngrokL = "https://bbbf-49-204-210-210.ngrok-free.app" 
 
   const handleSave = async () => {
     const payload = {

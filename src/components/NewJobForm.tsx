@@ -14,7 +14,7 @@ export default function NewJobForm(jobID:string) {
   const [jobDesc, setJobDesc] = useState("");
   const [jobCriteria, setJobCriteria] = useState("");
   const [isValid, setIsValid] = useState(false);
-  const ngrokL="https://e3a8-49-204-210-210.ngrok-free.app";
+  const ngrokL="https://bbbf-49-204-210-210.ngrok-free.app";
    const [jobId, setJobId] = useState(""); 
    const getJobId=async()=>{
     try {

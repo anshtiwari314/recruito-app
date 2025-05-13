@@ -28,7 +28,7 @@ export default function EditJobForm({
   const [description, setDescription] = useState(initialData.description)
   const [criteria, setCriteria] = useState(initialData.criteria)
   const dispatch = useDispatch()
-  const ngrokL = "https://e3a8-49-204-210-210.ngrok-free.app" 
+  const ngrokL = "https://bbbf-49-204-210-210.ngrok-free.app" 
 
   const handleSave = async () => {
     const isValid = title.trim().length >= 8 && description.trim().length > 15;
