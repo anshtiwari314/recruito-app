@@ -11,7 +11,7 @@ export default function MainPage() {
     alert("Please login to continue")
     window.location.href="/login"
   }
-  const [active,setActive]=useState<string>("newJob");
+  const [active,setActive]=useState<string>("openJobs");
   const [jobId,setJobId]=useState<string>("");
   const ngrokL="https://e3a8-49-204-210-210.ngrok-free.app";
  

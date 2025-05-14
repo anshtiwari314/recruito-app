@@ -12,7 +12,6 @@ import SampleQuestionsForm from "./SampleQuestion"
 import { useTestWrapper } from "../context/TestWrapper"
 import axios from "axios"
 
-// Define API Job type
 export interface ApiJob {
   jobid: string
   title: string

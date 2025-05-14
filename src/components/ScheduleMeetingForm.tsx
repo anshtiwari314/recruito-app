@@ -2,95 +2,98 @@ import React, { useEffect, useState } from "react";
 import Button from "./ui/Button";
 import { Card, CardContent } from "./ui/Card";
 import { Input } from "./ui/Input";
-import { Textarea } from "./ui/Textarea";
-import { useAppSelector } from "../store/store";
-import { Job } from "../reducers/jobSlices";
 import { useTestWrapper } from "../context/TestWrapper";
 import axios from "axios";
 
-// Date checker function
-const checkDate = (date: string, currDate: string) => {
-  const selectedDate = new Date(date);
-  const currentDate = new Date(currDate);
-  return selectedDate >= currentDate;
-};
 interface ApiJob {
-  jobid: string
-  title: string
-  job_description: string
-  key_criteria: string
-  sample_questions: string[]
-  candidate_data: { email: string; name: string; status: string; score: number }[]
+  jobid: string;
+  title: string;
+  job_description: string;
+  key_criteria: string;
+  sample_questions: string[];
+  candidate_data: { email: string; name: string; status: string; score: number }[];
 }
 
 export default function ScheduleMeetingForm() {
-  const jobIdRef=useTestWrapper().jobIdRef;
-  const ngRokL = "https://bbbf-49-204-210-210.ngrok-free.app"
-  const [jobId, setJobId] = useState(jobIdRef.current || "");
-  const [apiJobs, setApiJobs] = useState<ApiJob[]>([])
-  console.log("Job ID from ref:", jobIdRef.current);
-   const getAllJobs = async () => {
-    try {
-      const res = await axios.post(
-        `${ngRokL}/jobs-list`,
-        { agent_id: "1234" },
-        { headers: { "Content-Type": "application/json" } }
-      )
-      if (res.status === 200) {
-        setApiJobs(res.data.job_data)
-      }
-      console.log("Jobs from API:", res.data.job_data)
-    } catch (error) {
-      console.error("Error fetching jobs:", error)
-    }
-  }
+  const jobIdRef = useTestWrapper().jobIdRef;
+  const ngRokL = "https://bbbf-49-204-210-210.ngrok-free.app";
 
-  useEffect(() => {
-    getAllJobs()
-  }, [])
-  
-  const [candidate, setCandidate] = useState("example@example.com");
+  const [jobId, setJobId] = useState(jobIdRef.current || "");
+  const [apiJobs, setApiJobs] = useState<ApiJob[]>([]);
+  const [candidateList, setCandidateList] = useState<{ email: string; name: string }[]>([]);
+  const [selectedCandidate, setSelectedCandidate] = useState("");
   const [participants, setParticipants] = useState("");
   const [date, setDate] = useState("");
   const [isValid, setIsValid] = useState(false);
   const [meetingLink, setMeetingLink] = useState("");
 
-  const jobsAv: Job[] = useAppSelector((state) => state.jobReducer.jobs);
-
   const currDate = new Date();
   const formattedDate = currDate.toISOString().split("T")[0];
 
- 
   useEffect(() => {
-    const userEmail = sessionStorage.getItem("userEmail") || "";
-    setCandidate(userEmail);
+    const getAllJobs = async () => {
+      try {
+        const res = await axios.post(
+          `${ngRokL}/jobs-list`,
+          { agent_id: "1234" },
+          { headers: { "Content-Type": "application/json" } }
+        );
+        if (res.status === 200) {
+          setApiJobs(res.data.job_data);
+        }
+      } catch (error) {
+        console.error("Error fetching jobs:", error);
+      }
+    };
+
+    getAllJobs();
   }, []);
 
-  // Update isValid when form fields change
   useEffect(() => {
-    const isDateValid = date && checkDate(date, formattedDate);
-    setIsValid(!!(jobId && candidate && participants.trim().length > 0 && isDateValid));
-  }, [jobId, candidate, participants, date]);
+    const job = apiJobs.find((job) => job.jobid === jobId);
+    if (job) {
+      setCandidateList(job.candidate_data.map((c) => ({ name: c.name, email: c.email })));
+      setSelectedCandidate(""); 
+    } else {
+      setCandidateList([]);
+      setSelectedCandidate("");
+    }
+  }, [jobId, apiJobs]);
+
+  useEffect(() => {
+    const isDateValid = date && new Date(date) >= new Date(formattedDate);
+    setIsValid(!!(jobId && selectedCandidate && participants.trim() && isDateValid));
+  }, [jobId, selectedCandidate, participants, date]);
 
   const onSchedule = async () => {
     if (!isValid) return;
 
-  
     const agentId = "1234";
     const roomId = "abc-123-fgh-456";
-    const customerId = candidate;
+    const customerId = selectedCandidate;
     const jobno = jobId;
 
-    const params = new URLSearchParams({
-      room_id: roomId,
-      cust_email_id: customerId,
-      agent_id: agentId,
-      job_id: jobno,
-    });
-
-    const link = `https://app-domain-eg?${params.toString()}`;
+    const link = `https://app-domain-eg?room_id=${roomId}&cust_email_id=${customerId}&agent_id=${agentId}&job_id=${jobno}`;
     setMeetingLink(link);
-    setJobId("")
+
+    try {
+      const res = await axios.post(
+        `${ngRokL}/schedule-meeting`,
+        { link },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      if (res.status === 200) {
+        alert("Meeting scheduled successfully!");
+      } else {
+        throw new Error("Failed to schedule meeting");
+      }
+    } catch (error) {
+      console.error("Error scheduling meeting:", error);
+      alert("Error scheduling meeting. Please check the console.");
+    }
+
+    setJobId("");
+    setSelectedCandidate("");
     setParticipants("");
     setDate("");
     setIsValid(false);
@@ -109,9 +112,7 @@ export default function ScheduleMeetingForm() {
         <h2 className="text-xl font-semibold">Schedule Interview</h2>
 
         <div>
-          <label className="block text-m ml-1 font-medium text-gray-700 mb-1">
-            Job ID
-          </label>
+          <label className="block text-m ml-1 font-medium text-gray-700 mb-1">Job ID</label>
           <select
             value={jobId}
             onChange={(e) => setJobId(e.target.value)}
@@ -126,17 +127,29 @@ export default function ScheduleMeetingForm() {
           </select>
         </div>
 
-        <Input
-          value={`Candidate: ${candidate}`}
-          readOnly
-          className="bg-gray-100 cursor-not-allowed"
-        />
+        <div>
+          <label className="block text-m ml-1 font-medium text-gray-700 mb-1">Candidate</label>
+          <select
+            value={selectedCandidate}
+            onChange={(e) => setSelectedCandidate(e.target.value)}
+            className="mt-1 block w-full border-gray-600 rounded-md shadow-sm border h-10"
+            disabled={candidateList.length === 0}
+          >
+            <option value="">Select a candidate</option>
+            {candidateList.map((c, idx) => (
+              <option key={idx} value={c.email}>
+                 {c.email}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <Textarea
+        <textarea
           placeholder="Participants (comma-separated emails)"
           rows={3}
           value={participants}
           onChange={(e) => setParticipants(e.target.value)}
+          className="w-full border border-gray-600 rounded-md p-2"
         />
 
         <Input
@@ -151,14 +164,12 @@ export default function ScheduleMeetingForm() {
           disabled={!isValid}
           className={`${isValid ? "" : "bg-gray-300 text-gray-500 cursor-not-allowed pointer-events-none"}`}
         >
-          Schedule Meeting
+          Book Slot
         </Button>
 
         {meetingLink && (
           <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Your Meeting Link
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Your Meeting Link</label>
             <div className="flex items-center">
               <Input
                 type="text"
