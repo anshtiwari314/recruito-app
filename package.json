@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "tsc && vite build && cp ./lame.min.js ./dist/",
+    "build": "tsc && vite build && cp  ./dist/",
     "copy": "mv dist/index.html dist/meeting.html && cp dist/meeting.html combined_dist && cp dist/assets/*.js combined_dist/assets && cp dist/assets/*.css combined_dist/assets",
     "preview": "vite preview"
   },
