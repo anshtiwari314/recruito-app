@@ -7,13 +7,10 @@ import axios from "axios";
 
 export default function MainPage() {
   const getFromSTorage=sessionStorage.getItem("userEmail");
-  if(getFromSTorage===null){
-    alert("Please login to continue")
-    window.location.href="/login"
-  }
+ 
   const [active,setActive]=useState<string>("openJobs");
   const [jobId,setJobId]=useState<string>("");
-  const ngrokL="https://63bc-49-204-210-210.ngrok-free.app";
+  // const ngrokL="https://63bc-49-204-210-210.ngrok-free.app";
  
  
   
