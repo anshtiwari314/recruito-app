@@ -11,16 +11,26 @@ interface ApiJob {
   job_description: string;
   key_criteria: string;
   sample_questions: string[];
-  candidate_data: { email: string; name: string; status: string; score: number }[];
+  candidate_data: {
+    email: string;
+    name: string;
+    status: string;
+    score: number | string;
+    candidate_id: string;
+    meeting_link?: string | null;
+  }[];
 }
 
 export default function ScheduleMeetingForm() {
   const jobIdRef = useTestWrapper().jobIdRef;
-  const ngRokL = "https://bbbf-49-204-210-210.ngrok-free.app";
+  const candidRef = useTestWrapper().candiRef;
+  const ngRokL = "https://wpv7kxos9g.execute-api.ap-south-1.amazonaws.com/test/recruito-upload-apis";
 
   const [jobId, setJobId] = useState(jobIdRef.current || "");
   const [apiJobs, setApiJobs] = useState<ApiJob[]>([]);
-  const [candidateList, setCandidateList] = useState<{ email: string; name: string }[]>([]);
+  const [candidateList, setCandidateList] = useState<
+    { email: string; name: string }[]
+  >([]);
   const [selectedCandidate, setSelectedCandidate] = useState("");
   const [participants, setParticipants] = useState("");
   const [date, setDate] = useState("");
@@ -52,17 +62,42 @@ export default function ScheduleMeetingForm() {
   useEffect(() => {
     const job = apiJobs.find((job) => job.jobid === jobId);
     if (job) {
-      setCandidateList(job.candidate_data.map((c) => ({ name: c.name, email: c.email })));
-      setSelectedCandidate(""); 
+      setCandidateList(
+        job.candidate_data.map((c) => ({ name: c.name, email: c.email }))
+      );
+      setSelectedCandidate("");
+      setParticipants("");
     } else {
       setCandidateList([]);
       setSelectedCandidate("");
+      setParticipants("");
     }
   }, [jobId, apiJobs]);
 
   useEffect(() => {
+    const job = apiJobs.find((job) => job.jobid === jobId);
+    const candidate = job?.candidate_data.find(
+      (c) => c.email === selectedCandidate
+    );
+
+    if (candidate) {
+      const details = `Name: ${candidate.name}
+Email: ${candidate.email}
+Candidate ID: ${candidate.candidate_id}
+Score: ${candidate.score}
+Status: ${candidate.status}`;
+
+      setParticipants(details);
+    } else {
+      setParticipants("");
+    }
+  }, [selectedCandidate, jobId, apiJobs]);
+
+  useEffect(() => {
     const isDateValid = date && new Date(date) >= new Date(formattedDate);
-    setIsValid(!!(jobId && selectedCandidate && participants.trim() && isDateValid));
+    setIsValid(
+      !!(jobId && selectedCandidate && participants.trim() && isDateValid)
+    );
   }, [jobId, selectedCandidate, participants, date]);
 
   const onSchedule = async () => {
@@ -77,10 +112,18 @@ export default function ScheduleMeetingForm() {
     setMeetingLink(link);
 
     try {
+      const linktobeSent=`https://app-domain-eg?room_id=${roomId}`
       const res = await axios.post(
-        `${ngRokL}/schedule-meeting`,
-        { link },
-        { headers: { "Content-Type": "application/json" } }
+        `${ngRokL}/schedule_meeting`,
+        {
+          meeting_link: linktobeSent,
+          agent_id: "1234",
+          job_id: jobno,
+          candidate_id: candidRef.current,
+        },
+        {
+          headers: { "Content-Type": "application/json" },
+        }
       );
       if (res.status === 200) {
         alert("Meeting scheduled successfully!");
@@ -112,7 +155,9 @@ export default function ScheduleMeetingForm() {
         <h2 className="text-xl font-semibold">Schedule Interview</h2>
 
         <div>
-          <label className="block text-m ml-1 font-medium text-gray-700 mb-1">Job ID</label>
+          <label className="block text-m ml-1 font-medium text-gray-700 mb-1">
+            Job ID
+          </label>
           <select
             value={jobId}
             onChange={(e) => setJobId(e.target.value)}
@@ -128,7 +173,9 @@ export default function ScheduleMeetingForm() {
         </div>
 
         <div>
-          <label className="block text-m ml-1 font-medium text-gray-700 mb-1">Candidate</label>
+          <label className="block text-m ml-1 font-medium text-gray-700 mb-1">
+            Candidate
+          </label>
           <select
             value={selectedCandidate}
             onChange={(e) => setSelectedCandidate(e.target.value)}
@@ -138,15 +185,15 @@ export default function ScheduleMeetingForm() {
             <option value="">Select a candidate</option>
             {candidateList.map((c, idx) => (
               <option key={idx} value={c.email}>
-                 {c.email}
+                {c.email}
               </option>
             ))}
           </select>
         </div>
 
         <textarea
-          placeholder="Participants (comma-separated emails)"
-          rows={3}
+          placeholder="Participants details"
+          rows={5}
           value={participants}
           onChange={(e) => setParticipants(e.target.value)}
           className="w-full border border-gray-600 rounded-md p-2"
@@ -162,14 +209,20 @@ export default function ScheduleMeetingForm() {
         <Button
           onClick={onSchedule}
           disabled={!isValid}
-          className={`${isValid ? "" : "bg-gray-300 text-gray-500 cursor-not-allowed pointer-events-none"}`}
+          className={`${
+            isValid
+              ? ""
+              : "bg-gray-300 text-gray-500 cursor-not-allowed pointer-events-none"
+          }`}
         >
           Book Slot
         </Button>
 
         {meetingLink && (
           <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Your Meeting Link</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Your Meeting Link
+            </label>
             <div className="flex items-center">
               <Input
                 type="text"

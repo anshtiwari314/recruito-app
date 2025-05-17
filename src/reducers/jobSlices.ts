@@ -10,6 +10,7 @@ export interface Candidate {
   email?: string
   phone?: string
   resumeUrl?: string
+  candidate_id?:string
 }
 
 export interface Job {

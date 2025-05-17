@@ -18,13 +18,14 @@ export interface ApiJob {
   job_description: string
   key_criteria: string
   sample_questions: string[]
-  candidate_data: { email: string; name: string; status: string; score: number }[]
+  candidate_data: { email: string; name: string; status: string; score: number,candidate_id:string,meeting_link:string }[]
 }
 
 export default function OpenJobTables({ state }: any) {
-  const ngRokL = "https://bbbf-49-204-210-210.ngrok-free.app"
+  const ngRokL = "https://wpv7kxos9g.execute-api.ap-south-1.amazonaws.com/test/recruito-upload-apis"
   const dispatch = useDispatch()
   const jobIdRef = useTestWrapper().jobIdRef
+  const candiRef=useTestWrapper().candiRef
 
   
   const [apiJobs, setApiJobs] = useState<ApiJob[]>([])
@@ -106,12 +107,17 @@ export default function OpenJobTables({ state }: any) {
     setShowQuestionsModal(true)
   }
 
-  const handleScheduleJobMeeting = (jobId: string) => {
+  const handleScheduleJobMeeting = (jobId: string,can_id:string) => {
     alert(`Scheduling meeting for job ${jobId}`)
     // @ts-ignore
     jobIdRef.current = jobId
+    //@ts-ignore
+    candiRef.current=can_id
     state("scheduleMeeting")
   }
+ const handleWithMeetingLink = (ml:string) => {
+  window.location.href = `${ml}`;  
+}
 
   const handleUploadResume = () => {
     if (selectedFile && selectedJobId) {
@@ -156,7 +162,7 @@ export default function OpenJobTables({ state }: any) {
                   <Button variant="outline" onClick={() => handleAddResumes(job.jobid)}>Add Resumes</Button>
                   <Button variant="outline" onClick={() => handleViewCandidates(job.jobid)}>View Candidates</Button>
                   <Button variant="outline" onClick={() => handleAddSampleQuestions(job.jobid)}>Add Sample Questions</Button>
-                  <Button variant="outline" onClick={() => handleScheduleJobMeeting(job.jobid)}>Schedule Meeting</Button>
+                  <Button variant="outline" onClick={() => handleScheduleJobMeeting(job.jobid,"")}>Schedule Meeting</Button>
                 </TableCell>
               </TableRow>
             ))}
@@ -164,50 +170,68 @@ export default function OpenJobTables({ state }: any) {
         </Table>
 
         {/* Candidates Modal */}
-        <Dialog open={showCandidatesModal} onOpenChange={setShowCandidatesModal}>
-          <DialogContent>
-            <DialogHeader onClose={() => setShowCandidatesModal(false)}>
-              <DialogTitle>View Candidates for Job {selectedJobId}</DialogTitle>
-            </DialogHeader>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Score</TableHead>
-                  <TableHead>Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredCandidates.length > 0 ? (
-                  filteredCandidates.map((candidate) => (
-                    <TableRow key={candidate.email}>
-                      <TableCell>{candidate.name}</TableCell>
-                      <TableCell>{candidate.status}</TableCell>
-                      <TableCell>{candidate.score}</TableCell>
-                      <TableCell>
-                        <Button className="bg-gray-500 hover:bg-zinc-900" onClick={() => handleScheduleJobMeeting(selectedJobId)}>
-                          Schedule Meeting
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell className="text-center py-4" colSpan={4}>
-                      No candidates found for this job
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-            <div className="mt-4">
-              <DialogClose asChild>
-                <Button className="hover:bg-gray-600">Close</Button>
-              </DialogClose>
-            </div>
-          </DialogContent>
-        </Dialog>
+        {/* Candidates Modal */}
+<Dialog open={showCandidatesModal} onOpenChange={setShowCandidatesModal}>
+  <DialogContent className="w-full max-w-3xl">
+    <DialogHeader onClose={() => setShowCandidatesModal(false)}>
+      <DialogTitle>View Candidates for Job {selectedJobId}</DialogTitle>
+    </DialogHeader>
+    {/* Scroll wrapper */}
+    <div className="overflow-x-auto max-h-[60vh] overflow-y-auto mt-4">
+      <Table className="min-w-full">
+        <TableHeader>
+          <TableRow>
+            <TableHead>Candidate_id</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Score</TableHead>
+            <TableHead>Action</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filteredCandidates.length > 0 ? (
+            filteredCandidates.map((candidate) => (
+              <TableRow key={candidate.email}>
+                <TableCell>{candidate.candidate_id}</TableCell>
+                <TableCell>{candidate.name}</TableCell>
+                <TableCell>{candidate.email}</TableCell>
+                <TableCell>{candidate.status}</TableCell>
+                <TableCell>{candidate.score}</TableCell>
+                <TableCell>
+                  {candidate.meeting_link?(<Button
+                    className="bg-gray-500 hover:bg-zinc-900"
+                    onClick={() => handleWithMeetingLink(candidate.meeting_link)}
+                  >
+                   Meeting Link
+                  </Button>):(<Button
+                    className="bg-gray-500 hover:bg-zinc-900"
+                    onClick={() => handleScheduleJobMeeting(selectedJobId, candidate.candidate_id)}
+                  >
+                    Schedule Meeting
+                  </Button>)}
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              {/* Set colSpan equal to number of columns */}
+              <TableCell colSpan={6} className="text-center py-4">
+                No candidates found for this job
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </div>
+    <div className="mt-4 text-right">
+      <DialogClose asChild>
+        <Button className="hover:bg-gray-600">Close</Button>
+      </DialogClose>
+    </div>
+  </DialogContent>
+</Dialog>
+
 
         {/* Resumes Modal */}
         <Dialog open={showResumesModal} onOpenChange={setShowResumesModal}>

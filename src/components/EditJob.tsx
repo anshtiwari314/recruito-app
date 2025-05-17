@@ -28,7 +28,7 @@ export default function EditJobForm({
   const [description, setDescription] = useState(initialData.description)
   const [criteria, setCriteria] = useState(initialData.criteria)
   const dispatch = useDispatch()
-  const ngrokL = "https://bbbf-49-204-210-210.ngrok-free.app" 
+  const ngrokL = "https://wpv7kxos9g.execute-api.ap-south-1.amazonaws.com/test/recruito-upload-apis" 
 
   const handleSave = async () => {
     const isValid = title.trim().length >= 8 && description.trim().length > 15;
@@ -48,7 +48,14 @@ export default function EditJobForm({
     dispatch(editJob({ id: jobId, title, description, criteria }))
 
     try {
-      const res = await axios.post(`${ngrokL}/add_new_job`, {
+      console.log({
+        id: jobId,
+      title,
+      description,
+      criteria,
+      });
+      
+      const res = await axios.post(`${ngrokL}/add_job_details`, {
         job_id: jobId,
         job_title: title,
         job_description: description,

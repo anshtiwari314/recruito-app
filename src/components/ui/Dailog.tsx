@@ -29,7 +29,7 @@ export const DialogTrigger = ({ children, asChild = false, onClick, onOpen }: Di
 
 export const DialogContent = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center w-200 justify-center z-50">
       <div className={`bg-white p-6 rounded-md w-[90%] max-w-md shadow-lg ${className}`}>{children}</div>
     </div>
   )

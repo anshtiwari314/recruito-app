@@ -27,7 +27,7 @@ export default function Login() {
 
   function handleAuth() {
     setLoading(true)
-    const url = `${import.meta.env.VITE_API_URL}/login`
+    const url = `/login`
 
     fetch(url, {
       method: 'POST',
@@ -47,7 +47,6 @@ export default function Login() {
       .then((result) => {
         setLoading(false)
 
-        // Test ke liye, chahe result true ho ya na ho, email store kar le
         sessionStorage.setItem('userEmail', email)
 
         if (result.error !== null) {
@@ -57,7 +56,6 @@ export default function Login() {
         }
 
         if (result.result === true) {
-          // Successful login: home redirect
           window.location.href = '/'
         }
       })
