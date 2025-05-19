@@ -2,6 +2,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useSelector } from "react-redux";
 import jobSlices from "../reducers/jobSlices";
+import QpSlices from "../reducers/QpSlices";
 
 
 
@@ -9,6 +10,7 @@ import jobSlices from "../reducers/jobSlices";
 export const store = configureStore({
   reducer: {
     jobReducer: jobSlices.jobReducer,
+    qPReducer:QpSlices.qpReducer,
   },
 });
 

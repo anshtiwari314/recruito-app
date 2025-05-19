@@ -23,7 +23,7 @@ export default function SampleQuestionsForm({
   const handleSave = async () => {
     const payload = {
       agent_id: "1234", 
-      job_id: "jb_3578",
+      job_id: jobId,
       questions,
     }
     console.log("Payload:", payload)
