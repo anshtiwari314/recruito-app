@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 import Button from "./ui/Button";
 import { Card, CardContent } from "./ui/Card";
 import { Input } from "./ui/Input";
@@ -11,141 +12,135 @@ interface ApiJob {
   job_description: string;
   key_criteria: string;
   sample_questions: string[];
-  candidate_data: {
-    email: string;
-    name: string;
-    status: string;
-    score: number | string;
-    candidate_id: string;
-    meeting_link?: string | null;
-  }[];
+  candidate_data: Candidate[];
+}
+
+interface Candidate {
+  email: string;
+  name: string;
+  status: string;
+  score: number | string;
+  candidate_id: string;
+  meeting_link?: string | null;
 }
 
 export default function ScheduleMeetingForm() {
   const jobIdRef = useTestWrapper().jobIdRef;
   const candidRef = useTestWrapper().candiRef;
-  const ngRokL = "https://wpv7kxos9g.execute-api.ap-south-1.amazonaws.com/test/recruito-upload-apis";
+  const API_BASE =
+    "https://wpv7kxos9g.execute-api.ap-south-1.amazonaws.com/test/recruito-upload-apis";
 
-  const [jobId, setJobId] = useState(jobIdRef.current || "");
+  const [jobId, setJobId] = useState<string>(jobIdRef.current || "");
   const [apiJobs, setApiJobs] = useState<ApiJob[]>([]);
-  const [candidateList, setCandidateList] = useState<
-    { email: string; name: string }[]
-  >([]);
-  const [selectedCandidate, setSelectedCandidate] = useState("");
-  const [participants, setParticipants] = useState("");
-  const [date, setDate] = useState("");
-  const [isValid, setIsValid] = useState(false);
-  const [meetingLink, setMeetingLink] = useState("");
+  const [candidateList, setCandidateList] = useState<Candidate[]>([]);
+  const [selectedCandidateEmail, setSelectedCandidateEmail] = useState<string>(
+    ""
+  );
+  const [participants, setParticipants] = useState<string>("");
+  const [date, setDate] = useState<string>("");
+  const [isValid, setIsValid] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [meetingLink, setMeetingLink] = useState<string>("");
 
-  const currDate = new Date();
-  const formattedDate = currDate.toISOString().split("T")[0];
+  const today = new Date();
+  const formattedDate = today.toISOString().split("T")[0];
 
   useEffect(() => {
-    const getAllJobs = async () => {
+    const fetchJobs = async () => {
       try {
         const res = await axios.post(
-          `${ngRokL}/jobs-list`,
+          `${API_BASE}/jobs-list`,
           { agent_id: "1234" },
           { headers: { "Content-Type": "application/json" } }
         );
-        if (res.status === 200) {
-          setApiJobs(res.data.job_data);
-        }
-      } catch (error) {
-        console.error("Error fetching jobs:", error);
+        if (res.status === 200) setApiJobs(res.data.job_data);
+      } catch (err) {
+        console.error("Error fetching jobs:", err);
       }
     };
-
-    getAllJobs();
+    fetchJobs();
   }, []);
 
   useEffect(() => {
-    const job = apiJobs.find((job) => job.jobid === jobId);
+    const job = apiJobs.find((j) => j.jobid === jobId);
     if (job) {
-      setCandidateList(
-        job.candidate_data.map((c) => ({ name: c.name, email: c.email }))
-      );
-      setSelectedCandidate("");
+      setCandidateList(job.candidate_data);
+      setSelectedCandidateEmail("");
       setParticipants("");
+      candidRef.current = "";
     } else {
       setCandidateList([]);
-      setSelectedCandidate("");
-      setParticipants("");
     }
-  }, [jobId, apiJobs]);
+  }, [jobId, apiJobs, candidRef]);
 
   useEffect(() => {
-    const job = apiJobs.find((job) => job.jobid === jobId);
+    const job = apiJobs.find((j) => j.jobid === jobId);
     const candidate = job?.candidate_data.find(
-      (c) => c.email === selectedCandidate
+      (c) => c.email === selectedCandidateEmail
     );
-
     if (candidate) {
-      const details = `Name: ${candidate.name}
-Email: ${candidate.email}
-Candidate ID: ${candidate.candidate_id}
-Score: ${candidate.score}
-Status: ${candidate.status}`;
-
+      candidRef.current = candidate.candidate_id;
+      const details = `Name: ${candidate.name}\nEmail: ${candidate.email}\nCandidate ID: ${candidate.candidate_id}\nScore: ${candidate.score}\nStatus: ${candidate.status}`;
       setParticipants(details);
     } else {
       setParticipants("");
+      candidRef.current = "";
     }
-  }, [selectedCandidate, jobId, apiJobs]);
+  }, [selectedCandidateEmail, jobId, apiJobs, candidRef]);
 
+  // Validation
   useEffect(() => {
     const isDateValid = date && new Date(date) >= new Date(formattedDate);
     setIsValid(
-      !!(jobId && selectedCandidate && participants.trim() && isDateValid)
+      Boolean(
+        jobId &&
+          selectedCandidateEmail &&
+          participants.trim() &&
+          isDateValid &&
+          !loading
+      )
     );
-  }, [jobId, selectedCandidate, participants, date]);
+  }, [jobId, selectedCandidateEmail, participants, date, loading, formattedDate]);
 
+  // Schedule meeting with only roomId and candidateId in params
   const onSchedule = async () => {
     if (!isValid) return;
 
-    const agentId = "1234";
-    const roomId = "abc-123-fgh-456";
-    const customerId = selectedCandidate;
-    const jobno = jobId;
-
-    const link = `https://app-domain-eg?room_id=${roomId}&cust_email_id=${customerId}&agent_id=${agentId}&job_id=${jobno}`;
+    setLoading(true);
+    const roomId = uuidv4();
+    // roomid and candidateid only
+    const link = `https://app-domain-eg/?room_id="${roomId}"/candidate_id="${candidRef.current}"`;
     setMeetingLink(link);
 
     try {
-      const linktobeSent=`https://app-domain-eg?room_id=${roomId}`
       const res = await axios.post(
-        `${ngRokL}/schedule_meeting`,
+        `${API_BASE}/schedule_meeting`,
         {
-          meeting_link: linktobeSent,
-          agent_id: "1234",
-          job_id: jobno,
-          candidate_id: candidRef.current,
+          meeting_link: link,
         },
-        {
-          headers: { "Content-Type": "application/json" },
-        }
+        { headers: { "Content-Type": "application/json" } }
       );
       if (res.status === 200) {
-        alert("Meeting scheduled successfully!");
+        alert("Meeting scheduled successfully! ");
+        setSelectedCandidateEmail("");
+        setParticipants("");
+        setDate("");
+        // setMeetingLink("");
       } else {
         throw new Error("Failed to schedule meeting");
       }
-    } catch (error) {
-      console.error("Error scheduling meeting:", error);
+    } catch (err) {
+      console.error("Error scheduling meeting:", err);
       alert("Error scheduling meeting. Please check the console.");
     }
 
-    setJobId("");
-    setSelectedCandidate("");
-    setParticipants("");
-    setDate("");
-    setIsValid(false);
+    setLoading(false);
   };
 
   const copyLink = () => {
     if (meetingLink) {
       navigator.clipboard.writeText(meetingLink);
-      alert("Meeting link copied to clipboard!");
+      alert("Meeting link copied! 📋");
     }
   };
 
@@ -154,6 +149,7 @@ Status: ${candidate.status}`;
       <CardContent className="space-y-4">
         <h2 className="text-xl font-semibold">Schedule Interview</h2>
 
+        {/* Job ID Selector */}
         <div>
           <label className="block text-m ml-1 font-medium text-gray-700 mb-1">
             Job ID
@@ -172,52 +168,57 @@ Status: ${candidate.status}`;
           </select>
         </div>
 
+        {/* Candidate Selector */}
         <div>
           <label className="block text-m ml-1 font-medium text-gray-700 mb-1">
-            Candidate
+            Candidate ID
           </label>
           <select
-            value={selectedCandidate}
-            onChange={(e) => setSelectedCandidate(e.target.value)}
+            value={selectedCandidateEmail}
+            onChange={(e) => setSelectedCandidateEmail(e.target.value)}
             className="mt-1 block w-full border-gray-600 rounded-md shadow-sm border h-10"
-            disabled={candidateList.length === 0}
+            disabled={!jobId}
+            title={!jobId ? "Select a Job ID first" : ""}
           >
             <option value="">Select a candidate</option>
-            {candidateList.map((c, idx) => (
-              <option key={idx} value={c.email}>
-                {c.email}
+            {candidateList.map((c) => (
+              <option key={c.candidate_id} value={c.email}>
+                {c.candidate_id}
               </option>
             ))}
           </select>
         </div>
 
+        {/* Participants Details */}
         <textarea
           placeholder="Participants details"
           rows={5}
           value={participants}
-          onChange={(e) => setParticipants(e.target.value)}
-          className="w-full border border-gray-600 rounded-md p-2"
+          readOnly
+          className="w-full border border-gray-600 rounded-md p-2 bg-gray-50"
         />
 
-        <Input
-          type="date"
-          value={date}
-          min={formattedDate}
-          onChange={(e) => setDate(e.target.value)}
-        />
+        {/* Date Picker */}
+        <div>
+          <label className="block text-m ml-1 font-medium text-gray-700 mb-1">
+            Pick Date
+          </label>
+          <Input
+            type="date"
+            value={date}
+            min={formattedDate}
+            onChange={(e) => setDate(e.target.value)}
+            disabled={!selectedCandidateEmail}
+            title={!selectedCandidateEmail ? "Select candidate first" : ""}
+          />
+        </div>
 
-        <Button
-          onClick={onSchedule}
-          disabled={!isValid}
-          className={`${
-            isValid
-              ? ""
-              : "bg-gray-300 text-gray-500 cursor-not-allowed pointer-events-none"
-          }`}
-        >
-          Book Slot
+        {/* Schedule Button */}
+        <Button onClick={onSchedule} disabled={!isValid}>
+          {loading ? "Booking..." : "Book Slot"}
         </Button>
 
+        {/* Meeting Link Display */}
         {meetingLink && (
           <div className="mt-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">

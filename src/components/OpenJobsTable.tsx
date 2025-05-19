@@ -26,6 +26,7 @@ export default function OpenJobTables({ state }: any) {
   const dispatch = useDispatch()
   const jobIdRef = useTestWrapper().jobIdRef
   const candiRef=useTestWrapper().candiRef
+  const cameForEdit=useTestWrapper().cameForEdit;
 
   
   const [apiJobs, setApiJobs] = useState<ApiJob[]>([])
@@ -62,10 +63,21 @@ export default function OpenJobTables({ state }: any) {
   const selectedJob = apiJobs.find((job) => job.jobid === selectedJobId)
   const filteredCandidates = selectedJob?.candidate_data ?? []
 
+
+  const takeMeToCandidatePage=(jobId:string)=>{
+    //@ts-ignore
+    jobIdRef.current=jobId;
+    state("candidate")
+  }
   
   const handleEditJob = (jobId: string) => {
+    //@ts-ignore
+    cameForEdit.current=true;
+    //@ts-ignore
+    jobIdRef.current=jobId;
     setSelectedJobId(jobId)
-    setShowEditModal(true)
+    state("EditJob")
+    // setShowEditModal(true)
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -160,9 +172,9 @@ export default function OpenJobTables({ state }: any) {
                 <TableCell className="flex flex-wrap gap-2">
                   <Button variant="outline" onClick={() => handleEditJob(job.jobid)}>Edit</Button>
                   <Button variant="outline" onClick={() => handleAddResumes(job.jobid)}>Add Resumes</Button>
-                  <Button variant="outline" onClick={() => handleViewCandidates(job.jobid)}>View Candidates</Button>
+                  <Button variant="outline" onClick={() => takeMeToCandidatePage(job.jobid)}>View Candidates</Button>
                   <Button variant="outline" onClick={() => handleAddSampleQuestions(job.jobid)}>Add Sample Questions</Button>
-                  <Button variant="outline" onClick={() => handleScheduleJobMeeting(job.jobid,"")}>Schedule Meeting</Button>
+                  {/* <Button variant="outline" onClick={() => handleScheduleJobMeeting(job.jobid,"")}>Schedule Meeting</Button> */}
                 </TableCell>
               </TableRow>
             ))}

@@ -5,7 +5,9 @@ import { createContext, useContext, useRef, useMemo } from "react"
 // Define the context type properly
 interface TestWrapperContextType {
   jobIdRef: React.RefObject<string>,
-  candiRef: React.RefObject<string>
+  candiRef: React.RefObject<string>,
+  cameForEdit: React.RefObject<boolean>,
+
 }
 
 // Create context with proper typing and default value
@@ -27,11 +29,12 @@ export default function TestWrapper({ children }: TestWrapperProps) {
   // Initialize ref with null, not a string
   const jobIdRef = useRef<string | null>(null)
   const candiRef=useRef<string|null>(null)
-
+  const cameForEdit=useRef<boolean>(false);
   const contextValue = useMemo(
     () => ({
       jobIdRef,
-      candiRef
+      candiRef,
+      cameForEdit,
     }),
     [],
   )

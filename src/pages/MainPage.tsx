@@ -4,6 +4,8 @@ import OpenJobsTable from "../components/OpenJobsTable.tsx"
 import ScheduleMeetingForm from "../components/ScheduleMeetingForm.tsx"
 import Button from "../components/ui/Button.tsx";
 import axios from "axios";
+import CandidateView from "../components/CandidateView.tsx";
+import EditJobForm from "../components/EditJobForm.tsx";
 
 export default function MainPage() {
   const getFromSTorage=sessionStorage.getItem("userEmail");
@@ -12,8 +14,6 @@ export default function MainPage() {
   const [jobId,setJobId]=useState<string>("");
   // const ngrokL="https://63bc-49-204-210-210.ngrok-free.app";
  
- 
-  
   const onBtnClick1=(val:string)=>{
     setActive(val);
     
@@ -41,6 +41,9 @@ export default function MainPage() {
     {active==="newJob" && <NewJobForm jobId={jobId} />}
     {active==="openJobs" && <OpenJobsTable state={setActive} />}
     {active==="scheduleMeeting" && <ScheduleMeetingForm/>}
+    {active==="candidate" && <CandidateView state={setActive}/>}
+    {active==="EditJob" && <EditJobForm />}
+
    </div>
   </>
   );
@@ -54,5 +57,9 @@ export default function MainPage() {
 //jobid  i have ->done
 //email id of person who logged in->done
 //agent id of person who logged in->backend->done 
+
+
+//add a sample q on first tab
+//new page for can
 
 
