@@ -16,6 +16,7 @@ export default function NewJobForm(jobID:string) {
   const [isValid, setIsValid] = useState(false);
   const ngrokL="https://wpv7kxos9g.execute-api.ap-south-1.amazonaws.com/test/recruito-upload-apis";
    const [jobId, setJobId] = useState(""); 
+   const [qs, setQs] = useState<string[]>([]);
    const getJobId=async()=>{
     try {
     const res = await axios.post(`${ngrokL}/create_new_jobid`);
@@ -65,6 +66,7 @@ export default function NewJobForm(jobID:string) {
       job_title: jobTitle,
       job_description: jobDesc,
       key_criteria: jobCriteria,
+      sample_questions: qs,
     },{
       headers: {
         "Content-Type": "application/json",
@@ -119,6 +121,12 @@ export default function NewJobForm(jobID:string) {
             rows={4}
             value={jobCriteria}
             onChange={(e) => setJobCriteria(e.target.value)}
+          />
+          <Textarea
+            placeholder="Add Sample  Questions"
+            rows={4}
+            value={qs}
+            onChange={(e) => setQs(e.target.value.split("\n"))}
           />
           <Button
             onClick={onBtnClick}
