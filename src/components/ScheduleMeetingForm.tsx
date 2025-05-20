@@ -41,6 +41,7 @@ export default function ScheduleMeetingForm() {
   const [isValid, setIsValid] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [meetingLink, setMeetingLink] = useState<string>("");
+  const [prefixLink,setPrefixLink]=useState("demo-cxfirst-copilot.netlify.app")
 
   const today = new Date();
   const formattedDate = today.toISOString().split("T")[0];
@@ -67,6 +68,7 @@ export default function ScheduleMeetingForm() {
       setCandidateList(job.candidate_data);
       setSelectedCandidateEmail("");
       setParticipants("");
+      //@ts-ignore
       candidRef.current = "";
     } else {
       setCandidateList([]);
@@ -79,11 +81,13 @@ export default function ScheduleMeetingForm() {
       (c) => c.email === selectedCandidateEmail
     );
     if (candidate) {
+      //@ts-ignore
       candidRef.current = candidate.candidate_id;
       const details = `Name: ${candidate.name}\nEmail: ${candidate.email}\nCandidate ID: ${candidate.candidate_id}\nScore: ${candidate.score}\nStatus: ${candidate.status}`;
       setParticipants(details);
     } else {
       setParticipants("");
+      //@ts-ignore
       candidRef.current = "";
     }
   }, [selectedCandidateEmail, jobId, apiJobs, candidRef]);
@@ -101,15 +105,19 @@ export default function ScheduleMeetingForm() {
       )
     );
   }, [jobId, selectedCandidateEmail, participants, date, loading, formattedDate]);
-
+ 
   // Schedule meeting with only roomId and candidateId in params
   const onSchedule = async () => {
     if (!isValid) return;
 
     setLoading(true);
-    const roomId = uuidv4();
+    const arrayOfIds = uuidv4().split("-");
+    console.log(arrayOfIds);
+    
+    const roomId=arrayOfIds[1]+"-"+arrayOfIds[2]+"-"+arrayOfIds[3];
+    console.log(roomId)
     // roomid and candidateid only
-    const link = `https://app-domain-eg/?room_id="${roomId}"/candidate_id="${candidRef.current}"`;
+    const link = `https://${prefixLink}/?room_id="${roomId}"&candid="${candidRef.current}"`;
     setMeetingLink(link);
 
     try {
@@ -144,6 +152,7 @@ export default function ScheduleMeetingForm() {
     }
   };
 
+  
   return (
     <Card>
       <CardContent className="space-y-4">
