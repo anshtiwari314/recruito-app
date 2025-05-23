@@ -41,7 +41,7 @@ export default function ScheduleMeetingForm() {
   const [isValid, setIsValid] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [meetingLink, setMeetingLink] = useState<string>("");
-  const [prefixLink,setPrefixLink]=useState("demo-cxfirst-copilot.netlify.app")
+  const [prefixLink,setPrefixLink]=useState("https://recuiter-copilot.netlify.app/")
 
   const today = new Date();
   const formattedDate = today.toISOString().split("T")[0];
@@ -117,7 +117,7 @@ export default function ScheduleMeetingForm() {
     const roomId=arrayOfIds[1]+"-"+arrayOfIds[2]+"-"+arrayOfIds[3];
     console.log(roomId)
     // roomid and candidateid only
-    const link = `https://${prefixLink}/?room_id="${roomId}"&candid="${candidRef.current}"`;
+    const link = `${prefixLink}/?room_id="${roomId}"&candid="${candidRef.current}"`;
     setMeetingLink(link);
 
     try {
@@ -125,6 +125,7 @@ export default function ScheduleMeetingForm() {
         `${API_BASE}/schedule_meeting`,
         {
           meeting_link: link,
+          schedule_meeting:date
         },
         { headers: { "Content-Type": "application/json" } }
       );
