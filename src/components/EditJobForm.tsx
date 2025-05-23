@@ -88,7 +88,7 @@ export default function EditJobForm() {
           job_title: jobTitle,
           job_description: jobDesc,
           key_criteria: jobCriteria,
-          sample_questions: qs,
+          sample_questions: qs.join("\n"),
         },
         { headers: { "Content-Type": "application/json" } }
       );
