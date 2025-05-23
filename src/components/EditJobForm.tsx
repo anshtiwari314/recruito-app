@@ -82,7 +82,7 @@ export default function EditJobForm() {
     setLoading(true);
     try {
       const res = await axios.post(
-        `${API_BASE}/edit_job_details`,
+        `${API_BASE}/add_job_details`,
         {
           job_id: jobId,
           job_title: jobTitle,
@@ -92,7 +92,7 @@ export default function EditJobForm() {
         },
         { headers: { "Content-Type": "application/json" } }
       );
-      if (res.status === 200 && res.data.updated === "Success") {
+      if (res.status === 200) {
         alert("Job updated successfully! 🔄");
         dispatch(
           updateJob({ id: jobId, title: jobTitle, description: jobDesc, criteria: jobCriteria, sample_questions: qs })
@@ -134,7 +134,7 @@ export default function EditJobForm() {
           <Textarea
             placeholder="Sample Questions (one per line)"
             rows={4}
-            value={qs.join("\n")}
+            value={qs}
             onChange={(e) => setQs(e.target.value.split("\n"))}
           />
           <Button
