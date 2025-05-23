@@ -33,19 +33,20 @@ export default function ScheduleMeetingForm() {
   const [jobId, setJobId] = useState<string>(jobIdRef.current || "");
   const [apiJobs, setApiJobs] = useState<ApiJob[]>([]);
   const [candidateList, setCandidateList] = useState<Candidate[]>([]);
-  const [selectedCandidateEmail, setSelectedCandidateEmail] = useState<string>(
-    ""
-  );
+  const [selectedCandidateEmail, setSelectedCandidateEmail] = useState<string>("");
+  const [selectedCandidateId, setSelectedCandidateId] = useState<string>("");
+
   const [participants, setParticipants] = useState<string>("");
   const [date, setDate] = useState<string>("");
   const [isValid, setIsValid] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [meetingLink, setMeetingLink] = useState<string>("");
-  const [prefixLink,setPrefixLink]=useState("https://recuiter-copilot.netlify.app/")
 
+  const [prefixLink, setPrefixLink] = useState("https://recuiter-copilot.netlify.app/");
   const today = new Date();
   const formattedDate = today.toISOString().split("T")[0];
 
+  // Fetch jobs on mount
   useEffect(() => {
     const fetchJobs = async () => {
       try {
@@ -62,37 +63,37 @@ export default function ScheduleMeetingForm() {
     fetchJobs();
   }, []);
 
+  // Update candidate list based on selected job
   useEffect(() => {
     const job = apiJobs.find((j) => j.jobid === jobId);
     if (job) {
       setCandidateList(job.candidate_data);
       setSelectedCandidateEmail("");
       setParticipants("");
-      //@ts-ignore
       candidRef.current = "";
+      setSelectedCandidateId("");
     } else {
       setCandidateList([]);
     }
-  }, [jobId, apiJobs, candidRef]);
+  }, [jobId, apiJobs]);
 
+  // Update participant info and candidateId
   useEffect(() => {
     const job = apiJobs.find((j) => j.jobid === jobId);
-    const candidate = job?.candidate_data.find(
-      (c) => c.email === selectedCandidateEmail
-    );
+    const candidate = job?.candidate_data.find((c) => c.email === selectedCandidateEmail);
     if (candidate) {
-      //@ts-ignore
       candidRef.current = candidate.candidate_id;
+      setSelectedCandidateId(candidate.candidate_id);
       const details = `Name: ${candidate.name}\nEmail: ${candidate.email}\nCandidate ID: ${candidate.candidate_id}\nScore: ${candidate.score}\nStatus: ${candidate.status}`;
       setParticipants(details);
     } else {
       setParticipants("");
-      //@ts-ignore
       candidRef.current = "";
+      setSelectedCandidateId("");
     }
-  }, [selectedCandidateEmail, jobId, apiJobs, candidRef]);
+  }, [selectedCandidateEmail, jobId, apiJobs]);
 
-  // Validation
+  // Form validation
   useEffect(() => {
     const isDateValid = date && new Date(date) >= new Date(formattedDate);
     setIsValid(
@@ -105,19 +106,16 @@ export default function ScheduleMeetingForm() {
       )
     );
   }, [jobId, selectedCandidateEmail, participants, date, loading, formattedDate]);
- 
-  // Schedule meeting with only roomId and candidateId in params
+
+  // Schedule meeting
   const onSchedule = async () => {
     if (!isValid) return;
 
     setLoading(true);
     const arrayOfIds = uuidv4().split("-");
-    console.log(arrayOfIds);
-    
-    const roomId=arrayOfIds[1]+"-"+arrayOfIds[2]+"-"+arrayOfIds[3];
-    console.log(roomId)
-    // roomid and candidateid only
-    const link = `${prefixLink}/?room_id="${roomId}"&candid="${candidRef.current}"`;
+    const roomId = arrayOfIds[1] + "-" + arrayOfIds[2] + "-" + arrayOfIds[3];
+    const link = `${prefixLink}/?room_id="${roomId}"&candid="${selectedCandidateId}"`;
+
     setMeetingLink(link);
 
     try {
@@ -125,16 +123,19 @@ export default function ScheduleMeetingForm() {
         `${API_BASE}/schedule_meeting`,
         {
           meeting_link: link,
-          schedule_meeting:date
+          schedule_meeting: date,
+          agent_id: "1234",
+          job_id: jobId,
+          candidate_id: selectedCandidateId,
         },
         { headers: { "Content-Type": "application/json" } }
       );
       if (res.status === 200) {
-        alert("Meeting scheduled successfully! ");
+        alert("Meeting scheduled successfully! ✅");
         setSelectedCandidateEmail("");
         setParticipants("");
         setDate("");
-        // setMeetingLink("");
+        // Don't reset meeting link
       } else {
         throw new Error("Failed to schedule meeting");
       }
@@ -153,7 +154,6 @@ export default function ScheduleMeetingForm() {
     }
   };
 
-  
   return (
     <Card>
       <CardContent className="space-y-4">
