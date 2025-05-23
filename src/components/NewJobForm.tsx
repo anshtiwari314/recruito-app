@@ -66,7 +66,7 @@ export default function NewJobForm(jobID:string) {
       job_title: jobTitle,
       job_description: jobDesc,
       key_criteria: jobCriteria,
-      sample_questions: qs,
+      sample_questions: qs.join("\n"),
     },{
       headers: {
         "Content-Type": "application/json",
@@ -80,6 +80,7 @@ export default function NewJobForm(jobID:string) {
       setJobId("");
       setJobDesc("");
       setJobCriteria("");
+      setQs([]);
 
       alert("Job created successfully!");
     } else {
