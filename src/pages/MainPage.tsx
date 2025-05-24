@@ -51,6 +51,5 @@ export default function MainPage() {
   {active === "candidate" && <CandidateView state={setActive} />}
   {active === "EditJob" && <EditJobForm />}
 </div>
-
   );
 }
