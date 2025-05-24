@@ -1,65 +1,46 @@
 import React, { useState, useEffect } from "react";
 import NewJobForm from "../components/NewJobForm.tsx";
-import OpenJobsTable from "../components/OpenJobsTable.tsx"
-import ScheduleMeetingForm from "../components/ScheduleMeetingForm.tsx"
+import OpenJobsTable from "../components/OpenJobsTable.tsx";
+import ScheduleMeetingForm from "../components/ScheduleMeetingForm.tsx";
 import Button from "../components/ui/Button.tsx";
-import axios from "axios";
 import CandidateView from "../components/CandidateView.tsx";
 import EditJobForm from "../components/EditJobForm.tsx";
+import Login from "./Login.tsx";
+import { useNavigate } from "react-router-dom";
 
 export default function MainPage() {
-  const getFromSTorage=sessionStorage.getItem("userEmail");
- 
-  const [active,setActive]=useState<string>("openJobs");
-  const [jobId,setJobId]=useState<string>("");
-  // const ngrokL="https://63bc-49-204-210-210.ngrok-free.app";
- 
-  const onBtnClick1=(val:string)=>{
-    setActive(val);
-    
-  }
-  const onBtnClick2=(val:string)=>{
-    setActive(val);
-  }
-  const onBtnClick3=(val:string)=>{
-     setActive(val);
-  }
-  return (
-  <>
-   <div className="p-4 space-y-6">
-    <div className="flex gap-4">
-      <Button onClick={()=>onBtnClick1("newJob")}>
-        Add New Job
-      </Button>
-      <Button onClick={()=>onBtnClick2("openJobs")}>
-        View Open Jobs
-      </Button>
-      <Button onClick={() => onBtnClick3("scheduleMeeting")}>
-      Schedule Meeting
-      </Button>
-    </div>
-    {active==="newJob" && <NewJobForm jobId={jobId} />}
-    {active==="openJobs" && <OpenJobsTable state={setActive} />}
-    {active==="scheduleMeeting" && <ScheduleMeetingForm/>}
-    {active==="candidate" && <CandidateView state={setActive}/>}
-    {active==="EditJob" && <EditJobForm />}
+  const [active, setActive] = useState<string>("openJobs");
+  const [isReady, setIsReady] = useState<boolean>(false);
+  const navigate = useNavigate()
 
-   </div>
-  </>
+  useEffect(() => {
+    const agentId = sessionStorage.getItem("agent_id")
+    if (!agentId) {
+      navigate('/login')
+    }
+  }, [])
+  
+  return (
+    <div className="p-4 space-y-6">
+      <div className="text-sm text-gray-600">
+        Logged in as <strong>{sessionStorage.getItem("username")}</strong>
+      </div>
+      <div className="text-sm text-gray-600">
+        Agent ID: <strong>{sessionStorage.getItem("agent_id")}</strong>
+      </div>
+
+      <div className="flex gap-4">
+        <Button onClick={() => setActive("newJob")}>Add New Job</Button>
+        <Button onClick={() => setActive("openJobs")}>View Open Jobs</Button>
+        <Button onClick={() => setActive("scheduleMeeting")}>Schedule Meeting</Button>
+      </div>
+
+      {active === "newJob" && <NewJobForm jobId="" />}
+      {active === "openJobs" && <OpenJobsTable state={setActive} />}
+      {active === "scheduleMeeting" && <ScheduleMeetingForm />}
+      {active === "candidate" && <CandidateView state={setActive} />}
+      {active === "EditJob" && <EditJobForm />}
+      {/* {active==="Login" && <Login state={setActive}/>} */}
+    </div>
   );
 }
-
-//job id remove->call from backend to get id ->done
-//nothing can be empty ->third can be empty ->done
-//ensure saftey of ates and times stuff 
-//candidate-id ,job id,customer emai and candidate email 
-//cna-backend->done
-//jobid  i have ->done
-//email id of person who logged in->done
-//agent id of person who logged in->backend->done 
-
-
-//add a sample q on first tab
-//new page for can
-
-

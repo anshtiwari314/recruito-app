@@ -1,71 +1,81 @@
-import React, { useState, useEffect } from 'react'
+// Login.tsx
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 
 export default function Login() {
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [pass, setPass] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
-    // Agar test ke liye pehle se koi email store hai, toh woh bhi load kar le
-    const saved = sessionStorage.getItem('userEmail')
-    if (saved) setEmail(saved)
+    const agentId = sessionStorage.getItem("agent_id")
+    if (agentId) {
+      navigate('/')
+    }
   }, [])
 
-  function handleChecks() {
-    if (email === '') {
-      setError("Email field can't be empty")
-      return
-    }
-    if (pass === '') {
-      setError("Password field can't be empty")
+  const handleChecks = async () => {
+    setError(null)
+
+    if (!email || !pass) {
+      setError("Username and password are required.")
       return
     }
 
-    handleAuth()
-  }
-
-  function handleAuth() {
     setLoading(true)
-    const url = `/login`
 
-    fetch(url, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        userid: email,
-        password: pass,
-      }),
-      cache: 'default',
-      credentials: 'include',
-      mode: 'cors',
-    })
-      .then((res) => res.json())
-      .then((result) => {
-        setLoading(false)
-
-        sessionStorage.setItem('userEmail', email)
-
-        if (result.error !== null) {
-          setError(result.error)
-        } else {
-          setError(null)
+    try {
+      const response = await fetch(
+        "https://qhpv9mvz1h.execute-api.ap-south-1.amazonaws.com/prod/check-jarvis-login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ client: "recruito", userid: email, password: pass }),
         }
+      )
 
-        if (result.result === true) {
-          window.location.href = '/'
-        }
-      })
-      .catch((err) => {
+      const data = await response.json()
+
+      if (!data.result) {
+        setError("Invalid username or password.")
         setLoading(false)
-        setError('Network error, try again')
-        // Phir bhi store kar le for testing
-        sessionStorage.setItem('userEmail', email)
-        window.location.href = '/'
-      })
+        return
+      }
+
+      const agentRes = await fetch(
+        "https://wpv7kxos9g.execute-api.ap-south-1.amazonaws.com/test/recruito-upload-apis/main_router",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            trigger_func: "get_agent_id",
+            params: { user_name: email, password: pass },
+          }),
+        }
+      )
+
+      const agentData = await agentRes.json()
+      const agentId = agentData.agentid || ""
+
+      if (!agentId) {
+        setError("Agent ID not found. Please contact support.")
+        setLoading(false)
+        return
+      }
+
+      sessionStorage.setItem("agent_id", agentId)
+      sessionStorage.setItem("username", email)
+      sessionStorage.setItem("password", pass)
+
+      navigate('/main')
+    } catch (err) {
+      console.error("Login error:", err)
+      setError("Something went wrong. Please try again later.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -77,42 +87,10 @@ export default function Login() {
           </div>
         )}
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Login</h2>
-
         <div className="space-y-4">
-          <div>
-            <label htmlFor="login-email" className="block text-gray-700 font-medium mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              id="login-email"
-              placeholder="Enter your email"
-              autoComplete="on"
-              className="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={email}
-              onChange={(e) => setEmail(e.target.value.trim())}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="login-pass" className="block text-gray-700 font-medium mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              id="login-pass"
-              placeholder="Enter your password"
-              className="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={pass}
-              onChange={(e) => setPass(e.target.value.trim())}
-            />
-          </div>
-
-          <button
-            className="w-full bg-zinc-950 text-white py-2 rounded-md hover:bg-zinc-700 transition duration-300 text-lg"
-            onClick={handleChecks}
-            disabled={loading}
-          >
+          <input type="text" placeholder="Username" value={email} onChange={e => setEmail(e.target.value)} className="w-full border px-4 py-2 rounded-md" />
+          <input type="password" placeholder="Password" value={pass} onChange={e => setPass(e.target.value)} className="w-full border px-4 py-2 rounded-md" />
+          <button className="w-full bg-zinc-950 text-white py-2 rounded-md" onClick={handleChecks} disabled={loading}>
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </div>

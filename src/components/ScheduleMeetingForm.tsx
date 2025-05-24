@@ -124,7 +124,7 @@ export default function ScheduleMeetingForm() {
         {
           meeting_link: link,
           schedule_meeting: date,
-          agent_id: "1234",
+          agent_id: sessionStorage.getItem("agent_id")||"1234",
           job_id: jobId,
           candidate_id: selectedCandidateId,
         },
