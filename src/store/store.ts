@@ -6,6 +6,7 @@ import { TypedUseSelectorHook, useSelector } from "react-redux";
 import transcriptionReducer from "@/reducers/transcriptionReducer";
 import usersReducer from "@/reducers/usersReducer";
 import navigationparamReducer from "@/reducers/navigationparamReducer";
+import chatReducer from "@/reducers/chatReducer";
 
 // Create and configure the Redux store
 export const store = configureStore({
@@ -15,6 +16,7 @@ export const store = configureStore({
     trcpReducer:transcriptionReducer.transcriptionReducer,
     usersReducer:usersReducer.usersReducer,
     nvReducer: navigationparamReducer.nvReducer,
+    chatReducer:chatReducer.chatReducer
   },
 });
 

@@ -205,7 +205,7 @@ export default function MainPage() {
               <div
                 id="content-panel"
                 className="relative grow w-10/12 p-6 overflow-y-hidden"
-                style={{border:'0.1rem solid red'}}
+                //style={{border:'0.1rem solid red'}}
               >
                 
                 <ContentPanel isMobile={isMobile} />

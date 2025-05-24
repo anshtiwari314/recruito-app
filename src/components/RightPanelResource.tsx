@@ -9,17 +9,19 @@ export function RightPanelResource() {
   console.log("trying here",jobDescription, interviewGuide, jobTitle);
   return (
     <>
-      <div className="p-3 bg-neutral-50 rounded-lg">
+      <div className="p-3 bg-neutral-50 rounded-lg" >
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center">
               <i className="fa-regular fa-file-lines mr-2 text-neutral-600"></i>
               <div className="text-sm font-medium text-neutral-900">
-                Job Description
+              Knowledge Base 
               </div>
             </div>
             <div className="text-sm text-neutral-600 mt-1">
-              {jobTitle} Position Details
+              {/* {jobTitle} Position Details */}
+              {/* Traya Health Position Details */}
+              Ecommerce-Manager Position Details
             </div>
           </div>
           <button className="p-2 hover:bg-neutral-100 rounded-lg text-neutral-600">
@@ -40,11 +42,11 @@ export function RightPanelResource() {
             <div className="flex items-center">
               <i className="fa-regular fa-clipboard mr-2 text-neutral-600"></i>
               <div className="text-sm font-medium text-neutral-900">
-                Interview Guide
+              Technical Guide
               </div>
             </div>
             <div className="text-sm text-neutral-600 mt-1">
-              Technical Assessment Framework
+              Assessment Framework
             </div>
           </div>
           <button className="p-2 hover:bg-neutral-100 rounded-lg text-neutral-600">

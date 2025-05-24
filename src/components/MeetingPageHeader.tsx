@@ -23,6 +23,7 @@ export default function MeetingPageHeader() {
     setMicroPhoneToggle,
     setScreenSharing,
     stopVideoRecording,
+    chatToggle,setChatToggle,
     screenRecording,setScreenRecording,ngrokServerUrl,setNgrokServerUrl
   }:void = useData();
 
@@ -36,7 +37,7 @@ export default function MeetingPageHeader() {
       dispatch(setNVclosecall(true));
       dispatch(setNVaudioUploadAnimation(true));
 
-      await stopVideoRecording(); // Wait for recording to stop
+     // await stopVideoRecording(); // Wait for recording to stop
 
       // Include logic here to send audio out along with corresponding ui
       console.log("Closing the call...");
@@ -62,6 +63,11 @@ export default function MeetingPageHeader() {
     setScreenRecording((p:boolean)=>!p)
     console.log("toggling the screen recording...");
   };
+
+  const toggleChatWindow = ()=>{
+    setChatToggle((p:boolean)=>!p)
+    console.log("toggling the chat window...");
+  } 
 
   return (
     <>
@@ -144,6 +150,19 @@ export default function MeetingPageHeader() {
           
             {/* <i className="fa-solid fa-microphone-slash fa-lg"></i> */}
           
+        </button>
+        <button 
+        className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
+        onClick={toggleChatWindow}
+        >
+          {
+            chatToggle ? 
+          <i className="fas fa-comment text-black-500 fa-lg" ></i>:
+          <i className="far fa-comment text-black-500 fa-lg" ></i>
+          }
+        
+        
+        
         </button>
 
         {/*

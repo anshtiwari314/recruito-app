@@ -40,7 +40,7 @@ const FeedbackModel = ({isOpen,setIsOpen}) => {
   const [ratings,setRatings] = useState({})
   
   //@ts-ignore
-  const {socket2} = useData()
+  const {socket2,name,ngrokServerUrl} = useData()
 
   let feedbackList = [
     'Problem Solving Ability',
@@ -49,10 +49,11 @@ const FeedbackModel = ({isOpen,setIsOpen}) => {
     'Adaptability'
   ]
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if(socket2===null)
       return ;
     
+    console.log('socket2 from handleSubmit',socket2.connected)
     console.log("Feedback submitted:", feedback);
     console.log("Rating submitted:", ratings);
     
@@ -63,16 +64,22 @@ const FeedbackModel = ({isOpen,setIsOpen}) => {
     }
 
     let data ={
-      ...feedBackObj,
-      ...ratings,
-      feedback
+      feedback_form :{...feedBackObj,
+        ...ratings,
+        feedback},
+      roomid:'abc-123-fgh-456',
+      name
+
     }
     console.log(data)
-    socket2.emit('feedback_form_req',data)
+    //socket2.emit('feedback_form_req',data)
 
     setFeedback("");
-    //setRatings({});
+    setRatings({});
     setIsOpen(false);
+
+   let result = await PostReq(`${ngrokServerUrl}/feedback_form_req`,data)
+      console.log('feedback form req result',result)
   };
 
   useEffect(()=>{

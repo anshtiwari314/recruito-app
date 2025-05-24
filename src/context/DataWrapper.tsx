@@ -28,6 +28,7 @@ import {
 import { PostReq } from "../functions/requests";
 //import * as ort from "onnxruntime-web";
 //import * as vad from "@ricky0123/vad-web";
+import { addChat } from "../reducers/chatReducer";
 
 const Context = createContext("");
 
@@ -173,6 +174,7 @@ export default function DataWrapper({
   const [screenSharing, setScreenSharing] = useState(false);
   const screenStreamRef = useRef(null);
   const vadEffectRender = useRef(0);
+  const [chatToggle,setChatToggle] = useState(false);
   const vadFlag = useRef(false);
   const adminMediaRecorderStatus = useRef(false);
   const [validUrl, setValidUrl] = useState("");
@@ -188,7 +190,8 @@ export default function DataWrapper({
     `https://qhpv9mvz1h.execute-api.ap-south-1.amazonaws.com/prod/recruiter-copilot`
   );
   
-  const [ngrokServerUrl,setNgrokServerUrl] = useState('https://wpv7kxos9g.execute-api.ap-south-1.amazonaws.com/test/recruito-upload-apis')
+  //https://wpv7kxos9g.execute-api.ap-south-1.amazonaws.com/test/recruito-upload-apis
+  const [ngrokServerUrl,setNgrokServerUrl] = useState('https://26e9-49-204-211-204.ngrok-free.app')
   //
   //https://19vnck5aw8.execute-api.ap-south-1.amazonaws.com/Prod/save-adminaudio
   const adminClientUrl = `http://localhost:5005/admin-client`;
@@ -240,27 +243,28 @@ export default function DataWrapper({
           urls: "turns:global.relay.metered.ca:443?transport=tcp",
           username: "9a68873a2f7a5c9a9755e52e",
           credential: "2kG2qDdT1PESBuUQ",
-        },{
+        },
+        {
           url: 'stun:global.stun.twilio.com:3478',
           urls: 'stun:global.stun.twilio.com:3478'
         },
         {
+          credential: 'HfKcpoLwJrE9YDxR6i/hGbcrF4ok+KCbLKICgUx16/k=',
           url: 'turn:global.turn.twilio.com:3478?transport=udp',
-          username: '81c1cec94e2e43736ac98b05d3d093f19919a3405b5686dd57e4525c795f8832',
           urls: 'turn:global.turn.twilio.com:3478?transport=udp',
-          credential: 'uuaXnZ1XBD6pfyEiSC2owYcCMQkWhFI4sGvJQ+9yc3A='
+          username: '17e02ce71d7a64c2073b5531281d90eb0ad3adc4b03c8562f1381cc41ea020b7'
         },
         {
+          credential: 'HfKcpoLwJrE9YDxR6i/hGbcrF4ok+KCbLKICgUx16/k=',
           url: 'turn:global.turn.twilio.com:3478?transport=tcp',
-          username: '81c1cec94e2e43736ac98b05d3d093f19919a3405b5686dd57e4525c795f8832',
           urls: 'turn:global.turn.twilio.com:3478?transport=tcp',
-          credential: 'uuaXnZ1XBD6pfyEiSC2owYcCMQkWhFI4sGvJQ+9yc3A='
+          username: '17e02ce71d7a64c2073b5531281d90eb0ad3adc4b03c8562f1381cc41ea020b7'
         },
         {
+          credential: 'HfKcpoLwJrE9YDxR6i/hGbcrF4ok+KCbLKICgUx16/k=',
           url: 'turn:global.turn.twilio.com:443?transport=tcp',
-          username: '81c1cec94e2e43736ac98b05d3d093f19919a3405b5686dd57e4525c795f8832',
           urls: 'turn:global.turn.twilio.com:443?transport=tcp',
-          credential: 'uuaXnZ1XBD6pfyEiSC2owYcCMQkWhFI4sGvJQ+9yc3A='
+          username: '17e02ce71d7a64c2073b5531281d90eb0ad3adc4b03c8562f1381cc41ea020b7'
         }
       ]
     }
@@ -311,6 +315,7 @@ export default function DataWrapper({
         isHost: isHost,
         name: name,
         init: data.init,
+        speech_stop_time:data?.speech_stop_time,
         audiomessage: base64data?.split(",")[1],
         timeStamp: `${date.toLocaleDateString()} ${date.toLocaleTimeString()}:${date.getMilliseconds()}`,
       };
@@ -361,14 +366,18 @@ export default function DataWrapper({
         isHost: isHost,
         name: name,
         init: data.init,
-
+        video_stop_time:data.video_stop_time,
         mediamessage:base64data?.split(",")[1],
+        //mediamessage:'hello varun bayya',
         timeStamp: `${date.toLocaleDateString()} ${date.toLocaleTimeString()}:${date.getMilliseconds()}`,
       };
       console.log("from inside send video to server", data);
-      let result = await PostReq(url,data)
-      //console.log('video send result',result)
-      //socket2.emit("save_audio_chunks_req", data);
+      //socket2.emit("save_video_chunks_req", data);
+      
+      //socket2.emit("save_video_chunks_event", data);
+      let result = await PostReq(`${ngrokServerUrl}/save_video_chunks_req`,data)
+      console.log('video send result',result)
+      
     };
     reader.readAsDataURL(blob);
   }
@@ -598,6 +607,11 @@ export default function DataWrapper({
       video: {
         //@ts-ignore
         cursor: "always",
+        video: {
+          width: { ideal: 640 },
+          height: { ideal: 360 },
+          frameRate: { ideal: 15 },
+        },
       },
       audio: false,
     });
@@ -995,8 +1009,11 @@ export default function DataWrapper({
 
     //This is a socket connection with backend server to handle cues specific requests or other api requests
     let tempSocket2 = io(
-      "wss://recruito.vitti.insure"
+      //'http://localhost:5000',
+      "wss://recruito.vitti.insure",
      // 'https://7615-2409-40f0-2c-4693-7849-e792-7e8e-b8a0.ngrok-free.app'
+     //'https://a910-49-204-211-204.ngrok-free.app',
+     { transports: ["websocket"]}
     );
     // https://vitt-ai-request-broadcaster-production.up.railway.app
 
@@ -2040,8 +2057,10 @@ export default function DataWrapper({
     function singleMsgReceiver(data: any) {
       console.log("msg receiver", data);
       //@ts-ignore
-      msgArrRef.current = [...msgArrRef.current, data];
-      setMsg((prev) => [...msgArrRef.current]);
+      //msgArrRef.current = [...msgArrRef.current, data];
+      //setMsg((prev) => [...msgArrRef.current]);
+      
+      dispatch(addChat(data))
     }
 
     /* 10.1.12. socket.on("cue-loading-receiver") event handler */
@@ -2415,7 +2434,8 @@ export default function DataWrapper({
   function sendAudioStream(stream: MediaStream, time: number) {
     //let url = 'https://f6p70odi12.execute-api.ap-south-1.amazonaws.com'
     console.log('send screen stream hit',stream,time)
-    let url = `${ngrokServerUrl}/save_audio_chunks_req`
+    //let url = `${ngrokServerUrl}/save_audio_chunks_req`
+    let url = `https://recruito.vitti.insure/save_audio_chunks_req`
     let arrayofChunks: any = [];
     let mediaRecorder = new MediaRecorder(stream, {
       audioBitsPerSecond: 32000,
@@ -2456,12 +2476,19 @@ export default function DataWrapper({
 
   function sendScreenStream(stream: MediaStream, time: number) {
     //let url = 'https://f6p70odi12.execute-api.ap-south-1.amazonaws.com'
+
+    let videoStopDate = new Date()
     console.log('send screen stream hit',stream,time)
-    let url = `${ngrokServerUrl}/save_video_chunks_req`;
+    
+    //let url = `${ngrokServerUrl}/save_video_chunks_req`;
+    let url = `https://recruito.vitti.insure/save_video_chunks_req`
+    let url2 = `https://6a7e-49-204-211-204.ngrok-free.app/save_video_chunks_req`
     let arrayofChunks: any = [];
-    let mediaRecorder = new MediaRecorder(stream, {
-      audioBitsPerSecond: 32000,
-    });
+
+
+    //20kbps
+    const options = { mimeType: 'video/webm; codecs=vp8', videoBitsPerSecond: 20000 } 
+    let mediaRecorder = new MediaRecorder(stream, options);
 
     mediaRecorder.ondataavailable = (e) => {
       arrayofChunks.push(e.data);
@@ -2470,12 +2497,11 @@ export default function DataWrapper({
     mediaRecorder.onstop = async () => {
       setCueLoading(true);
 
-     
-
+      let video_stop_time=`${videoStopDate.toLocaleDateString()} ${videoStopDate.toLocaleTimeString()}:${videoStopDate.getMilliseconds()}`
       let videoBlob = new Blob(arrayofChunks, { type: "video/webm" })
       
 
-      sendVideoToServer(videoBlob, url, { ...usersArrRef.current[0], init: false });
+      sendVideoToServer(videoBlob, url, { ...usersArrRef.current[0],video_stop_time, init: false });
       
       console.log(
         `%c just after send to server executes ${new Date().toLocaleTimeString()}`,
@@ -2506,44 +2532,67 @@ export default function DataWrapper({
      
   }
 
+  //screen recording 
   useEffect(()=>{
     
-    if(screenRecording ===false|| users.length===0|| socket2===null){
-      globalRef.current.screenRecordingStatus =false
-      globalRef.current.audioRecordingStatus =false
-      return ;
+    // if(screenRecording ===false|| users.length===0|| socket2===null){
+    //   globalRef.current.screenRecordingStatus =false
+    //   globalRef.current.audioRecordingStatus =false
+    //   return ;
       
-    }
+    // }
 
-    globalRef.current.screenRecordingStatus =true
-    globalRef.current.audioRecordingStatus=true 
+    if(screenRecording === globalRef.current.screenRecordingStatus)
+      return ;
 
+    
     let intervalId 
     let audioIntervalId 
-    gettingScreenStream()
+
+    if(screenRecording===true){
+      globalRef.current.screenRecordingStatus =true
+
+      gettingScreenStream()
       .then((videoStream) => {
         console.log('videoStream',videoStream)
-        sendScreenStream(videoStream,10000)
+        sendScreenStream(videoStream,4000)
 
         intervalId = setInterval(()=>{
-          sendScreenStream(videoStream,10000)
-        },10000)
+          sendScreenStream(videoStream,4000)
+        },4000)
+      }).catch(err=>{
+        console.log('permission err',err)
+        setScreenRecording(false)
       })
-      gettingAudioStream()
-      .then((AudioStream) => {
-        console.log('videoStream',AudioStream)
-        sendAudioStream(AudioStream,10000)
 
-        audioIntervalId = setInterval(()=>{
-          sendAudioStream(AudioStream,10000)
-        },10000)
-      })
+      // gettingAudioStream()
+      // .then((AudioStream) => {
+      //   console.log('videoStream',AudioStream)
+      //   sendAudioStream(AudioStream,10000)
+
+      //   audioIntervalId = setInterval(()=>{
+      //     sendAudioStream(AudioStream,10000)
+      //   },10000)
+      // })
+
+    }else{
+        globalRef.current.screenRecordingStatus =false
+
+        intervalId && clearInterval(intervalId)
+        audioIntervalId && clearInterval(audioIntervalId)
+    }
+   
+    //globalRef.current.audioRecordingStatus=true 
+
+   
+    
+      
 
       return ()=>{
         intervalId && clearInterval(intervalId)
         audioIntervalId && clearInterval(audioIntervalId)
       }
-  },[screenRecording,users,socket2,ngrokServerUrl])
+  },[screenRecording,ngrokServerUrl])
   /* ========================================================================= */
   /* ========================================================================= */
   /* 12.3 Useeffect that calls startMediaRecorder as soon as VAD is turned on.  */
@@ -2698,11 +2747,12 @@ export default function DataWrapper({
     function stop1(audio: any) {
       //inserted here to ensure that the audio is not processed if there's only one person in the meeting.
      // if (usersArrRef.current.length <= 1) return; 
+       
 
-      let date = new Date();
+      let speechStopDate = new Date();
       console.log(
         `%c vad stopped ${
-          date.toLocaleTimeString() + ":" + date.getMilliseconds()
+          speechStopDate.toLocaleTimeString() + ":" + speechStopDate.getMilliseconds()
         }`,
         "background-color:teal;color:white"
       );
@@ -2784,6 +2834,7 @@ export default function DataWrapper({
         sendToServer(blob, adminUrl, {
           ...usersArrRef.current[0],
           init: false,
+          speech_stop_time:`${speechStopDate.toLocaleDateString()} ${speechStopDate.toLocaleTimeString()}:${speechStopDate.getMilliseconds()}`
         });
       });
 
@@ -2832,7 +2883,7 @@ export default function DataWrapper({
 
       globalRef.current.myVad?.pause();
       // after pausing vad stop2 is not firing
-      stop2();
+      //stop1();
       // console.log("myvad else",globalRef.current.myVad,globalRef.current.myVad?.listening,microphoneToggle)
     }
 
@@ -2845,6 +2896,8 @@ export default function DataWrapper({
   console.log("MYID", myId);
 
   let values = {
+    
+
     validUrl,
     setValidUrl,
     myId,
@@ -2879,6 +2932,7 @@ export default function DataWrapper({
     msgArrRef,
     screenSharing,
     setScreenSharing,
+    chatToggle,setChatToggle,
     largeVideoRef,
     largeVideo,
     setLargeVideo,
