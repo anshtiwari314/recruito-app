@@ -118,7 +118,7 @@ export default function ScheduleMeetingForm() {
     setLoading(true);
     const arrayOfIds = uuidv4().split("-");
     const roomId = arrayOfIds[1] + "-" + arrayOfIds[2] + "-" + arrayOfIds[3];
-    const link = `${prefixLink}/?room_id=${roomId}&candid=${selectedCandidateId}`;
+    const link = `${prefixLink}?room_id=${roomId}&candid=${selectedCandidateId}`;
 
     setMeetingLink(link);
 
