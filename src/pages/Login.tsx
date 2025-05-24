@@ -69,7 +69,7 @@ export default function Login() {
       sessionStorage.setItem("username", email)
       sessionStorage.setItem("password", pass)
 
-      navigate('/main')
+      navigate('/')
     } catch (err) {
       console.error("Login error:", err)
       setError("Something went wrong. Please try again later.")
