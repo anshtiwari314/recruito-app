@@ -32,9 +32,8 @@ export default function MainPage() {
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm rounded-lg px-4 py-2 text-sm text-gray-700 dark:text-gray-300 space-y-1 text-right">
           <div>
             <span className="font-medium">Logged in as:</span> {username}
-          </div>
-          <div>
-            <span className="font-medium">Agent ID:</span> {agentId}
+         
+            <span className="ml-4   font-medium">Agent ID:</span> {agentId}
           </div>
         </div>
       </div>
