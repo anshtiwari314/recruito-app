@@ -25,15 +25,11 @@ interface Candidate {
 }
 
 export default function ScheduleMeetingForm() {
-  const jobIdRef = useTestWrapper().jobIdRef;
-  const candidRef = useTestWrapper().candiRef;
-  const API_BASE =
-    "https://wpv7kxos9g.execute-api.ap-south-1.amazonaws.com/test/recruito-upload-apis";
-
+  const { candiRef, jobIdRef } = useTestWrapper();
+  const [selectedCandidateEmail, setSelectedCandidateEmail] = useState<string>("");
   const [jobId, setJobId] = useState<string>(jobIdRef.current || "");
   const [apiJobs, setApiJobs] = useState<ApiJob[]>([]);
   const [candidateList, setCandidateList] = useState<Candidate[]>([]);
-  const [selectedCandidateEmail, setSelectedCandidateEmail] = useState<string>("");
   const [selectedCandidateId, setSelectedCandidateId] = useState<string>("");
 
   const [participants, setParticipants] = useState<string>("");
@@ -51,7 +47,7 @@ export default function ScheduleMeetingForm() {
     const fetchJobs = async () => {
       try {
         const res = await axios.post(
-          `${API_BASE}/jobs-list`,
+          `https://wpv7kxos9g.execute-api.ap-south-1.amazonaws.com/test/recruito-upload-apis/jobs-list`,
           { agent_id: "1234" },
           { headers: { "Content-Type": "application/json" } }
         );
@@ -68,9 +64,18 @@ export default function ScheduleMeetingForm() {
     const job = apiJobs.find((j) => j.jobid === jobId);
     if (job) {
       setCandidateList(job.candidate_data);
-      setSelectedCandidateEmail("");
+
+      const candidate = job.candidate_data.find(
+        (c) => c.candidate_id === candiRef.current
+      );
+
+      if (candidate) {
+        setSelectedCandidateEmail(candidate.email);
+      } else {
+        setSelectedCandidateEmail("");
+      }
+
       setParticipants("");
-      candidRef.current = "";
       setSelectedCandidateId("");
     } else {
       setCandidateList([]);
@@ -82,13 +87,12 @@ export default function ScheduleMeetingForm() {
     const job = apiJobs.find((j) => j.jobid === jobId);
     const candidate = job?.candidate_data.find((c) => c.email === selectedCandidateEmail);
     if (candidate) {
-      candidRef.current = candidate.candidate_id;
+      candiRef.current = candidate.candidate_id;
       setSelectedCandidateId(candidate.candidate_id);
       const details = `Name: ${candidate.name}\nEmail: ${candidate.email}\nCandidate ID: ${candidate.candidate_id}\nScore: ${candidate.score}\nStatus: ${candidate.status}`;
       setParticipants(details);
     } else {
       setParticipants("");
-      candidRef.current = "";
       setSelectedCandidateId("");
     }
   }, [selectedCandidateEmail, jobId, apiJobs]);
@@ -120,11 +124,11 @@ export default function ScheduleMeetingForm() {
 
     try {
       const res = await axios.post(
-        `${API_BASE}/schedule_meeting`,
+        `https://wpv7kxos9g.execute-api.ap-south-1.amazonaws.com/test/recruito-upload-apis/schedule_meeting`,
         {
           meeting_link: link,
           schedule_meeting: date,
-          agent_id: sessionStorage.getItem("agent_id")||"1234",
+          agent_id: sessionStorage.getItem("agent_id") || "1234",
           job_id: jobId,
           candidate_id: selectedCandidateId,
         },
@@ -135,7 +139,6 @@ export default function ScheduleMeetingForm() {
         setSelectedCandidateEmail("");
         setParticipants("");
         setDate("");
-        // Don't reset meeting link
       } else {
         throw new Error("Failed to schedule meeting");
       }

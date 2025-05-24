@@ -24,33 +24,33 @@ export default function MainPage() {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Top bar with agent info on right */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-gray-800 dark:text-white">
-          Dashboard
-        </h1>
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm rounded-lg px-4 py-2 text-sm text-gray-700 dark:text-gray-300 space-y-1 text-right">
-          <div>
-            <span className="font-medium">Logged in as:</span> {username}
-         
-            <span className="ml-4   font-medium">Agent ID:</span> {agentId}
-          </div>
-        </div>
-      </div>
+  <h1 className="text-2xl font-semibold text-gray-800 ">
+    Job Portal Dashboard
+  </h1>
 
-      {/* Navigation Buttons */}
-      <div className="flex gap-4">
-        <Button onClick={() => setActive("newJob")}>Add New Job</Button>
-        <Button onClick={() => setActive("openJobs")}>View Open Jobs</Button>
-        <Button onClick={() => setActive("scheduleMeeting")}>Schedule Meeting</Button>
-      </div>
-
-      {/* Conditional Sections */}
-      {active === "newJob" && <NewJobForm jobId="" />}
-      {active === "openJobs" && <OpenJobsTable state={setActive} />}
-      {active === "scheduleMeeting" && <ScheduleMeetingForm />}
-      {active === "candidate" && <CandidateView state={setActive} />}
-      {active === "EditJob" && <EditJobForm />}
+  {/* Top Row: Buttons Left, User Info Right */}
+  <div className="flex justify-between items-center">
+    <div className="flex gap-4">
+      <Button onClick={() => setActive("newJob")}>Add New Job</Button>
+      <Button onClick={() => setActive("openJobs")}>View Open Jobs</Button>
+      <Button onClick={() => setActive("scheduleMeeting")}>Schedule Meeting</Button>
     </div>
+
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm rounded-lg px-4 py-2 text-sm text-gray-700 dark:text-gray-300 space-y-1 text-right">
+      <div>
+        <span className="font-medium">Logged in as:</span> {username}
+        <span className="ml-4 font-medium">Agent ID:</span> {agentId}
+      </div>
+    </div>
+  </div>
+
+  {/* Conditional Sections */}
+  {active === "newJob" && <NewJobForm jobId="" />}
+  {active === "openJobs" && <OpenJobsTable state={setActive} />}
+  {active === "scheduleMeeting" && <ScheduleMeetingForm />}
+  {active === "candidate" && <CandidateView state={setActive} />}
+  {active === "EditJob" && <EditJobForm />}
+</div>
+
   );
 }

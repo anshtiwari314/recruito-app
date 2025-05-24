@@ -39,8 +39,8 @@ const statusOptions = [
 export default function CandidateView({ state }: any) {
   const ngRokL = "https://wpv7kxos9g.execute-api.ap-south-1.amazonaws.com/test/recruito-upload-apis";
   const [apiJobs, setApiJobs] = useState<ApiJob[]>([]);
-  const jobIdRef = useTestWrapper().jobIdRef;
-  const candiRef = useTestWrapper().jobIdRef;
+  const {jobIdRef,candiRef} = useTestWrapper();
+  // const  = useTestWrapper().jobIdRef;
 
   const getAllJobs = async () => {
     try {
@@ -72,7 +72,7 @@ export default function CandidateView({ state }: any) {
 
   const handleScheduleJobMeeting = (jobId: string | null, candidateId: string) => {
     console.log("Schedule meeting for", jobId, candidateId);
-    alert(`Scheduling meeting for job ${jobId}`);
+    // alert(`Scheduling meeting for job ${jobId}`);
     // @ts-ignore
     jobIdRef.current = jobId;
     //@ts-ignore
