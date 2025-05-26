@@ -38,7 +38,7 @@ export default function ScheduleMeetingForm() {
   const [loading, setLoading] = useState<boolean>(false);
   const [meetingLink, setMeetingLink] = useState<string>("");
 
-  const [prefixLink, setPrefixLink] = useState("https://recuiter-copilot-ai.netlify.app/");
+  const [prefixLink, setPrefixLink] = useState("https://recurito-co-pilot.netlify.app/");
   const today = new Date();
   const formattedDate = today.toISOString().split("T")[0];
 
