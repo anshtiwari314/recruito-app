@@ -86,22 +86,75 @@ export default function OpenJobTables({ state }: any) {
     }
   }
 
-  const resumeUploader = async (jobId: string) => {
-    if (!jobId || !selectedFile) {
-      alert("Please select a job and a file to upload")
+    const getBase64FileSize = (base64String: string): number => {
+    const padding = (base64String.match(/=+$/) || [''])[0].length
+    const sizeInBytes = (base64String.length * 3) / 4 - padding
+    return Math.round(sizeInBytes)
+  }
+
+const pdfToBase64String = (): Promise<string | null> => {
+  return new Promise((resolve, reject) => {
+    if (!selectedFile) {
+      resolve(null)
       return
     }
-    try {
-      const formData = new FormData()
-      formData.append("file", selectedFile)
-      formData.append("filename", selectedFile.name)
-      formData.append("job_id", jobId)
-      const res = await axios.post(`${ngRokL}/cv-upload`, formData)
-      if (res.status === 200) console.log("Resume Uploaded for:", jobId)
-    } catch (error) {
-      console.error("Error uploading resume", error)
+
+    const reader = new FileReader()
+    reader.readAsDataURL(selectedFile)
+    reader.onload = () => {
+      const result = reader.result as string
+      const base64 = result.split(',')[1]
+      resolve(base64)
     }
+    reader.onerror = (error) => {
+      reject(error)
+    }
+  })
+}
+
+const resumeUploader = async (jobId: string) => {
+  if (!jobId || !selectedFile) {
+    alert("Please select a job and a file to upload")
+    return
   }
+
+  try {
+    const start = performance.now() 
+    const s1=performance.now();
+    const base64String = await pdfToBase64String()
+    const s2=performance.now();
+    console.log(`Time to convert PDF to base64: ${((s2 - s1) / 1000).toFixed(2)} seconds`)
+    if (!base64String) {
+      console.error("Base64 string could not be generated.")
+      return
+    }
+
+    const sizeInBytes = getBase64FileSize(base64String)
+    console.log(`Base64 PDF size: ${sizeInBytes} bytes ~ ${(sizeInBytes / 1024).toFixed(2)} KB`)
+
+    const payload = {
+      filename: selectedFile.name,
+      pdf_base64: base64String,
+      job_id: jobId,
+    }
+
+    const res = await axios.post(`${ngRokL}/cv-upload`, payload, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    const end = performance.now() 
+    const duration = ((end - start) / 1000).toFixed(2)
+
+    if (res.status === 200) {
+      console.log(`Resume Uploaded for: ${jobId}`)
+      console.log(`Time taken: ${duration} seconds`)
+    }
+  } catch (error) {
+    console.error(" Error uploading resume", error)
+  }
+}
+
 
   const handleAddResumes = (jobId: string) => {
     setSelectedJobId(jobId)
