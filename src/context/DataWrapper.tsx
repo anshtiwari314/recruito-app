@@ -27,6 +27,7 @@ import {
 } from "@/reducers/transcriptionReducer";
 import { PostReq } from "../functions/requests";
 import cuesReducer, { addCuesInTopic, updateCuesInTopic } from "../reducers/cuesReducer";
+import { addChat } from "../reducers/chatReducer";
 //import * as ort from "onnxruntime-web";
 //import * as vad from "@ricky0123/vad-web";
 
@@ -170,8 +171,9 @@ export default function DataWrapper({
   const msgArrRef = useRef([]);
 
   const [name, setName] = useState("");
-  const [cameraToggle, setCameraToggle] = useState(false);
+  const [cameraToggle, setCameraToggle] = useState(true);
   const [microphoneToggle, setMicroPhoneToggle] = useState(true);
+  const [chatToggle,setChatToggle] = useState(false);
   const microphoneToggleRef = useRef(true);
   const [screenSharing, setScreenSharing] = useState(false);
   const screenStreamRef = useRef(null);
@@ -217,34 +219,34 @@ export default function DataWrapper({
 
         // commenting some servers bcz it duplicating connections
          
-        // { urls: 'stun:stun.l.google.com:19302' },
-        // {urls:'stun:stun1.l.google.com:19302'},
-        // {urls:'stun:stun2.l.google.com:19302'},
-        // {urls:'stun:stun3.l.google.com:19302'},
-        // {urls:'stun:stun4.l.google.com:19302'},
-        // {
-        //   urls: "stun:stun.relay.metered.ca:80",
-        // },
-        // {
-        //   urls: "turn:global.relay.metered.ca:80",
-        //   username: "9a68873a2f7a5c9a9755e52e",
-        //   credential: "2kG2qDdT1PESBuUQ",
-        // },
-        // {
-        //   urls: "turn:global.relay.metered.ca:80?transport=tcp",
-        //   username: "9a68873a2f7a5c9a9755e52e",
-        //   credential: "2kG2qDdT1PESBuUQ",
-        // },
-        // {
-        //   urls: "turn:global.relay.metered.ca:443",
-        //   username: "9a68873a2f7a5c9a9755e52e",
-        //   credential: "2kG2qDdT1PESBuUQ",
-        // },
-        // {
-        //   urls: "turns:global.relay.metered.ca:443?transport=tcp",
-        //   username: "9a68873a2f7a5c9a9755e52e",
-        //   credential: "2kG2qDdT1PESBuUQ",
-        // },
+        { urls: 'stun:stun.l.google.com:19302' },
+        {urls:'stun:stun1.l.google.com:19302'},
+        {urls:'stun:stun2.l.google.com:19302'},
+        {urls:'stun:stun3.l.google.com:19302'},
+        {urls:'stun:stun4.l.google.com:19302'},
+        {
+          urls: "stun:stun.relay.metered.ca:80",
+        },
+        {
+          urls: "turn:global.relay.metered.ca:80",
+          username: "9a68873a2f7a5c9a9755e52e",
+          credential: "2kG2qDdT1PESBuUQ",
+        },
+        {
+          urls: "turn:global.relay.metered.ca:80?transport=tcp",
+          username: "9a68873a2f7a5c9a9755e52e",
+          credential: "2kG2qDdT1PESBuUQ",
+        },
+        {
+          urls: "turn:global.relay.metered.ca:443",
+          username: "9a68873a2f7a5c9a9755e52e",
+          credential: "2kG2qDdT1PESBuUQ",
+        },
+        {
+          urls: "turns:global.relay.metered.ca:443?transport=tcp",
+          username: "9a68873a2f7a5c9a9755e52e",
+          credential: "2kG2qDdT1PESBuUQ",
+        },
         {
           url: 'stun:global.stun.twilio.com:3478',
           urls: 'stun:global.stun.twilio.com:3478'
@@ -270,6 +272,10 @@ export default function DataWrapper({
       ]
     }
   }
+
+  useEffect(()=>{
+    console.log('your room id is ',roomId)
+  },[roomId])
   //@ts-ignore
 
   /* ========================================================================= */
@@ -991,6 +997,7 @@ export default function DataWrapper({
       users,
       myId
     );
+    //console.log(usersArrRef.current[0]?.videoStream?.getTracks())
   }, [users, myId]);
 
   /* ========================================================================= */
@@ -1002,7 +1009,7 @@ export default function DataWrapper({
     //This is a socket connection to handle live messages between participants
 
     let url1 = 'https://vitt-jarvis-node-production.up.railway.app/'
-    let url2 = 'http://localhost:3002'
+    let url2 = 'http://localhost:3005'
     let url3 = 'https://temp-meeting-server-production.up.railway.app/'
     let url4 = 'https://temp-meeting-server.vercel.app/'
     let url5 = 'https://temp-meeting-server.onrender.com'
@@ -1016,7 +1023,7 @@ export default function DataWrapper({
 
     //This is a socket connection with backend server to handle cues specific requests or other api requests
     let tempSocket2 = io(
-     // 'http://localhost:5000',
+    // 'http://localhost:5000',
       "wss://recruito.vitti.insure",
     // 'https://490f-49-204-211-204.ngrok-free.app',
      //'https://a910-49-204-211-204.ngrok-free.app',
@@ -1239,6 +1246,27 @@ export default function DataWrapper({
   /* ========================================================================= */
   /* ========================================================================= */
   /* 3.2. Set users and usersarrref consts here (from the perspective of this user, put first user in usersarrref) */
+  
+  function enableDisabledCamera(){
+    gettingVideoStream()
+      .then((videoStream) => {
+        console.log('videostream',videoStream)
+      })
+      .catch((err)=>{
+        console.log('err in enableDisabledCamera',err)
+      })
+  }
+
+  function enableDisabledMicrophone(){
+    gettingAudioStream()
+    .then((audioStream) => {
+      console.log('audiostream',audioStream)
+    })
+    .catch((err)=>{
+      console.log('err in enableDisabledMic',err)
+    })
+  }
+  
   useEffect(() => {
     if (
       myId === "" ||
@@ -1281,6 +1309,40 @@ export default function DataWrapper({
         tempObj.isCameraAvailable = false;
         tempObj.videoStream = false;
         console.log("camera permission", err);
+
+
+      //   if (error.name === 'NotAllowedError') {
+      //     // User denied camera access
+      //     showMessage(
+      //         'Camera access denied. Please enable camera access in your browser settings (e.g., Site Settings or Permissions) to use this feature.',
+      //         'error'
+      //     );
+      // } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+      //     // No camera found
+      //     showMessage(
+      //         'No camera found on your device. Please ensure a camera is connected and recognized by your system.',
+      //         'error'
+      //     );
+      // } else if (error.name === 'NotReadableError') {
+      //     // Camera is already in use
+      //     showMessage(
+      //         'Camera is already in use by another application. Please close other applications using the camera and try again.',
+      //         'error'
+      //     );
+      // } else if (error.name === 'OverconstrainedError') {
+      //     // Constraints could not be satisfied
+      //     showMessage(
+      //         'Camera constraints could not be satisfied. Your device might not support the requested camera settings.',
+      //         'error'
+      //     );
+      // } else {
+      //     // Other errors
+      //     showMessage(
+      //         `An unexpected error occurred: ${error.message}. Please try again or check your browser settings.`,
+      //         'error'
+      //     );
+      // }
+  
       });
 
     gettingAudioStream()
@@ -1370,6 +1432,71 @@ export default function DataWrapper({
     console.log("myData modified", usersArrRef.current, cameraToggle);
   }, [socket, myStream, cameraToggle]);
 
+  // useEffect(()=>{
+  //   if (socket === null || myStream === null || myStream === false) return;
+
+  //   if(cameraToggle){
+
+  //     gettingVideoStream()
+  //     .then(videoStream=>{
+
+        
+  //       try{
+  //         let peerConnection = peersObjRef.current[usersArrRef.current[1].id].call.peerConnection
+  //         let call = peersObjRef.current[usersArrRef.current[1].id].call
+          
+  //         let senders = peerConnection.getSenders()
+  //         let receivers = peerConnection.getReceivers()
+  //         //console.log('call',call)
+  //         console.log('senders',senders)
+  //         console.log('receivers',receivers)
+    
+  //         let sender =senders.find(s => s.track === usersArrRef.current[0].videoStream.getVideoTracks()[0]);
+          
+          
+  //         console.log('sender',sender)
+  //         sender.replaceTrack(videoStream.getVideoTracks()[0])
+  //       }catch(err){
+  //         console.log('err',err)
+  //       }finally{
+  //         console.log('just before init videostream')
+  //         usersArrRef.current[0].videoStream = videoStream
+  //         setUsers(prev=>[...usersArrRef.current])
+  //       }      
+
+  //     })
+      
+    
+  //   }else{
+  //     let tracks= usersArrRef.current[0].videoStream.getTracks()
+      
+  //     tracks.forEach((track)=>{
+  //       track.stop()
+  //     })
+    
+  //     console.log('after stopping videotrack',tracks)
+
+
+  //     // let peerConnection = peersObjRef.current[usersArrRef.current[1].id].call.peerConnection
+  //     // let call = peersObjRef.current[usersArrRef.current[1].id].call
+      
+  //     // let senders = peerConnection.getSenders()
+  //     // let receivers = peerConnection.getReceivers()
+  //     // //console.log('call',call)
+  //     // console.log('senders',senders)
+  //     // console.log('receivers',receivers)
+
+  //     // let sender =senders.find(s => s.track === usersArrRef.current[0].videoStream.getVideoTracks()[0]);
+  //     // console.log('sender',sender)
+  //     // sender.replaceTrack(null)
+
+  //     //usersArrRef.current[0].videoStream = new MediaStream()
+      
+  //     //setMyStream(usersArrRef.current[0].videoStream)
+  //     //setUsers((prev) => [...usersArrRef.current]);
+      
+  //   }
+  // },[cameraToggle])
   /* ========================================================================= */
   /* ========================================================================= */
   /* 4.2. this code is responsible for enable & disable audiostream */
@@ -1660,6 +1787,7 @@ export default function DataWrapper({
       } else {
         console.log("socket 2nd connect triggered");
         socket.emit("join-room", roomId, myId);
+        console.log("join-room 2 triggered")
       }
     }
 
@@ -1693,6 +1821,7 @@ export default function DataWrapper({
         // console.log("join-room-first-time")
         firstTimeConnectRef.current = false;
         socket.emit("join-room", roomId, myId);
+        console.log("join-room 1 triggered")
         clearTimeout(intervalId);
       }
     }, 5000);
@@ -1805,6 +1934,9 @@ export default function DataWrapper({
       call = peer?.call(newUserId, stream);
     }
 
+    //if data is present at peersArrRef then is normal video or audio stream, if data is present at peers2ArrRef then it is screen sharing connection
+    peersObjRef.current[call.peer] = { call: call };
+
     try {
       //if call undefined
 
@@ -1894,7 +2026,11 @@ export default function DataWrapper({
 
     /* 10.1.1. socket.on("user-connected") event handler i.e. new user has connected as a peer on the call */
     function newUser(userId: string) {
-      console.log("new user triggered");
+      //console.log("new user triggered");
+      console.log(
+        `%c new user triggered ${new Date().toLocaleTimeString()}`,
+        "background-color:teal;color:white"
+      );
       if (peersArrRef.current.includes(userId) === true) return;
 
       peersArrRef.current.push(userId);
@@ -1902,6 +2038,7 @@ export default function DataWrapper({
       console.log("user-connected", userId);
 
       //send this data to new user before making rtc connection
+      
       socket.emit("connected-user-data", {
         ...usersArrRef.current[0],
         stream: null,
@@ -1924,6 +2061,17 @@ export default function DataWrapper({
       removeUserFromMainPage(userId);
     }
 
+    function chkIfUserExist(id){
+      let flag = false 
+      for(let i=0;i<usersArrRef.current.length;i++){
+        if(usersArrRef.current[i].id ===id){
+          flag = true 
+          break;
+        }
+         
+      }
+     return flag 
+    }
     /* 10.1.4. socket.on("receive-connected-user-data") event handler */
     function sendUserData(data: any) {
       console.log("send user triggered", data);
@@ -1961,7 +2109,12 @@ export default function DataWrapper({
           from: myId,
         });
         //@ts-ignore
+
+        if(cameraToggle)
         sendVideoToNewUser(myStream, data.id);
+        else 
+        sendVideoToNewUser(new MediaStream(), data.id);
+
         console.log("before exec send audio", myAudioStream);
         //@ts-ignore
         sendAudioToNewUser(myAudioStream, data.audioPeerId);
@@ -1987,17 +2140,25 @@ export default function DataWrapper({
       peers2ArrRef.current.push(data.peer2Id);
       audioPeersArrRef.current.push(data.audioPeerId);
 
-      if (peersArrRef.current.includes(data.id) === false)
+      if (peersArrRef.current.includes(data.id) === false){
         peersArrRef.current.push(data.id);
+      }
 
-      usersArrRef.current.push(data);
       console.log("connected-usr-data", data);
-
-      setUsers((prev) => [...prev, data]);
+      
+      if(!chkIfUserExist(data.id)){
+        usersArrRef.current.push(data);
+        setUsers((prev) => [...prev, data]);
+      }
+      
+      //usersArrRef.current.push(data);
+      //setUsers((prev) => [...prev, data]);
+      
+      
     }
 
     /* 10.1.6. socket.on("camera-toggle-receiver") event handler */
-    function cameraToggle(data: any) {
+    function toggleCamera(data: any) {
       console.log("camera toggle", data);
 
       usersArrRef.current = usersArrRef.current.map((e: any, i: number) => {
@@ -2007,11 +2168,12 @@ export default function DataWrapper({
         return e;
       });
       setUsers((prev) => [...usersArrRef.current]);
-      console.log("new data", usersArrRef.current);
+      console.log("new data",usersArrRef.current[1] && usersArrRef.current[1].stream.getVideoTracks());
+      console.log("new data",usersArrRef.current[1] && usersArrRef.current[1].stream);
     }
 
     /* 10.1.7. socket.on("microphone-toggle-receiver") event handler */
-    function microphoneToggle(data: any) {
+    function toggleMicrophone(data: any) {
       console.log("microphone toggle", data);
 
       usersArrRef.current = usersArrRef.current.map((e: any, i: number) => {
@@ -2022,7 +2184,8 @@ export default function DataWrapper({
       });
 
       setUsers((prev) => [...usersArrRef.current]);
-      console.log("new data", usersArrRef.current);
+      console.log("new data", usersArrRef.current[1] && usersArrRef.current[1].stream.getVideoTracks());
+      console.log("new data",usersArrRef.current[1] && usersArrRef.current[1].stream);
     }
 
     /* 10.1.8. socket.on("user-chat-receiver") event handler */
@@ -2076,8 +2239,10 @@ export default function DataWrapper({
     function singleMsgReceiver(data: any) {
       console.log("msg receiver", data);
       //@ts-ignore
-      msgArrRef.current = [...msgArrRef.current, data];
-      setMsg((prev) => [...msgArrRef.current]);
+      //msgArrRef.current = [...msgArrRef.current, data];
+      //setMsg((prev) => [...msgArrRef.current]);
+      
+      dispatch(addChat(data))
     }
 
     /* 10.1.12. socket.on("cue-loading-receiver") event handler */
@@ -2089,8 +2254,8 @@ export default function DataWrapper({
     socket.on("to-leave-page-receiver", userMovedToLeavePage);
     socket.on("receive-connected-user-data", sendUserData);
     socket.on("user-connected", newUser);
-    socket.on("camera-toggle-receiver", cameraToggle);
-    socket.on("microphone-toggle-receiver", microphoneToggle);
+    socket.on("camera-toggle-receiver", toggleCamera);
+    socket.on("microphone-toggle-receiver", toggleMicrophone);
     socket.on("user-chat-receiver", chatsReceiver);
     socket.on("screen-share-end-receiver", stopScreenReceiving);
     socket.on("screen-share-receiver", screenShareDataReceiver);
@@ -2103,8 +2268,8 @@ export default function DataWrapper({
       socket.off("to-leave-page-receiver", userMovedToLeavePage);
       socket.off("tab-close-remove-video", removeUser);
       socket.off("receive-connected-user-data", sendUserData);
-      socket.off("camera-toggle-receiver", cameraToggle);
-      socket.off("microphone-toggle-receiver", microphoneToggle);
+      socket.off("camera-toggle-receiver", toggleCamera);
+      socket.off("microphone-toggle-receiver", toggleMicrophone);
       socket.off("user-chat-receiver", chatsReceiver);
       socket.off("screen-share-end-receiver", stopScreenReceiving);
       socket.off("screen-share-receiver", screenShareDataReceiver);
@@ -2206,7 +2371,7 @@ export default function DataWrapper({
         console.log("2nd getting video stream", userVideoStream, call.peer);
 
         //if data is present at peersArrRef then is normal video or audio stream, if data is present at peers2ArrRef then it is screen sharing connection
-        peersObjRef.current[call.peer] = { call: call };
+        //peersObjRef.current[call.peer] = { call: call };
 
         for (let i = 0; i < usersArrRef.current.length; i++) {
           if (usersArrRef.current[i].id === call.peer) {
@@ -2666,283 +2831,283 @@ export default function DataWrapper({
   /* ========================================================================= */
   /* ========================================================================= */
   /* 13.1. Declaration of the VAD function here */
-  useEffect(() => {
-    if (myAudioStream === null || users.length === 0 || socket === null) return;
+  // useEffect(() => {
+  //   if (myAudioStream === null || users.length === 0 || socket === null) return;
 
-    //console.log('i am selected topic from vad effect',selectedTopic)
-    // if(vadEffectRender.current>0)
-    // return ;
-    vadEffectRender.current++;
-    //@ts-ignore
-    let myVad = null;
+  //   //console.log('i am selected topic from vad effect',selectedTopic)
+  //   // if(vadEffectRender.current>0)
+  //   // return ;
+  //   vadEffectRender.current++;
+  //   //@ts-ignore
+  //   let myVad = null;
 
-    async function VAD(cb1: CallableFunction, cb2: CallableFunction) {
-      sendToServer(new Blob([]), adminUrl, {
-        ...usersArrRef.current[0],
+  //   async function VAD(cb1: CallableFunction, cb2: CallableFunction) {
+  //     sendToServer(new Blob([]), adminUrl, {
+  //       ...usersArrRef.current[0],
 
-        init: true,
-      });
-      //console.log('just before myvad' ,globalRef.current.myVad,vad)
+  //       init: true,
+  //     });
+  //     //console.log('just before myvad' ,globalRef.current.myVad,vad)
 
-      try{
+  //     try{
 
-        const myvad = await vad.MicVAD.new({
-          onSpeechStart: cb1,
-          onSpeechEnd: cb2,
-          //positiveSpeechThreshold:0.9,
-          //negativeSpeechThreshold:0.85,
-          // positiveSpeechThreshold:0.5,
-          // negativeSpeechThreshold:0.3,
-          // redemptionFrames:100
-        });
-        //console.log('myvad' ,myvad)
-         //myvad.start()
-        globalRef.current.myVad = myvad;
-      }catch(e){
-        console.log('err during calling vad',e)
-      }
+  //       const myvad = await vad.MicVAD.new({
+  //         onSpeechStart: cb1,
+  //         onSpeechEnd: cb2,
+  //         //positiveSpeechThreshold:0.9,
+  //         //negativeSpeechThreshold:0.85,
+  //         // positiveSpeechThreshold:0.5,
+  //         // negativeSpeechThreshold:0.3,
+  //         // redemptionFrames:100
+  //       });
+  //       //console.log('myvad' ,myvad)
+  //        //myvad.start()
+  //       globalRef.current.myVad = myvad;
+  //     }catch(e){
+  //       console.log('err during calling vad',e)
+  //     }
       
-    }
+  //   }
 
-    let stop;
-    let medRec = null;
-    let flag = false;
-    let start2IntervalId: any = null;
-    let stop2TimeoutId: any = null;
-    function getWavBytes(buffer: any, options: any) {
-      const type = options.isFloat ? Float32Array : Uint16Array;
-      const numFrames = buffer.byteLength / type.BYTES_PER_ELEMENT;
+  //   let stop;
+  //   let medRec = null;
+  //   let flag = false;
+  //   let start2IntervalId: any = null;
+  //   let stop2TimeoutId: any = null;
+  //   function getWavBytes(buffer: any, options: any) {
+  //     const type = options.isFloat ? Float32Array : Uint16Array;
+  //     const numFrames = buffer.byteLength / type.BYTES_PER_ELEMENT;
 
-      const headerBytes = getWavHeader(
-        Object.assign({}, options, { numFrames })
-      );
-      const wavBytes = new Uint8Array(headerBytes.length + buffer.byteLength);
+  //     const headerBytes = getWavHeader(
+  //       Object.assign({}, options, { numFrames })
+  //     );
+  //     const wavBytes = new Uint8Array(headerBytes.length + buffer.byteLength);
 
-      // prepend header, then add pcmBytes
-      wavBytes.set(headerBytes, 0);
-      wavBytes.set(new Uint8Array(buffer), headerBytes.length);
+  //     // prepend header, then add pcmBytes
+  //     wavBytes.set(headerBytes, 0);
+  //     wavBytes.set(new Uint8Array(buffer), headerBytes.length);
 
-      return wavBytes;
-    }
+  //     return wavBytes;
+  //   }
 
-    function getWavHeader(options: any) {
-      const numFrames = options.numFrames;
-      const numChannels = options.numChannels || 2;
-      const sampleRate = options.sampleRate || 44100;
-      const bytesPerSample = options.isFloat ? 4 : 2;
-      const format = options.isFloat ? 3 : 1;
+  //   function getWavHeader(options: any) {
+  //     const numFrames = options.numFrames;
+  //     const numChannels = options.numChannels || 2;
+  //     const sampleRate = options.sampleRate || 44100;
+  //     const bytesPerSample = options.isFloat ? 4 : 2;
+  //     const format = options.isFloat ? 3 : 1;
 
-      const blockAlign = numChannels * bytesPerSample;
-      const byteRate = sampleRate * blockAlign;
-      const dataSize = numFrames * blockAlign;
+  //     const blockAlign = numChannels * bytesPerSample;
+  //     const byteRate = sampleRate * blockAlign;
+  //     const dataSize = numFrames * blockAlign;
 
-      const buffer = new ArrayBuffer(44);
-      const dv = new DataView(buffer);
+  //     const buffer = new ArrayBuffer(44);
+  //     const dv = new DataView(buffer);
 
-      let p = 0;
+  //     let p = 0;
 
-      function writeString(s: string) {
-        for (let i = 0; i < s.length; i++) {
-          dv.setUint8(p + i, s.charCodeAt(i));
-        }
-        p += s.length;
-      }
+  //     function writeString(s: string) {
+  //       for (let i = 0; i < s.length; i++) {
+  //         dv.setUint8(p + i, s.charCodeAt(i));
+  //       }
+  //       p += s.length;
+  //     }
 
-      function writeUint32(d: any) {
-        dv.setUint32(p, d, true);
-        p += 4;
-      }
+  //     function writeUint32(d: any) {
+  //       dv.setUint32(p, d, true);
+  //       p += 4;
+  //     }
 
-      function writeUint16(d: any) {
-        dv.setUint16(p, d, true);
-        p += 2;
-      }
+  //     function writeUint16(d: any) {
+  //       dv.setUint16(p, d, true);
+  //       p += 2;
+  //     }
 
-      writeString("RIFF"); // ChunkID
-      writeUint32(dataSize + 36); // ChunkSize
-      writeString("WAVE"); // Format
-      writeString("fmt "); // Subchunk1ID
-      writeUint32(16); // Subchunk1Size
-      writeUint16(format); // AudioFormat https://i.stack.imgur.com/BuSmb.png
-      writeUint16(numChannels); // NumChannels
-      writeUint32(sampleRate); // SampleRate
-      writeUint32(byteRate); // ByteRate
-      writeUint16(blockAlign); // BlockAlign
-      writeUint16(bytesPerSample * 8); // BitsPerSample
-      writeString("data"); // Subchunk2ID
-      writeUint32(dataSize); // Subchunk2Size
+  //     writeString("RIFF"); // ChunkID
+  //     writeUint32(dataSize + 36); // ChunkSize
+  //     writeString("WAVE"); // Format
+  //     writeString("fmt "); // Subchunk1ID
+  //     writeUint32(16); // Subchunk1Size
+  //     writeUint16(format); // AudioFormat https://i.stack.imgur.com/BuSmb.png
+  //     writeUint16(numChannels); // NumChannels
+  //     writeUint32(sampleRate); // SampleRate
+  //     writeUint32(byteRate); // ByteRate
+  //     writeUint16(blockAlign); // BlockAlign
+  //     writeUint16(bytesPerSample * 8); // BitsPerSample
+  //     writeString("data"); // Subchunk2ID
+  //     writeUint32(dataSize); // Subchunk2Size
 
-      return new Uint8Array(buffer);
-    }
+  //     return new Uint8Array(buffer);
+  //   }
 
-    function start() {
-      let date = new Date();
-      console.log(
-        `%c vad started ${
-          date.toLocaleTimeString() + ":" + date.getMilliseconds()
-        }`,
-        "background-color:teal;color:white"
-      );
+  //   function start() {
+  //     let date = new Date();
+  //     console.log(
+  //       `%c vad started ${
+  //         date.toLocaleTimeString() + ":" + date.getMilliseconds()
+  //       }`,
+  //       "background-color:teal;color:white"
+  //     );
 
-      if (adminMediaRecorderStatus.current === false) {
-        console.log("caling the function");
-        // sendVadStreamToServer(myStream,usersArrRef.current[0],adminUrl,4000)
-      }
-      vadFlag.current = true;
-    }
-    function stop1(audio: any) {
-      //inserted here to ensure that the audio is not processed if there's only one person in the meeting.
-     // if (usersArrRef.current.length <= 1) return; 
+  //     if (adminMediaRecorderStatus.current === false) {
+  //       console.log("caling the function");
+  //       // sendVadStreamToServer(myStream,usersArrRef.current[0],adminUrl,4000)
+  //     }
+  //     vadFlag.current = true;
+  //   }
+  //   function stop1(audio: any) {
+  //     //inserted here to ensure that the audio is not processed if there's only one person in the meeting.
+  //    // if (usersArrRef.current.length <= 1) return; 
        
 
-      let speechStopDate = new Date();
-      console.log(
-        `%c vad stopped ${
-          speechStopDate.toLocaleTimeString() + ":" + speechStopDate.getMilliseconds()
-        }`,
-        "background-color:teal;color:white"
-      );
-      let date2 = new Date();
-      console.log(
-        `%c  internal processing start ${
-          date2.toLocaleTimeString() + ":" + date2.getMilliseconds()
-        }`,
-        "background-color:teal;color:white"
-      );
-      //@ts-ignore
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const source = audioCtx.createBufferSource();
+  //     let speechStopDate = new Date();
+  //     console.log(
+  //       `%c vad stopped ${
+  //         speechStopDate.toLocaleTimeString() + ":" + speechStopDate.getMilliseconds()
+  //       }`,
+  //       "background-color:teal;color:white"
+  //     );
+  //     let date2 = new Date();
+  //     console.log(
+  //       `%c  internal processing start ${
+  //         date2.toLocaleTimeString() + ":" + date2.getMilliseconds()
+  //       }`,
+  //       "background-color:teal;color:white"
+  //     );
+  //     //@ts-ignore
+  //     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  //     const source = audioCtx.createBufferSource();
 
-      const myArrayBuffer = audioCtx.createBuffer(1, audio.length, 16000);
+  //     const myArrayBuffer = audioCtx.createBuffer(1, audio.length, 16000);
 
-      let nowBuffering;
-      for (
-        let channel = 0;
-        channel < myArrayBuffer.numberOfChannels;
-        channel++
-      ) {
-        // This gives us the actual array that contains the data
-        nowBuffering = myArrayBuffer.getChannelData(channel);
-        //  console.log('array buffer length',myArrayBuffer.length)
-        for (let i = 0; i < myArrayBuffer.length; i++) {
-          // Math.random() is in [0; 1.0]
-          // audio needs to be in [-1.0; 1.0]
-          nowBuffering[i] = audio[i] * 2;
-        }
-      }
+  //     let nowBuffering;
+  //     for (
+  //       let channel = 0;
+  //       channel < myArrayBuffer.numberOfChannels;
+  //       channel++
+  //     ) {
+  //       // This gives us the actual array that contains the data
+  //       nowBuffering = myArrayBuffer.getChannelData(channel);
+  //       //  console.log('array buffer length',myArrayBuffer.length)
+  //       for (let i = 0; i < myArrayBuffer.length; i++) {
+  //         // Math.random() is in [0; 1.0]
+  //         // audio needs to be in [-1.0; 1.0]
+  //         nowBuffering[i] = audio[i] * 2;
+  //       }
+  //     }
 
-      // set the buffer in the AudioBufferSourceNode
-      //source.buffer = myArrayBuffer;
+  //     // set the buffer in the AudioBufferSourceNode
+  //     //source.buffer = myArrayBuffer;
 
-      // connect the AudioBufferSourceNode to the
-      // destination so we can hear the sound
-      //source.connect(audioCtx.destination);
+  //     // connect the AudioBufferSourceNode to the
+  //     // destination so we can hear the sound
+  //     //source.connect(audioCtx.destination);
 
-      //start the source playing
-      //console.log("ctx stream source",)
+  //     //start the source playing
+  //     //console.log("ctx stream source",)
 
-      //source.start();
+  //     //source.start();
 
-      //let stream= audioCtx.createMediaStreamDestination()
-      // stream
+  //     //let stream= audioCtx.createMediaStreamDestination()
+  //     // stream
 
-      const ch1Data = myArrayBuffer.getChannelData(0);
-      const floatArr = new Float32Array(ch1Data.length);
+  //     const ch1Data = myArrayBuffer.getChannelData(0);
+  //     const floatArr = new Float32Array(ch1Data.length);
 
-      console.log("duration", myArrayBuffer.duration);
-      const wavBytes = getWavBytes(nowBuffering?.buffer, {
-        isFloat: true, // floating point or 16-bit integer
-        numChannels: 1,
-        sampleRate: 16000,
-      });
-      const wavBlob = new Blob([wavBytes], { type: "audio/ogg" });
+  //     console.log("duration", myArrayBuffer.duration);
+  //     const wavBytes = getWavBytes(nowBuffering?.buffer, {
+  //       isFloat: true, // floating point or 16-bit integer
+  //       numChannels: 1,
+  //       sampleRate: 16000,
+  //     });
+  //     const wavBlob = new Blob([wavBytes], { type: "audio/ogg" });
 
-      downsampleToWav(wavBlob, (buffer: ArrayBuffer) => {
-        let date = new Date();
-        console.log(
-          `%c processing complete ${
-            date.toLocaleTimeString() + ":" + date.getMilliseconds()
-          }`,
-          "background-color:teal;color:white"
-        );
+  //     downsampleToWav(wavBlob, (buffer: ArrayBuffer) => {
+  //       let date = new Date();
+  //       console.log(
+  //         `%c processing complete ${
+  //           date.toLocaleTimeString() + ":" + date.getMilliseconds()
+  //         }`,
+  //         "background-color:teal;color:white"
+  //       );
 
-        const mp3Buffer = encodeMp3(buffer);
-        let blob = new Blob(mp3Buffer, { type: "audio/mp3" });
+  //       const mp3Buffer = encodeMp3(buffer);
+  //       let blob = new Blob(mp3Buffer, { type: "audio/mp3" });
 
-        // cue logo will appear at admin end
-        if (peersArrRef.current.length > 0)
-          socket.emit("cue-loading-transmitter", {
-            toPeer: peersArrRef.current[0],
-            toggle: true,
-          });
+  //       // cue logo will appear at admin end
+  //       if (peersArrRef.current.length > 0)
+  //         socket.emit("cue-loading-transmitter", {
+  //           toPeer: peersArrRef.current[0],
+  //           toggle: true,
+  //         });
         
-        //console.log('just before send to server executes',selectedTopic)
-        sendToServer(blob, adminUrl, {
-          ...usersArrRef.current[0],
-          init: false,
-         // selected_topic:selectedTopic,
-          speech_stop_time:`${speechStopDate.toLocaleDateString()} ${speechStopDate.toLocaleTimeString()}:${speechStopDate.getMilliseconds()}`
-        });
-      });
+  //       //console.log('just before send to server executes',selectedTopic)
+  //       sendToServer(blob, adminUrl, {
+  //         ...usersArrRef.current[0],
+  //         init: false,
+  //        // selected_topic:selectedTopic,
+  //         speech_stop_time:`${speechStopDate.toLocaleDateString()} ${speechStopDate.toLocaleTimeString()}:${speechStopDate.getMilliseconds()}`
+  //       });
+  //     });
 
-      // console.log('myArray buffer',myArrayBuffer,myArrayBuffer.length)
+  //     // console.log('myArray buffer',myArrayBuffer,myArrayBuffer.length)
 
-      // let fA = new Float32Array(audio)
-      // console.log('bufff',audio.buffer)
-      // let arrBuf = new ArrayBuffer(audio)
-      // console.log('arrBuf',arrBuf)
-      // let blob = new Blob([fA.buffer],{type:'audio/wav'})
-      // console.log('blob',URL.createObjectURL(blob))
+  //     // let fA = new Float32Array(audio)
+  //     // console.log('bufff',audio.buffer)
+  //     // let arrBuf = new ArrayBuffer(audio)
+  //     // console.log('arrBuf',arrBuf)
+  //     // let blob = new Blob([fA.buffer],{type:'audio/wav'})
+  //     // console.log('blob',URL.createObjectURL(blob))
 
-      //let stream= audioCtx.createMediaStreamDestination()
-      //console.log('context stream',stream.stream.getAudioTracks()[0])
+  //     //let stream= audioCtx.createMediaStreamDestination()
+  //     //console.log('context stream',stream.stream.getAudioTracks()[0])
 
-      // let mediaRec = new MediaRecorder(audioCtx.createMediaStreamDestination())
-      // medRec.
+  //     // let mediaRec = new MediaRecorder(audioCtx.createMediaStreamDestination())
+  //     // medRec.
 
-      // sendToServer(blob,adminUrl,usersArrRef.current[0])
-      // vadFlag.current=false
-    }
+  //     // sendToServer(blob,adminUrl,usersArrRef.current[0])
+  //     // vadFlag.current=false
+  //   }
 
-    function stop2() {
-      stop2TimeoutId = setTimeout(() => {
-        console.log(
-          `%c audio stopped ${new Date().toLocaleTimeString()}`,
-          "background-color:teal;color:white"
-        );
-        start2IntervalId ? clearInterval(start2IntervalId) : null;
-        globalRef.current.recordingStatus = false;
-        setRecordingOn(false);
-      }, 1000);
-    }
+  //   function stop2() {
+  //     stop2TimeoutId = setTimeout(() => {
+  //       console.log(
+  //         `%c audio stopped ${new Date().toLocaleTimeString()}`,
+  //         "background-color:teal;color:white"
+  //       );
+  //       start2IntervalId ? clearInterval(start2IntervalId) : null;
+  //       globalRef.current.recordingStatus = false;
+  //       setRecordingOn(false);
+  //     }, 1000);
+  //   }
 
-    //add isHost === false for client specific use-cases
-    if (users[0].isMicrophoneAvailable && microphoneToggle) {
-      //console.log("myvad if",globalRef.current.myVad,globalRef.current.myVad?.listening,microphoneToggle)
+  //   //add isHost === false for client specific use-cases
+  //   if (users[0].isMicrophoneAvailable && microphoneToggle) {
+  //     //console.log("myvad if",globalRef.current.myVad,globalRef.current.myVad?.listening,microphoneToggle)
 
-      if (globalRef.current.myVad === null) {
-        console.log('just before calling vad')
-        VAD(start, stop1);
-      } else {
-        globalRef.current.myVad?.start();
-      }
-    } else {
-      // myVad=null
+  //     if (globalRef.current.myVad === null) {
+  //       console.log('just before calling vad')
+  //       VAD(start, stop1);
+  //     } else {
+  //       globalRef.current.myVad?.start();
+  //     }
+  //   } else {
+  //     // myVad=null
 
-      globalRef.current.myVad?.pause();
-      // after pausing vad stop2 is not firing
-      //stop1();
-      // console.log("myvad else",globalRef.current.myVad,globalRef.current.myVad?.listening,microphoneToggle)
-    }
-    //console.log('vad effect',globalRef.current.myVad)
+  //     globalRef.current.myVad?.pause();
+  //     // after pausing vad stop2 is not firing
+  //     //stop1();
+  //     // console.log("myvad else",globalRef.current.myVad,globalRef.current.myVad?.listening,microphoneToggle)
+  //   }
+  //   //console.log('vad effect',globalRef.current.myVad)
 
-    return () => {
-      start2IntervalId ? clearInterval(start2IntervalId) : null;
-      stop2TimeoutId ? clearTimeout(stop2TimeoutId) : null;
-    };
-  }, [isHost, myAudioStream, users, socket, adminUrl]);
+  //   return () => {
+  //     start2IntervalId ? clearInterval(start2IntervalId) : null;
+  //     stop2TimeoutId ? clearTimeout(stop2TimeoutId) : null;
+  //   };
+  // }, [isHost, myAudioStream, users, socket, adminUrl]);
 
-  console.log("MYID", myId);
+  //console.log("MYID", myId);
 
   let values = {
     
@@ -2968,12 +3133,14 @@ export default function DataWrapper({
     setUsers,
     myStream,
     setMyStream,
+    myAudioStream,
     name,
     setName,
     cameraToggle,
     setCameraToggle,
     microphoneToggle,
     setMicroPhoneToggle,
+    chatToggle,setChatToggle,
     msg,
     setMsg,
     cueLoading,
@@ -2991,7 +3158,7 @@ export default function DataWrapper({
     stopVideoRecording,
     startRecordingScreen,
     screenRecording,
-    setScreenRecording,ngrokServerUrl,setNgrokServerUrl
+    setScreenRecording,ngrokServerUrl,setNgrokServerUrl,enableDisabledCamera,enableDisabledMicrophone
   };
 
   return (

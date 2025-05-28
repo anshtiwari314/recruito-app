@@ -8,6 +8,9 @@ import type { TranscriptionDataType } from "@/reducers/transcriptionReducer";
 import parse from 'html-react-parser';
 import { useDispatch } from "react-redux";
 import { updateSelectedTopic } from "@/reducers/cuesReducer";
+import DraggableChatWindow from './DraggableChatWindow';
+import ResizableDiv from './ResizableDiv';
+import DraggableResizableBox from './DeepSeekResizableDiv';
 
 export function SingleCue({
   question,
@@ -253,34 +256,66 @@ export default function ContentPanelMain() {
     state.trcpReducer.TranscriptionList,
     //state.cuesReducer.topics
   ]);
-  console.log('cues state',cuesState)
+  //console.log('cues state',cuesState)
   const [isExpanded, setIsExpanded] = useState(false);
+  const fullscreenElement = useRef(null)
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
   };
 
   const transcriptionRef = useRef<HTMLDivElement | null>(null);
+  //const {chatToggle,setChatToggle} = useData()
 
   useEffect(() => {
     if (transcriptionRef.current) {
-      console.log('transcriptions inside content panel is changed')
+      //console.log('transcriptions inside content panel is changed')
         transcriptionRef.current.scrollTop = transcriptionRef.current.scrollHeight;
     }
   }, [transcriptions]); // Runs when transcriptions update
 
-  
+  const goFullscreen = () => {
+    const element = fullscreenElement.current;
+    setIsFullscreen(true)
+    if (element.requestFullscreen) {
+      element.requestFullscreen();
+    } else if (element.mozRequestFullScreen) { /* Firefox */
+      element.mozRequestFullScreen();
+    } else if (element.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+      element.webkitRequestFullscreen();
+    } else if (element.msRequestFullscreen) { /* IE/Edge */
+      element.msRequestFullscreen();
+    }
+  };
+
+  const exitFullscreen = () => {
+    setIsFullscreen(false)
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.mozCancelFullScreen) { /* Firefox */
+      document.mozCancelFullScreen();
+    } else if (document.webkitExitFullscreen) { /* Chrome, Safari & Opera */
+      document.webkitExitFullscreen();
+    } else if (document.msExitFullscreen) { /* IE/Edge */
+      document.msExitFullscreen();
+    }
+  };
   
 
   return (
     <div className={`${!isExpanded ? "flex justify-between" : "flex flex-col"}`} 
-    style={{flex:0.75,maxHeight:'75%'}}
+    style={{flex:0.75,height:'75%'}}
     
     >
+    
+    
+    {/* <ResizableDiv/>
+    <DraggableResizableBox/> */}
       <div
         id="transcription"
        
-        style={{overflowY:'hidden',height:'100%',padding:'0 0.8rem'}}
+        style={{overflowY:'hidden',height:'60vh',padding:'0 0.8rem'}}
         className={`${!isExpanded ? "flex-grow-0 flex-shrink-0 w-1/4 min-h-96 max-h-lvh mr-6" : "max-h-96 w-full"} mb-6 bg-white rounded-lg shadow-sm border-2 border-zinc-500 `}
       >
         {/* Header of transcription section */}
@@ -324,14 +359,21 @@ export default function ContentPanelMain() {
       {/* AI Suggestions section */}
       <div
         id="ai-suggestions"
-        style={{overflowY:'hidden',height:'100%',padding:'0 0.8rem',paddingBottom:'5rem'}}
+        style={{overflowY:'hidden',height:'60vh',padding:'0 0.8rem',paddingBottom:'5rem'}}
         className={`${!isExpanded ? "flex-grow-0 w-3/4 min-h-96 max-h-lvh" : "w-full max-h-96"} mb-6 bg-white rounded-lg shadow-sm border-2 border-zinc-500 overflow-y-auto`}
+        ref={fullscreenElement}
       >
         {/* AI Suggestions section header */}
         <div className="flex items-center justify-between mb-4" style={{height:'10%'}}>
         <h3 className="text-lg font-semibold text-neutral-900" >
           AI Suggestions
         </h3>
+        <button 
+            className="text-sm text-neutral-600 hover:text-neutral-700"
+            onClick={isFullscreen? exitFullscreen:goFullscreen }
+          >
+            <i className={`fa-solid fa-${isFullscreen ? "compress" : "expand"} mr-1`}></i>{isFullscreen ? "Collapse" : "Expand to full screen"}
+          </button>
         </div>
 
 

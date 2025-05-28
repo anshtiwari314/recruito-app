@@ -4,6 +4,7 @@ import MyLargerVideoComp from "@/components/MyLargerVideoComp";
 import ContentPanelMain from "./ContentPanelMain";
 import ContentPanelFooter from "./ContentPanelFooter";
 import { useAppSelector } from "@/store/store";
+import DraggableChatWindow from './DraggableChatWindow';
 
 export default function ContentPanel({
   isMobile,
@@ -55,10 +56,11 @@ export default function ContentPanel({
       }
     }
   }, [users, selectedNumber]);
-  console.log("users updated", users);
+  //console.log("users updated", users);
 
   return (
-    <>
+    <div>
+      <DraggableChatWindow/>
       {isHost ? (
         <div style={{
         //border:'0.2rem solid green',
@@ -82,7 +84,7 @@ export default function ContentPanel({
           />
         )
       )}
-    </>
+    </div>
   );
 }
 

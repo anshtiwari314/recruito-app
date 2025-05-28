@@ -11,6 +11,7 @@ import RightPanel from "@/components/RightPanel";
 import NotFound from "./NotFoundPage";
 import Leave from "./LeavePage";
 import MeetingPageHeader from "../components/MeetingPageHeader";
+import ShowMessage from "../components/ShowMessage";
 
 export default function MainPage() {
   //@ts-ignore
@@ -151,7 +152,21 @@ export default function MainPage() {
           dispatch(setQP(qParams));
           
           // Set the myId state variable to the temporary ID
-          setMyId(uuidv4());
+          setMyId(uuidv4())
+
+
+          // the below code is for only testing
+
+        //   if(loginResult?.isAuthenticated===true){
+        //   setMyId(uuidv4())
+        //   }
+        //   else{
+        //   setMyId('febc1696-f7f3-41ad-a8f8-ba0bd6865286')
+        //     setTimeout(()=>{
+        //       setMyId('febc1696-f7f3-41ad-a8f8-ba0bd6865286')
+        //     },2000)
+        //}
+
         }
       };
 
@@ -182,7 +197,7 @@ export default function MainPage() {
   }, []);
 
     //http://localhost:5173/?room_id=abc-123-fgh-456&cust_email_id=saurabhahlawat89@gmail.com&agent_id=1234&job_id=1
-  
+  //http://localhost:5173/?room_id=anuj-anuj-anuj-anuj&cust_email_id=saurabhahlawat89@gmail.com&agent_id=1234&job_id=1
 
   return (
     <>
@@ -196,7 +211,7 @@ export default function MainPage() {
             {/* App header */}
             
             <MeetingPageHeader/>
-
+            {/* <ShowMessage/> */}
             {/* Main Content */}
             <main id="main-content" className="flex h-[calc(100vh-120px)]" 
             style={{height:'90vh'}}

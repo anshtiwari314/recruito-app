@@ -1,7 +1,7 @@
 import React,{useRef,useEffect} from "react"
 
 export function RightPanelVideo({e,muted}:{e:any,muted:boolean}) {
-    console.log(e)
+    //console.log(e)
 
     const vidRef = useRef<any>(null)
 
@@ -14,7 +14,7 @@ export function RightPanelVideo({e,muted}:{e:any,muted:boolean}) {
       return ;
 
    
-      console.log("display 2",e.videoStream,vid)
+      //console.log("display 2",e.videoStream,vid)
 
       if(e.isCameraAvailable===true)
       vid.srcObject = e.videoStream

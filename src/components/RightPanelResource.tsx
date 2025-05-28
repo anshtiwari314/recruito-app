@@ -6,7 +6,7 @@ export function RightPanelResource() {
     (state) => state.cuesReducer
   );
 
-  console.log("trying here",jobDescription, interviewGuide, jobTitle);
+  //console.log("trying here",jobDescription, interviewGuide, jobTitle);
   return (
     <>
       <div className="p-3 bg-neutral-50 rounded-lg" >
@@ -21,7 +21,7 @@ export function RightPanelResource() {
             <div className="text-sm text-neutral-600 mt-1">
               {/* {jobTitle} Position Details */}
               {/* Traya Health Position Details */}
-              HDFC Life
+              Checklist Guideline 
             </div>
           </div>
           <button className="p-2 hover:bg-neutral-100 rounded-lg text-neutral-600">
@@ -46,7 +46,7 @@ export function RightPanelResource() {
               </div>
             </div>
             <div className="text-sm text-neutral-600 mt-1">
-              Assessment Framework
+              Implementation FAQ's
             </div>
           </div>
           <button className="p-2 hover:bg-neutral-100 rounded-lg text-neutral-600">
