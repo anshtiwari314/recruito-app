@@ -109,7 +109,7 @@ export default function CandidateView({ state }: any) {
   };
 
   return (
-    <div className="overflow-x-auto max-h-[60vh] overflow-y-auto mt-4">
+    <div className="overflow-x-auto  overflow-y-auto mt-4">
       <Table className="min-w-full">
         <TableHeader>
           <TableRow>
