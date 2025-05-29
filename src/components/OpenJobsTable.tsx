@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useRef } from "react"
 import { useDispatch } from "react-redux"
 import { addResumes, viewCandidates, addSampleQuestions } from "../reducers/jobSlices"
 import Button from "./ui/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/Card"
-import { Dialog, DialogContent, DialogTitle, DialogClose, DialogHeader } from "./ui/Dailog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "./ui/Dailog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/Table"
 import { Input } from "./ui/Input"
-import { useAppSelector } from "../store/store"
 import EditJobForm from "./EditJob"
 import SampleQuestionsForm from "./SampleQuestion"
 import { useTestWrapper } from "../context/TestWrapper"
@@ -18,27 +17,35 @@ export interface ApiJob {
   job_description: string
   key_criteria: string
   sample_questions: string[]
-  candidate_data: { email: string; name: string; status: string; score: number,candidate_id:string,meeting_link:string }[]
+  candidate_data: {
+    email: string
+    name: string
+    status: string
+    score: number
+    candidate_id: string
+    meeting_link: string
+  }[]
 }
 
 export default function OpenJobTables({ state }: any) {
-  const ngRokL = "https://wpv7kxos9g.execute-api.ap-south-1.amazonaws.com/test/recruito-upload-apis"
+  const ngRokL =
+    "https://wpv7kxos9g.execute-api.ap-south-1.amazonaws.com/test/recruito-upload-apis"
   const dispatch = useDispatch()
-  const jobIdRef = useTestWrapper().jobIdRef
-  const candiRef=useTestWrapper().candiRef
-  const cameForEdit=useTestWrapper().cameForEdit;
+  const { jobIdRef, candiRef, cameForEdit } = useTestWrapper()
 
-  
   const [apiJobs, setApiJobs] = useState<ApiJob[]>([])
-
-  const [showCandidatesModal, setShowCandidatesModal] = useState(false)
   const [showResumesModal, setShowResumesModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showQuestionsModal, setShowQuestionsModal] = useState(false)
   const [selectedJobId, setSelectedJobId] = useState("")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [uploadStatus, setUploadStatus] = useState<
+    "idle" | "uploading" | "success" | "error"
+  >("idle")
+  const progressTimer = useRef<NodeJS.Timeout>()
 
- 
+  // Fetch jobs
   const getAllJobs = async () => {
     try {
       const res = await axios.post(
@@ -46,162 +53,105 @@ export default function OpenJobTables({ state }: any) {
         { agent_id: "1234" },
         { headers: { "Content-Type": "application/json" } }
       )
-      if (res.status === 200) {
-        setApiJobs(res.data.job_data)
-      }
-      console.log("Jobs from API:", res.data.job_data)
-    } catch (error) {
-      console.error("Error fetching jobs:", error)
+      if (res.status === 200) setApiJobs(res.data.job_data)
+    } catch (err) {
+      console.error("Error fetching jobs:", err)
     }
   }
-
   useEffect(() => {
     getAllJobs()
   }, [])
 
-  
-  const selectedJob = apiJobs.find((job) => job.jobid === selectedJobId)
-  const filteredCandidates = selectedJob?.candidate_data ?? []
-
-
-  const takeMeToCandidatePage=(jobId:string)=>{
-    //@ts-ignore
-    jobIdRef.current=jobId;
-    state("candidate")
+  const startFakeProgress = () => {
+    setUploadProgress(1)
+    setUploadStatus("uploading")
+    progressTimer.current = setInterval(() => {
+      setUploadProgress((p) => {
+        const next = p + Math.random() * 5
+        return next < 90 ? Math.round(next) : 90
+      })
+    }, 300)
   }
-  
-  const handleEditJob = (jobId: string) => {
-    //@ts-ignore
-    cameForEdit.current=true;
-    //@ts-ignore
-    jobIdRef.current=jobId;
-    setSelectedJobId(jobId)
-    state("EditJob")
-    // setShowEditModal(true)
+  const stopFakeProgress = () => {
+    if (progressTimer.current) clearInterval(progressTimer.current)
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setSelectedFile(e.target.files[0])
-    }
-  }
-
-    const getBase64FileSize = (base64String: string): number => {
-    const padding = (base64String.match(/=+$/) || [''])[0].length
-    const sizeInBytes = (base64String.length * 3) / 4 - padding
-    return Math.round(sizeInBytes)
-  }
-
-const pdfToBase64String = (): Promise<string | null> => {
-  return new Promise((resolve, reject) => {
-    if (!selectedFile) {
-      resolve(null)
-      return
-    }
-
-    const reader = new FileReader()
-    reader.readAsDataURL(selectedFile)
-    reader.onload = () => {
-      const result = reader.result as string
-      const base64 = result.split(',')[1]
-      resolve(base64)
-    }
-    reader.onerror = (error) => {
-      reject(error)
-    }
-  })
-}
-
-const resumeUploader = async (jobId: string) => {
-  if (!jobId || !selectedFile) {
-    alert("Please select a job and a file to upload")
-    return
-  }
-
-  try {
-    const start = performance.now() 
-    const s1=performance.now();
-    const base64String = await pdfToBase64String()
-    const s2=performance.now();
-    console.log(`Time to convert PDF to base64: ${((s2 - s1) / 1000).toFixed(2)} seconds`)
-    if (!base64String) {
-      console.error("Base64 string could not be generated.")
-      return
-    }
-
-    const sizeInBytes = getBase64FileSize(base64String)
-    console.log(`Base64 PDF size: ${sizeInBytes} bytes ~ ${(sizeInBytes / 1024).toFixed(2)} KB`)
-
-    const payload = {
-      filename: selectedFile.name,
-      pdf_base64: base64String,
-      job_id: jobId,
-    }
-
-    const res = await axios.post(`${ngRokL}/cv-upload`, payload, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
+  const pdfToBase64 = (): Promise<string | null> =>
+    new Promise((resolve, reject) => {
+      if (!selectedFile) return resolve(null)
+      const reader = new FileReader()
+      reader.readAsDataURL(selectedFile)
+      reader.onload = () => resolve((reader.result as string).split(",")[1])
+      reader.onerror = (err) => reject(err)
     })
-    const end = performance.now() 
-    const duration = ((end - start) / 1000).toFixed(2)
 
-    if (res.status === 200) {
-      console.log(`Resume Uploaded for: ${jobId}`)
-      console.log(`Time taken: ${duration} seconds`)
+  const resumeUploader = async (jobId: string) => {
+    if (!jobId || !selectedFile) {
+      alert("Select job and file pehle")
+      return
     }
-  } catch (error) {
-    console.error(" Error uploading resume", error)
+    try {
+      startFakeProgress()
+      const base64 = await pdfToBase64()
+      if (!base64) throw new Error("Base64 fail")
+      const payload = {
+        filename: selectedFile.name,
+        pdf_base64: base64,
+        job_id: jobId,
+      }
+      const res = await axios.post(`${ngRokL}/cv-upload`, payload, {
+        headers: { "Content-Type": "application/json" },
+      })
+      stopFakeProgress()
+      if (res.status === 200) {
+        setUploadProgress(100)
+        setUploadStatus("success")
+      } else throw new Error("Non-200")
+    } catch (err) {
+      console.error(err)
+      stopFakeProgress()
+      setUploadProgress(100)
+      setUploadStatus("error")
+    }
   }
-}
-
-
-  const handleAddResumes = (jobId: string) => {
-    setSelectedJobId(jobId)
-    setShowResumesModal(true)
-  }
-
-  const handleViewCandidates = (jobId: string) => {
-    setSelectedJobId(jobId)
-    setShowCandidatesModal(true)
-    dispatch(viewCandidates(jobId))
-  }
-
-  const handleAddSampleQuestions = (jobId: string) => {
-    setSelectedJobId(jobId)
-    setShowQuestionsModal(true)
-  }
-
-  const handleScheduleJobMeeting = (jobId: string,can_id:string) => {
-    alert(`Scheduling meeting for job ${jobId}`)
-    // @ts-ignore
-    jobIdRef.current = jobId
-    //@ts-ignore
-    candiRef.current=can_id
-    state("scheduleMeeting")
-  }
- const handleWithMeetingLink = (ml:string) => {
-  window.location.href = `${ml}`;  
-}
 
   const handleUploadResume = () => {
     if (selectedFile && selectedJobId) {
       dispatch(addResumes({ jobId: selectedJobId, file: selectedFile.name }))
-      resumeUploader(selectedJobId)
-      setShowResumesModal(false)
-      setSelectedFile(null)
+      resumeUploader(selectedJobId).then(() => {
+        setSelectedFile(null)
+        setTimeout(() => {
+          setShowResumesModal(false)
+          setUploadProgress(0)
+          setUploadStatus("idle")
+        }, 2000)
+      })
     }
   }
 
-  const handleSaveJobEdit = (data: any) => {
-    console.log("Saving job edit:", data)
-    // TODO: dispatch edit action
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.length) setSelectedFile(e.target.files[0])
   }
 
-  const handleSaveQuestions = (data: any) => {
-    console.log("Saving questions:", data)
-    dispatch(addSampleQuestions(data))
+  const takeToCandidates = (jobId: string) => {
+    // @ts-ignore
+    jobIdRef.current = jobId
+    state("candidate")
   }
+  const handleEdit = (jobId: string) => {
+    // @ts-ignore
+    cameForEdit.current = true
+    // @ts-ignore
+    jobIdRef.current = jobId
+    setSelectedJobId(jobId)
+    state("EditJob")
+  }
+  const handleQuestions = (jobId: string) => {
+    setSelectedJobId(jobId)
+    setShowQuestionsModal(true)
+  }
+
+  const selectedJob = apiJobs.find((j) => j.jobid === selectedJobId)
 
   return (
     <Card className="w-full">
@@ -222,94 +172,82 @@ const resumeUploader = async (jobId: string) => {
               <TableRow key={job.jobid}>
                 <TableCell>{job.jobid}</TableCell>
                 <TableCell>{job.title}</TableCell>
-                <TableCell className="flex flex-wrap gap-2">
-                  <Button variant="outline" onClick={() => handleEditJob(job.jobid)}>Edit</Button>
-                  <Button variant="outline" onClick={() => handleAddResumes(job.jobid)}>Add Resumes</Button>
-                  <Button variant="outline" onClick={() => takeMeToCandidatePage(job.jobid)}>View Candidates</Button>
-                  <Button variant="outline" onClick={() => handleAddSampleQuestions(job.jobid)}>Add Sample Questions</Button>
-                  {/* <Button variant="outline" onClick={() => handleScheduleJobMeeting(job.jobid,"")}>Schedule Meeting</Button> */}
+                <TableCell className="flex gap-2 flex-wrap">
+                  <Button variant="outline" onClick={() => handleEdit(job.jobid)}>
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedJobId(job.jobid)
+                      setShowResumesModal(true)
+                      setUploadProgress(0)
+                      setUploadStatus("idle")
+                    }}
+                  >
+                    Add Resumes
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => takeToCandidates(job.jobid)}
+                  >
+                    View Candidates
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleQuestions(job.jobid)}
+                  >
+                    Add Sample Questions
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
 
-        {/* Candidates Modal */}
-        {/* Candidates Modal */}
-<Dialog open={showCandidatesModal} onOpenChange={setShowCandidatesModal}>
-  <DialogContent className="w-full max-w-3xl">
-    <DialogHeader onClose={() => setShowCandidatesModal(false)}>
-      <DialogTitle>View Candidates for Job {selectedJobId}</DialogTitle>
-    </DialogHeader>
-    {/* Scroll wrapper */}
-    <div className="overflow-x-auto max-h-[60vh] overflow-y-auto mt-4">
-      <Table className="min-w-full">
-        <TableHeader>
-          <TableRow>
-            <TableHead>Candidate_id</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Score</TableHead>
-            <TableHead>Action</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredCandidates.length > 0 ? (
-            filteredCandidates.map((candidate) => (
-              <TableRow key={candidate.email}>
-                <TableCell>{candidate.candidate_id}</TableCell>
-                <TableCell>{candidate.name}</TableCell>
-                <TableCell>{candidate.email}</TableCell>
-                <TableCell>{candidate.status}</TableCell>
-                <TableCell>{candidate.score}</TableCell>
-                <TableCell>
-                  {candidate.meeting_link?(<Button
-                    className="bg-gray-500 hover:bg-zinc-900"
-                    onClick={() => handleWithMeetingLink(candidate.meeting_link)}
-                  >
-                   Meeting Link
-                  </Button>):(<Button
-                    className="bg-gray-500 hover:bg-zinc-900"
-                    onClick={() => handleScheduleJobMeeting(selectedJobId, candidate.candidate_id)}
-                  >
-                    Schedule Meeting
-                  </Button>)}
-                </TableCell>
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              {/* Set colSpan equal to number of columns */}
-              <TableCell colSpan={6} className="text-center py-4">
-                No candidates found for this job
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </div>
-    <div className="mt-4 text-right">
-      <DialogClose asChild>
-        <Button className="hover:bg-gray-600">Close</Button>
-      </DialogClose>
-    </div>
-  </DialogContent>
-</Dialog>
-
-
         {/* Resumes Modal */}
         <Dialog open={showResumesModal} onOpenChange={setShowResumesModal}>
           <DialogContent>
             <DialogHeader onClose={() => setShowResumesModal(false)}>
-              <DialogTitle>Add Resumes</DialogTitle>
+              <DialogTitle>Upload Resume</DialogTitle>
+              <DialogClose />
             </DialogHeader>
             <div className="flex items-center gap-4 mt-4">
-              <Input type="file" accept="application/pdf" onChange={handleFileChange} className="flex-1" />
-              <Button className="bg-gray-500 hover:bg-zinc-950" onClick={handleUploadResume} disabled={!selectedFile}>
-                Upload
+              <Input
+                type="file"
+                accept="application/pdf"
+                onChange={handleFileChange}
+              />
+              <Button
+                onClick={handleUploadResume}
+                disabled={!selectedFile || uploadStatus === "uploading"}
+              >
+                {uploadStatus === "uploading" ? "Uploading..." : "Upload"}
               </Button>
             </div>
+
+            {/* Progress Bar */}
+            {uploadStatus !== "idle" && (
+              <div className="mt-4">
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div
+                    className="h-3 rounded-full transition-all duration-200 ease-linear"
+                    style={{
+                      width: `${uploadProgress}%`,
+                      background:
+                        uploadStatus === "error"
+                          ? "linear-gradient(90deg, #ef4444, #f87171)"
+                          : "linear-gradient(90deg, #4ade80, #06b6d4)",
+                    }}
+                  />
+                </div>
+                <p className="mt-2 font-medium">
+                  {uploadStatus === "uploading" && `${uploadProgress}%`}
+                  {uploadStatus === "success" && "Resume Uploaded Successfully"}
+                  {uploadStatus === "error" && "Upload Failed Try After sometimes"}
+                </p>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
 
@@ -328,7 +266,7 @@ const resumeUploader = async (jobId: string) => {
                   : undefined
               }
               onClose={() => setShowEditModal(false)}
-              onSave={handleSaveJobEdit}
+              onSave={(data) => console.log("Save edit:", data)}
             />
           </DialogContent>
         </Dialog>
@@ -338,9 +276,9 @@ const resumeUploader = async (jobId: string) => {
           <DialogContent>
             <SampleQuestionsForm
               jobId={selectedJobId}
-              initialQuestions={selectedJob?.sample_questions?.join("\n") || ""}
+              initialQuestions={selectedJob?.sample_questions.join("\n") || ""}
               onClose={() => setShowQuestionsModal(false)}
-              onSave={handleSaveQuestions}
+              onSave={(data) => dispatch(addSampleQuestions(data))}
             />
           </DialogContent>
         </Dialog>

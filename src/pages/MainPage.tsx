@@ -45,7 +45,7 @@ export default function MainPage() {
   </div>
 
   {/* Conditional Sections */}
-  {active === "newJob" && <NewJobForm jobId="" />}
+  {active === "newJob" && <NewJobForm  />}
   {active === "openJobs" && <OpenJobsTable state={setActive} />}
   {active === "scheduleMeeting" && <ScheduleMeetingForm />}
   {active === "candidate" && <CandidateView state={setActive} />}

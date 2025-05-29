@@ -8,7 +8,7 @@ import { addJob } from "../reducers/jobSlices";
 import axios from "axios";
 
 
-export default function NewJobForm(jobID:string) {
+export default function NewJobForm() {
   const dispatch = useDispatch();
   const [jobTitle, setJobTitle] = useState("");
   const [jobDesc, setJobDesc] = useState("");
@@ -66,7 +66,7 @@ export default function NewJobForm(jobID:string) {
       job_title: jobTitle,
       job_description: jobDesc,
       key_criteria: jobCriteria,
-      sample_questions: qs.join("\n"),
+      sample_questions: qs.length > 0 ? qs.join("\n") : null,
     },{
       headers: {
         "Content-Type": "application/json",
@@ -140,4 +140,3 @@ export default function NewJobForm(jobID:string) {
     </Card>
   );
 }
-//resume ->form /data -> pdf[bytes format]
