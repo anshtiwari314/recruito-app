@@ -108,7 +108,7 @@ export default function DataWrapper({
   const { CuesList, jobDescription, interviewGuide, jobTitle } = useAppSelector(
     (state) => state.cuesReducer
   );
-  const { jobId, roomId, custEmailId, agentId, isHost, meetingIsLegit } =
+  const { jobId, roomId, candid, agentId, isHost, meetingIsLegit } =
     useAppSelector((state) => state.qpReducer);
 
   const { closeCall } = useAppSelector((state) => state.nvReducer);
@@ -288,6 +288,7 @@ export default function DataWrapper({
 
     reader.onloadend = () => {
       let base64data = reader.result;
+      console.log(base64data?.split(",")[1],"[DEbugggggggggggggggg]");
       blob = null;
 
       console.log("inside send to server", data);
@@ -309,18 +310,18 @@ export default function DataWrapper({
         //agentid: agentId,
         
         roomid: "abc-123-fgh-456",
-        jobid: "1",
+        // jobid: "1",
         agentid: "1234",
-        custemailid: custEmailId,
+        // custemailid: custEmailId,
         isHost: isHost,
         name: name,
-        init: data.init,
-        speech_stop_time:data?.speech_stop_time,
+        candid:candid,
+        // init: data.init,
         audiomessage: base64data?.split(",")[1],
         timeStamp: `${date.toLocaleDateString()} ${date.toLocaleTimeString()}:${date.getMilliseconds()}`,
       };
       console.log("from inside send to server", data);
-      socket2.emit("ai_suggestion_req", data);
+      socket2.emit("ai_suggestion_req_v2", data);
     };
     reader.readAsDataURL(blob);
   }
@@ -362,7 +363,7 @@ export default function DataWrapper({
         roomid: "abc-123-fgh-456",
         jobid: "1",
         agentid: "1234",
-        custemailid: custEmailId,
+        // custemailid: custEmailId,
         isHost: isHost,
         name: name,
         init: data.init,
@@ -805,7 +806,7 @@ export default function DataWrapper({
       chunkFormData.append('agentid', agentId);
       chunkFormData.append('ishost', isHost);
       chunkFormData.append('jobid', jobId);
-      chunkFormData.append('custemailid', custEmailId);
+      // chunkFormData.append('custemailid', custEmailId);
       chunkFormData.append('name', name);
       chunkFormData.append("totalChunks", `${totalChunks}`);
 
@@ -1046,7 +1047,7 @@ export default function DataWrapper({
     if (
       socket2 === null ||
       myId === "" ||
-      custEmailId === "" ||
+      // custEmailId === "" ||
       meetingIsLegit === false
     )
       return;
@@ -1107,7 +1108,7 @@ export default function DataWrapper({
       socket2.off("live_transcriptions_res", handleLiveTranscriptions);
       socket2.off("questions_loader_res", handleJobDetails);
     };
-  }, [myId, custEmailId, socket2, meetingIsLegit]);
+  }, [myId, socket2, meetingIsLegit]);
 
   useEffect(() => {
     if (socket2 === null) return;
@@ -1224,7 +1225,7 @@ export default function DataWrapper({
     if (
       myId === "" ||
       roomId === "" ||
-      custEmailId === "" ||
+      // custEmailId === "" ||
       name === "" ||
       audioPeer === null ||
       agentId === "" ||
@@ -1242,7 +1243,7 @@ export default function DataWrapper({
 
     tempObj.isLoading = false;
     tempObj.roomId = roomId;
-    tempObj.custEmailId = custEmailId;
+    // tempObj.custEmailId = custEmailId;
     tempObj.agentId = agentId;
     tempObj.name = name;
     tempObj.audioPeerId = audioPeer.id;
@@ -1297,7 +1298,7 @@ export default function DataWrapper({
         audioStreamRef.current = null;
       }
     };
-  }, [myId, roomId, custEmailId, agentId, name, audioPeer, meetingIsLegit]);
+  }, [myId, roomId, agentId, name, audioPeer, meetingIsLegit]);
 
   /* ========================================================================= */
   /* ========================================================================= */
@@ -1702,7 +1703,7 @@ export default function DataWrapper({
           roomid: "abc-123-fgh-456",
           jobid: "1",
           agentid: "1234",
-          custemailid: custEmailId,
+          // custemailid: custEmailId,
           name: name,
         };
         // let liveQnaReqPayload= {
@@ -1745,17 +1746,13 @@ export default function DataWrapper({
     )
       return;
     let questionsApiReqPayload = {
-      // jobid:jobId,
-      // roomid : roomId,
-      //agentid:agentId,
-      roomid: "abc-123-fgh-456",
-      jobid: "1",
-      agentid: "1234",
-      custemailid: custEmailId,
+      roomid:roomId,
+      agentid: agentId,
+      candid:candid,
       name: name,
     };
-    console.log("before emiiting questions_loader_req", socket2.connected);
-    socket2.emit("questions_loader_req", questionsApiReqPayload);
+    console.log("before emiiting questions_loader_req", socket2.connected,"Payload i am sending ",questionsApiReqPayload);
+    socket2.emit("questions_loader_req_v2", questionsApiReqPayload);
   }, [socket2, myStream, myId, isHost]);
   /* ========================================================================= */
   /* ========================================================================= */

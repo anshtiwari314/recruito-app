@@ -107,71 +107,50 @@ export default function ContentPanelMain() {
     if (transcriptionRef.current) {
       transcriptionRef.current.scrollTop = transcriptionRef.current.scrollHeight;
     }
-  }, [transcriptions]); // Runs when transcriptions update
+  }, [transcriptions]);
 
   return (
-    <div className={`${!isExpanded ? "flex justify-between" : "flex flex-col"}`} 
-    style={{flex:0.75,maxHeight:'75%'}}
-    
+    <div
+      className={`flex gap-6 mb-4 ${
+        isExpanded ? "flex-col h-[60vh]" : "flex-row h-[50vh]"
+      }`}
     >
+    
       <div
-        id="transcription"
-        ref={transcriptionRef}
-        style={{overflowY:'hidden',height:'100%',padding:'0 0.8rem'}}
-        className={`${!isExpanded ? "flex-grow-0 flex-shrink-0 w-1/4 min-h-96 max-h-lvh mr-6" : "max-h-96 w-full"} mb-6 bg-white rounded-lg shadow-sm border-2 border-zinc-500 `}
+        className={`flex flex-col bg-white rounded-lg shadow-sm border-2 border-zinc-500 ${
+          isExpanded ? "h-[55%] w-full" : "w-[26%] h-full"
+        }`}
       >
-        {/* Header of transcription section */}
-        <div className="flex items-center justify-between mb-4" style={{height:'10%'}}>
-          <h2 className="text-lg font-semibold text-neutral-900">
-            Live Transcription
-          </h2>
-          <button 
+        <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-300">
+          <h2 className="text-lg font-semibold text-neutral-900">Live Transcription</h2>
+          <button
             className="text-sm text-neutral-600 hover:text-neutral-700"
             onClick={toggleExpand}
           >
-            <i className={`fa-solid fa-${isExpanded ? "compress" : "expand"} mr-1`}></i>{isExpanded ? "Collapse" : "Expand"}
+            <i className={`fa-solid fa-${isExpanded ? "compress" : "expand"} mr-1`}></i>
+            {isExpanded ? "Collapse" : "Expand"}
           </button>
         </div>
-
-        {/* Details of transcripts to be fetched from API server ; for loop */}
-        <div className="space-y-8 flex-1" style={{overflowY:'scroll',height:'85%'}}>
+        <div
+          ref={transcriptionRef}
+          className="flex-1 overflow-y-auto px-3 py-2 space-y-9"
+        >
           {transcriptions.map((transcription, i) => (
             <SingleTranscription data={transcription} key={i} />
           ))}
-
-          {/* <div className="flex space-x-3">
-            <img
-              src="https://api.dicebear.com/7.x/notionists/svg?scale=200&amp;seed=VA"
-              className="w-8 h-8 rounded-full"
-            />
-            <div>
-              <div className="flex items-center">
-                <span className="text-base font-bold text-neutral-900">Varun</span>
-                <span className="text-sm text-neutral-500 ml-2">08:32 PM</span>
-              </div>
-              <p className="text-neutral-700 text-sm">
-                I have worked on multiple EDI projects involving X12 and EDIFACT
-                standards...
-              </p>
-            </div>
-          </div> */}
         </div>
       </div>
 
-      {/* AI Suggestions section */}
+    
       <div
-        id="ai-suggestions"
-        style={{overflowY:'hidden',height:'100%',padding:'0 0.8rem'}}
-        className={`${!isExpanded ? "flex-grow-0 w-3/4 min-h-96 max-h-lvh" : "w-full max-h-96"} mb-6 bg-white rounded-lg shadow-sm border-2 border-zinc-500 overflow-y-auto`}
+        className={`flex flex-col bg-white rounded-lg shadow-sm border-2 border-zinc-500 ${
+          isExpanded ? "h-[42%] w-full" : "w-[80%] h-full"
+        }`}
       >
-        {/* AI Suggestions section header */}
-        <div className="flex items-center justify-between mb-4" style={{height:'10%'}}>
-        <h3 className="text-lg font-semibold text-neutral-900" >
-          AI Suggestions
-        </h3>
+        <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-300">
+          <h3 className="text-lg font-semibold text-neutral-900">AI Suggestions</h3>
         </div>
-        <div className="space-y-3" style={{overflowY:'scroll',height:'85%'}}>
-          {/* Details of each suggestion to be fetched from API server ; for loop */}
+        <div className="flex-1 overflow-y-auto px-3 py-2 space-y-3">
           {currentCues &&
             currentCues.map((question: CuesDataType, index: number) => (
               <SingleCue
@@ -185,4 +164,6 @@ export default function ContentPanelMain() {
     </div>
   );
 }
+
+
 

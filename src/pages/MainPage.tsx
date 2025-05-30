@@ -21,36 +21,21 @@ export default function MainPage() {
 
   const dispatch = useDispatch();
   const [meetingIsLegitMain, setMeetingIsLegitMain] = useState<boolean>(true);
-
   const { link } = useParams();
-  // const [searchParams,setSearchParams] = useSearchParams()
   const [isMobile, setIsMobile] = useState(false);
-  const [tempIsHost, settempIsHost] = useState<boolean | null>(null);
+  const [tempIsHost, setTempIsHost] = useState<boolean | null>(null);
 
+  // Handle viewport resizing
   useEffect(() => {
-    function Resizing() {
-      // Use window.innerWidth to get the current viewport width
-      if (window.innerWidth < 800) {
-        setIsMobile(true);
-      } else {
-        setIsMobile(false);
-      }
+    function handleResize() {
+      setIsMobile(window.innerWidth < 800);
     }
-
-    // Initial check
-    Resizing();
-
-    // Add event listener for window resizing
-    window.addEventListener("resize", Resizing);
-
-    // Cleanup function to remove the event listener when the component unmounts
-    return () => {
-      window.removeEventListener("resize", Resizing);
-    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
-    let params = new URL(window.location.href).searchParams;
     let isMounted = true;
 
     if (sessionStorage.getItem("exitdone") !== null) {
@@ -58,131 +43,120 @@ export default function MainPage() {
       return;
     }
 
-    if (
-      !params.get("room_id")?.trim() ||
-      !params.get("cust_email_id")?.trim() ||
-      !params.get("agent_id")?.trim() ||
-      !params.get("job_id")?.trim()
-    ) {
+    const query = window.location.search.slice(1);
+    const parts = query.split("&");
+    const roomParam = parts[0] || "";
+    const candidParam = parts[1] || "";
+
+    // Validate presence
+    if (!roomParam.trim() || !candidParam.trim()) {
       setMeetingIsLegitMain(false);
-    } else {
-      // Determine if the user is the host based on api calls by first fetching name of user and then authenticating password
-      let myName: string = "";
-      myName = sessionStorage.getItem("userName") ?? "";
+      return;
+    }
 
-      // Check if the user's name is already stored in sessionStorage
-      if (myName.length > 2) {
-        // If the name is found, set it using setName function
-        setName(myName);
-      } else {
-        // If the name is not found, prompt the user to enter their name
-        while (myName.length < 2) {
-          myName = prompt("Please enter your name") ?? "";
+    // Store in local state if needed
+    // e.g., setRoomId(roomParam); setCandid(candidParam);
 
-          // Alert the user if the entered name is less than 2 characters long
-          if (myName.length < 2) alert("Name must have 2 letters long");
-        }
-        // Set the entered name using setName function
-        setName(myName);
-        // Store the entered name in sessionStorage
-        sessionStorage.setItem("userName", myName);
+    // Get or prompt user name
+    let myName = sessionStorage.getItem("userName") ?? "";
+    if (myName.length < 2) {
+      while (myName.length < 2) {
+        myName = prompt("Please enter your name") ?? "";
+        if (myName.length < 2) alert("Name must be at least 2 characters");
       }
+      sessionStorage.setItem("userName", myName);
+    }
+    setName(myName);
 
-      const checkLogin = async () => {
-        // ✅ Step 1. Make a post api call here to check if user is present in server database -
-        try {
-          const response = await fetch(
-            "https://qhpv9mvz1h.execute-api.ap-south-1.amazonaws.com/prod/check-jarvis-login",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ client: "recruito", userid: myName }),
-            }
-          );
-
-          const data = await response.json();
-          // ✅ Step 2: If the user exists, check the password
-          if (data.result === true) {
-            let password = prompt("Please provide the password") ?? "";
-            const passwordResponse = await fetch(
-              "https://qhpv9mvz1h.execute-api.ap-south-1.amazonaws.com/prod/check-jarvis-login",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  client: "recruito",
-                  userid: myName,
-                  password,
-                }),
-              }
-            );
-
-            const passwordData = await passwordResponse.json();
-
-            return { isAuthenticated: passwordData.result === true };
-          } else {
-            return { isAuthenticated: false };
+    // Authentication flow
+    const checkLogin = async () => {
+      try {
+        const res1 = await fetch(
+          "https://qhpv9mvz1h.execute-api.ap-south-1.amazonaws.com/prod/check-jarvis-login",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ client: "recruito", userid: myName }),
           }
-        } catch (error) {
-          console.error("Error:", error);
-          return { isAuthenticated: false };
-        }
-      };
+        );
+        const data1 = await res1.json();
+        if (!data1.result) return { isAuthenticated: false };
 
-      // Call async checkLogin function here
-      const checkLoginData = async () => {
-        const loginResult = await checkLogin(); // Wait for checkLogin to complete
-        if (isMounted) {
-          settempIsHost(loginResult?.isAuthenticated ?? false);
-          const qParams: QPState = {
-            roomId: params.get("room_id") ?? "",
-            jobId: params.get("job_id") ?? "",
-            custEmailId: params.get("cust_email_id") ?? "",
-            agentId: params.get("agent_id") ?? "",
-            isHost: loginResult?.isAuthenticated ?? false,
-            name: sessionStorage.getItem("userName") ?? "",
-            meetingIsLegit: true,
-          };
-          // Set the query params state for this meeting
-          dispatch(setQP(qParams));
-          
-          // Set the myId state variable to the temporary ID
-          setMyId(uuidv4());
-        }
-      };
-
-      checkLoginData();
-    }
-
-    return () => {
-      isMounted = false; // Cleanup to prevent memory leaks
-    };
-  }, []);
-
-  /* Executes beforeunload */
-  useEffect(() => {
-    function executeBeforeTabClose(e: BeforeUnloadEvent) {
-      e.preventDefault();
-      // Some browsers require returnValue, even though it's deprecated
-      if ("returnValue" in e) {
-        e.returnValue = ""; // Still required for confirmation dialog
+        const password = prompt("Please provide the password") ?? "";
+        sessionStorage.setItem("userPassword", password);
+        const res2 = await fetch(
+          "https://qhpv9mvz1h.execute-api.ap-south-1.amazonaws.com/prod/check-jarvis-login",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ client: "recruito", userid: myName, password }),
+          }
+        );
+        const data2 = await res2.json();
+        return { isAuthenticated: data2.result === true };
+      } catch (err) {
+        console.error(err);
+        return { isAuthenticated: false };
       }
-      return ""; // Some TypeScript versions require an explicit return
-    }
+    };
 
-    window.addEventListener("beforeunload", executeBeforeTabClose);
+    const initialize = async () => {
+      const login = await checkLogin();
+      if (!isMounted) return;
+      setTempIsHost(login.isAuthenticated);
+
+      // Fetch agent ID
+      let agentId = "";
+      try {
+        const agentRes = await fetch(
+          "https://wpv7kxos9g.execute-api.ap-south-1.amazonaws.com/test/recruito-upload-apis/main_router",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              trigger_func: "get_agent_id",
+              params: { user_name: myName, password: sessionStorage.getItem("userPassword") ?? "" },
+            }),
+          }
+        );
+        const agentData = await agentRes.json();
+        if (agentData.agentid) {
+          agentId = agentData.agentid;
+          sessionStorage.setItem("agent_id", agentId);
+        }
+      } catch (err) {
+        console.error("Failed to fetch agent id:", err);
+      }
+
+      // Dispatch query params
+      const qParams: QPState = {
+        roomId: roomParam,
+        candid: candidParam,
+        agentId,
+        isHost: login.isAuthenticated,
+        name: myName,
+        meetingIsLegit: true,
+      };
+      dispatch(setQP(qParams));
+      setMyId(uuidv4());
+    };
+
+    initialize();
 
     return () => {
-      window.removeEventListener("beforeunload", executeBeforeTabClose);
+      isMounted = false;
     };
   }, []);
 
-    //http://localhost:5173/?room_id=abc-123-fgh-456&cust_email_id=saurabhahlawat89@gmail.com&agent_id=1234&job_id=1
-  
+  // Warn on tab close
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
 
   return (
     <>
@@ -192,27 +166,12 @@ export default function MainPage() {
         closeCall ? (
           <Leave />
         ) : (
-          <div className="overflow-y-auto w-screen min-h-screen relative bg-neutral-50" style={{height:'100vh',width:'100vw',overflow:'hidden'}}>
-            {/* App header */}
-            
-            <MeetingPageHeader/>
-
-            {/* Main Content */}
-            <main id="main-content" className="flex h-[calc(100vh-120px)]" 
-            style={{height:'90vh'}}
-            >
-              {/* Content Panel */}
-              <div
-                id="content-panel"
-                className="relative grow w-10/12 p-6 overflow-y-hidden"
-                //style={{border:'0.1rem solid red'}}
-              >
-                
+          <div className="overflow-y-auto w-screen min-h-screen relative bg-neutral-50" style={{ height: '100vh', width: '100vw' }}>
+            <MeetingPageHeader />
+            <main id="main-content" className="flex h-[calc(100vh-120px)]">
+              <div id="content-panel" className="relative grow w-10/12 p-6 overflow-y-hidden">
                 <ContentPanel isMobile={isMobile} />
-                {/**/}
               </div>
-
-              {/* Right Panel */}
               <RightPanel />
             </main>
           </div>
@@ -223,5 +182,3 @@ export default function MainPage() {
     </>
   );
 }
-
-

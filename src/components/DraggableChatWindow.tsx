@@ -4,12 +4,16 @@ import { useAppSelector } from "@/store/store";
 import { v4 as uuidv4 } from "uuid";
 import { addChat } from "../reducers/chatReducer";
 import { useDispatch } from "react-redux";
+import { getTimeStamp } from "../functions/generalFn";
+
 
 
 const DraggableChatWindow = () => {
   const [position, setPosition] = useState({ x: 100, y: 100 });
   const [isDragging, setIsDragging] = useState(false);
-  const {chatToggle,setChatToggle,socket,name} = useData()
+  // const {chatToggle,setChatToggle,socket,name} = useData()
+   const {chatToggle,setChatToggle,socket,socket2,name} = useData()
+  const {candid,isHost} = useAppSelector(state=>state.qpReducer)
   const isUserScrolling = useRef(false);
   const dispatch = useDispatch();
  
@@ -39,7 +43,7 @@ const DraggableChatWindow = () => {
   };
 
   const handleSendMessage = () => {
-    if(socket===null || msg ==='')
+    if(socket===null ||socket2===null|| msg ==='')
       return ;
 
     let tempMsg= {
@@ -49,8 +53,16 @@ const DraggableChatWindow = () => {
       isOutgoing:true,
       msg
     }
+    let tempOb={
+      msg,
+      type:isHost?'recruiter':'candidate',
+      username:name,
+      timestamp:getTimeStamp(),
+      candid
+    }
 
     socket.emit('send-msg',tempMsg)
+     socket2.emit('chatmessage_req',tempOb)
     dispatch(addChat(tempMsg))
     setMsg('')
   };
@@ -88,6 +100,12 @@ const DraggableChatWindow = () => {
       
   //   }
   // }, [chats]);
+  const handleKeyPress=(event)=>{
+    if(event.key==='Enter')
+    {
+      handleSendMessage();
+    }
+  }
 
   if(chatToggle)
   return (
@@ -150,6 +168,7 @@ const DraggableChatWindow = () => {
           placeholder="Type a message..."
           value={msg}
           onChange={(e) => setMsg(e.target.value)}
+          onKeyDown={handleKeyPress}
         />
         <button
           onClick={handleSendMessage}

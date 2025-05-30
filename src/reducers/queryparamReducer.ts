@@ -2,8 +2,9 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 type QPState = {
   roomId: string,
-  jobId: string,
-  custEmailId: string,
+  // jobId: string,
+  // custEmailId: string,
+  candid:string,
   agentId: string,
   name:string
   isHost: boolean,
@@ -12,8 +13,9 @@ type QPState = {
 
 const initialQPState = {
   roomId: "",
-  jobId: "",
-  custEmailId: "",
+  candid:"",
+  // jobId: "",
+  // custEmailId: "",
   agentId: "",
   name:"",
   isHost: false,
