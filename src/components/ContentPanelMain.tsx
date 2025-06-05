@@ -112,7 +112,7 @@ export default function ContentPanelMain() {
   return (
     <div
       className={`flex gap-6 mb-4 ${
-        isExpanded ? "flex-col h-[60vh]" : "flex-row h-[50vh]"
+        isExpanded ? "flex-col h-[60vh]" : "flex-row h-[60vh]"
       }`}
     >
     

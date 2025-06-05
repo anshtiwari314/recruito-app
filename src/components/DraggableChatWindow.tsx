@@ -1,185 +1,266 @@
-import React, { useState,useEffect, useRef } from "react";
-import { useData } from "@/context/DataWrapper";
-import { useAppSelector } from "@/store/store";
-import { v4 as uuidv4 } from "uuid";
-import { addChat } from "../reducers/chatReducer";
-import { useDispatch } from "react-redux";
-import { getTimeStamp } from "../functions/generalFn";
+import { useState, useEffect, useRef } from "react"
+import { useData } from "@/context/DataWrapper"
+import { useAppSelector } from "@/store/store"
+import { v4 as uuidv4 } from "uuid"
+import { addChat } from "@/reducers/chatReducer"
+import { useDispatch } from "react-redux"
+import { getTimeStamp,getTimeStampInIndian } from "@/functions/generalFn"
+import { FaTimes, FaPaperPlane, FaCopy, FaCheck } from "react-icons/fa"
+
 
 
 
 const DraggableChatWindow = () => {
-  const [position, setPosition] = useState({ x: 100, y: 100 });
-  const [isDragging, setIsDragging] = useState(false);
-  // const {chatToggle,setChatToggle,socket,name} = useData()
-   const {chatToggle,setChatToggle,socket,socket2,name} = useData()
-  const {candid,isHost} = useAppSelector(state=>state.qpReducer)
-  const isUserScrolling = useRef(false);
-  const dispatch = useDispatch();
- 
-  const [msg, setMsg] = useState("");
-  const chatDivRef = useRef(null)
-  
 
-  const [chats] = useAppSelector(state => [state.chatReducer]);
-  const chatWindowRef = useRef(null);
+  const [position, setPosition] = useState({ x: 100, y: 100 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [copiedId, setCopiedId] = useState(null)
+  const { chatToggle, setChatToggle, setUnreadCount, socket, socket2, name } = useData()
+  const { candid, isHost } = useAppSelector((state) => state.qpReducer)
+  const isUserScrolling = useRef(false)
+  const dispatch = useDispatch()
+  const [msg, setMsg] = useState("")
+  const chatDivRef = useRef(null)
+  const [chats] = useAppSelector((state) => [state.chatReducer])
+  const chatWindowRef = useRef(null)
+  
+ //code checker logic
+  const isCodeMessage = (message) => {
+    const codePatterns = [
+      /^```[\s\S]*```$/m, 
+      /^\s*[{}[\]();,]\s*$/m, 
+      /^\s*(function|const|let|var|if|else|for|while|return|import|export|class)\s+/m, 
+      /^\s*\/\/.*$/m, 
+      /^\s*\/\*[\s\S]*?\*\/\s*$/m, 
+      /^[^a-zA-Z]*[{}[\]();]+[^a-zA-Z]*$/m,
+    ]
+
+    let codeScore = 0
+
+    if (/[{}]/.test(message) && /[;]/.test(message)) codeScore += 2
+    if (/^\s{2,}/m.test(message)) codeScore += 1
+    if (/\b(function|const|let|var|if|else|for|while|return)\b/.test(message)) codeScore += 2
+    if (/\/\/|\/\*|\*\//.test(message)) codeScore += 2 
+    if (/=>|===|!==|\+\+|--/.test(message)) codeScore += 1
+    if (/console\.(log|error|warn)/.test(message)) codeScore += 2
+    if (/<\/?[a-z][^>]*>/i.test(message)) codeScore += 1
+
+    const lines = message.split("\n")
+    if (lines.length > 2 && lines.filter((line) => /^\s+/.test(line)).length > 1) codeScore += 1
+
+    return codeScore >= 3 || codePatterns.some((pattern) => pattern.test(message))
+  }
 
   const handleMouseDown = (e) => {
-    setIsDragging(true);
-    chatWindowRef.current.startX = e.clientX - position.x;
-    chatWindowRef.current.startY = e.clientY - position.y;
-  };
+    setIsDragging(true)
+    chatWindowRef.current.startX = e.clientX - position.x
+    chatWindowRef.current.startY = e.clientY - position.y
+  }
 
   const handleMouseMove = (e) => {
-    if (!isDragging) return;
+    if (!isDragging) return
     setPosition({
       x: e.clientX - chatWindowRef.current.startX,
       y: e.clientY - chatWindowRef.current.startY,
-    });
-  };
+    })
+  }
 
   const handleMouseUp = () => {
-    setIsDragging(false);
-  };
+    setIsDragging(false)
+  }
 
   const handleSendMessage = () => {
-    if(socket===null ||socket2===null|| msg ==='')
-      return ;
+    if (socket === null || socket2 === null || msg === "") return
 
-    let tempMsg= {
-      id:uuidv4(),
+    const tempMsg = {
+      id: uuidv4(),
       name,
-      timeStamp:new Date().toLocaleTimeString(),
-      isOutgoing:true,
-      msg
-    }
-    let tempOb={
+      timeStamp: new Date().toLocaleTimeString(),
+      isOutgoing: true,
       msg,
-      type:isHost?'recruiter':'candidate',
-      username:name,
-      timestamp:getTimeStamp(),
-      candid
     }
 
-    socket.emit('send-msg',tempMsg)
-     socket2.emit('chatmessage_req',tempOb)
+    const tempOb = {
+      msg,
+      type: isHost ? "recruiter" : "candidate",
+      username: name,
+      timestamp: getTimeStampInIndian(),
+      candid,
+    }
+    console.log(tempOb,"to backend socket");
+
+    socket.emit("send-msg", tempMsg)
+    socket2.emit("chatmessage_req", tempOb)
     dispatch(addChat(tempMsg))
-    setMsg('')
-  };
+    setMsg("")
+  }
 
-  const handleScroll = () => {
-    const chatDiv = chatDivRef.current;
-    if (chatDiv) {
-      // Check if the user is scrolling (not at the bottom)
-      //const isAtBottom = chatDiv.scrollHeight - chatDiv.scrollTop - chatDiv.clientHeight < 5 * 16; // 5rem in pixels (assuming 1rem = 16px)
-      //isUserScrolling.current = !isAtBottom;
-      isUserScrolling.current = false
-    }
-  };
-
-  useEffect(() => {
-    const chatDiv = chatDivRef.current;
-    if (chatDiv) {
-      chatDiv.addEventListener('scroll', handleScroll);
-    }
-    return () => {
-      if (chatDiv) {
-        chatDiv.removeEventListener('scroll', handleScroll);
-      }
-    };
-  }, []);
-
-
-  // useEffect(() => {
-  //   if (chatDivRef.current) {
-  //     //console.log('transcriptions inside content panel is changed')
-  //     if (!isUserScrolling.current) {
-  //       chatDivRef.current.scrollTop = chatDivRef.current.scrollHeight;
-  //     }  
-      
-      
-  //   }
-  // }, [chats]);
-  const handleKeyPress=(event)=>{
-    if(event.key==='Enter')
-    {
-      handleSendMessage();
+  const handleCopy = async (text, id) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedId(id)
+      setTimeout(() => setCopiedId(null), 2000)
+    } catch (err) {
+      console.error("Failed to copy text: ", err)
     }
   }
 
-  if(chatToggle)
+  const handleScroll = () => {
+    const chatDiv = chatDivRef.current
+    if (chatDiv) {
+      const isAtBottom = chatDiv.scrollHeight - chatDiv.scrollTop - chatDiv.clientHeight < 20
+      isUserScrolling.current = !isAtBottom
+    }
+  }
+
+  useEffect(() => {
+    const chatDiv = chatDivRef.current
+    if (chatDiv) {
+      chatDiv.addEventListener("scroll", handleScroll)
+    }
+    return () => {
+      if (chatDiv) {
+        chatDiv.removeEventListener("scroll", handleScroll)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (chatDivRef.current && !isUserScrolling.current) {
+      chatDivRef.current.scrollTop = chatDivRef.current.scrollHeight
+    }
+  }, [chats])
+
+  const handleToCloseChatBar = () => {
+    setChatToggle(false)
+    setUnreadCount(0)
+  }
+
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault()
+      handleSendMessage()
+    }
+  }
+
+  if (!chatToggle) return null
+
   return (
     <div
       ref={chatWindowRef}
-      className="fixed bg-white border border-gray-300 rounded-lg shadow-lg w-fit h-[60vh] flex flex-col z-10"
+      className="fixed bg-white border border-gray-600 rounded-xl shadow-2xl w-[420px] h-[580px] flex flex-col z-50"
       style={{ top: position.y, left: position.x }}
-      
-    // onMouseUp={handleMouseUp}
     >
-        
       {/* Header */}
       <div
-        className="bg-gray-500 text-white font-bold px-4 py-2 cursor-move rounded-t-lg flex justify-between"
-        onMouseMove={handleMouseMove}
+        className="bg-zinc-900 border-b border-gray-100 px-4 py-3 cursor-move rounded-t-xl flex justify-between items-center"
         onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
       >
-        <div>
-        Chat Window
+        <div className="flex items-center space-x-2">
+          <div className="h-2 w-2 bg-green-500 rounded-full"></div>
+          <span className="text-m font-bold text-white">Chat Window</span>
         </div>
-        <div style={{cursor:'pointer'}} onClick={()=>setChatToggle(false)}>
-        <i className="fa-solid fa-xmark text-black-500 fa-lg"></i>
-        </div>
-        
-      </div>
-
-      {/* Messages Section */}
-      <div className="flex-1 p-3 overflow-y-auto space-y-3 bg-gray-100" ref={chatDivRef}>
-        {chats.map((chat, index) => (
-          <div
-            key={index}
-           // className={`px-4 py-2 rounded-lg`}
-            style={{display:'flex',flexDirection:'column',width:'100%'}}
-          >
-            <div style={{textAlign:chat.isOutgoing?'right':'left',fontSize:'0.8rem'}}>{chat.name}</div>
-            <div 
-                style={{
-                    alignItems:'center',
-                    justifyContent:'center',
-                    width:'75%',
-                    //border:'0.1rem solid red'
-                    }}
-                className={`px-4 py-2 rounded-lg ${chat.isOutgoing 
-                ? "bg-gray-500 text-white self-end"
-                : "bg-gray-300 text-black self-start"}`}    >
-            {chat.msg}
-            
-            </div>    
-            <div style={{textAlign:chat.isOutgoing?'right':'left',fontSize:'0.8rem'}}>{chat.timeStamp}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Input Bar */}
-      <div className="flex items-center py-3 px-2 bg-gray-200 border-t border-gray-300">
-        <input
-          type="text"
-          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none"
-          placeholder="Type a message..."
-          value={msg}
-          onChange={(e) => setMsg(e.target.value)}
-          onKeyDown={handleKeyPress}
-        />
         <button
-          onClick={handleSendMessage}
-          className="ml-1 bg-gray-500 text-white px-4 py-2 rounded-lg"
+          onClick={handleToCloseChatBar}
+          className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+          aria-label="Close chat"
         >
-          Send
+          <FaTimes size={16} />
         </button>
       </div>
-    </div>
-  );
-  else return null 
-};
 
-export default DraggableChatWindow;
+
+      <div ref={chatDivRef} className="flex-1 p-4 overflow-y-auto" onScroll={handleScroll}>
+        <div className="space-y-3">
+          {chats.map((chat, index) => {
+            const isCode = isCodeMessage(chat.msg)
+            const messageId = `${chat.id || index}-${chat.timeStamp}`
+
+            return (
+              <div key={index} className="flex flex-col">
+               
+                <div
+                  className={`text-s font-medium mb-1 ${chat.isOutgoing ? "text-right text-gray-600" : "text-left text-gray-600"}`}
+                >
+                  {chat.name}
+                </div>
+
+                {/* Message bubble */}
+                <div className={`flex ${chat.isOutgoing ? "justify-end" : "justify-start"}`}>
+                  <div
+                    className={`px-3 py-2 rounded-2xl max-w-[85%] ${
+                      chat.isOutgoing ? "bg-zinc-500 text-white" : "bg-gray-100 text-gray-800"
+                    }`}
+                  >
+                    {isCode ? (
+                      <div className="relative group">
+                        <pre className="text-xs font-mono whitespace-pre-wrap overflow-x-auto bg-gray-900 text-gray-400 p-3 rounded-lg border">
+                          <code>{chat.msg}</code>
+                        </pre>
+                        <button
+                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-800 rounded"
+                          onClick={() => handleCopy(chat.msg, messageId)}
+                          title="Copy code"
+                        >
+                          {copiedId === messageId ? (
+                            <FaCheck size={12} className="text-green-400" />
+                          ) : (
+                            <FaCopy size={12} className="text-gray-400" />
+                          )}
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-sm whitespace-pre-wrap leading-relaxed">{chat.msg}</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className={`text-xs mt-1 text-gray-400 ${chat.isOutgoing ? "text-right" : "text-left"}`}>
+                  {chat.timeStamp}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+   
+      <div className="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl">
+        <div className="text-xs text-gray-500 mb-2">Press Enter to send • Shift + Enter for new line</div>
+        <div className="flex items-end space-x-2">
+          <textarea
+            className="flex-1 px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none min-h-[40px] max-h-[100px] text-sm"
+            placeholder="Type your message..."
+            value={msg}
+            onChange={(e) => setMsg(e.target.value)}
+            onKeyDown={handleKeyPress}
+            rows={1}
+            style={{
+              height: "auto",
+              minHeight: "40px",
+              maxHeight: "100px",
+              overflowY: msg.split("\n").length > 3 ? "scroll" : "hidden",
+            }}
+            onInput={(e) => {
+              e.target.style.height = "auto"
+              e.target.style.height = Math.min(e.target.scrollHeight, 100) + "px"
+            }}
+          />
+          <button
+            onClick={handleSendMessage}
+            className={`p-2 rounded-xl transition-colors ${
+              msg.trim() ? "bg-gray-500 hover:bg-gray-600 text-white" : "bg-gray-200 text-gray-400 cursor-not-allowed"
+            }`}
+            disabled={!msg.trim()}
+          >
+            <FaPaperPlane size={16} />
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default DraggableChatWindow

@@ -60,6 +60,12 @@ type users = {
   isScreenSharingEnabled: boolean;
   containsScreenStream: boolean;
 };
+type Title = { key: string; value: string };
+type Resource = { key: string; value: string };
+type InterviewMeta = {
+  title: Title;
+  resources: Resource[];
+};
 
 export default function DataWrapper({
   children,
@@ -144,6 +150,8 @@ export default function DataWrapper({
   const audioPeersArrRef = useRef<string[]>([]);
   const [screenRecording,setScreenRecording] = useState(false)
   const [audioRecording,setaudioRecording] = useState(false)
+  const [unreadCount,setUnreadCount]=useState<number>(0);
+  // const [chatToggle,setChatToggle]=useState<boolean>(false)
 
   const globalRef = useRef({
     recordingStatus: false,
@@ -166,7 +174,10 @@ export default function DataWrapper({
   const [msg, setMsg] = useState([]);
   const [cueLoading, setCueLoading] = useState(false);
   const msgArrRef = useRef([]);
-
+  const interviewMetaRef = useRef<InterviewMeta>({
+    title: null,
+    resources: [],
+  });
   const [name, setName] = useState("");
   const [cameraToggle, setCameraToggle] = useState(false);
   const [microphoneToggle, setMicroPhoneToggle] = useState(true);
@@ -1069,8 +1080,13 @@ export default function DataWrapper({
     }
 
     function handleJobDetails(data: any) {
-      console.log("handle job details", data);
+      console.log("[Debug]handle job details", data);
       let filteredCues = data?.preloadedQuestions;
+        
+        interviewMetaRef.current.title = data?.title ?? null;
+       
+        interviewMetaRef.current.resources = data?.resources ?? [];
+        console.log(interviewMetaRef,"------[Debug]")
       if (!filteredCues) {
         filteredCues = [];
       }
@@ -2057,7 +2073,11 @@ export default function DataWrapper({
       //msgArrRef.current = [...msgArrRef.current, data];
       //setMsg((prev) => [...msgArrRef.current]);
       
-      dispatch(addChat(data))
+      dispatch(addChat(data));
+      if(chatToggle===false)
+      {
+        setUnreadCount((cnt)=>cnt+1)
+      }
     }
 
     /* 10.1.12. socket.on("cue-loading-receiver") event handler */
@@ -2940,7 +2960,7 @@ export default function DataWrapper({
     stopVideoRecording,
     startRecordingScreen,
     screenRecording,
-    setScreenRecording,ngrokServerUrl,setNgrokServerUrl
+    setScreenRecording,ngrokServerUrl,setNgrokServerUrl,interviewMetaRef,unreadCount,setUnreadCount
   };
 
   return (
@@ -2948,4 +2968,3 @@ export default function DataWrapper({
     <Context.Provider value={values}>{children}</Context.Provider>
   );
 }
-

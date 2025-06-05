@@ -1,92 +1,131 @@
-import React,{useRef,useEffect} from "react"
+import React, { useRef, useEffect } from "react";
 
-export function RightPanelVideo({e,muted}:{e:any,muted:boolean}) {
-    console.log(e)
+// Helper: Initial se ek color generate karne wala simple function
+function getColorFromInitial(initial: string) {
 
-    const vidRef = useRef<any>(null)
+  const colors: Record<string, string> = {
+    A: "#E27D60", B: "#85DCB", C: "#E8A87C", D: "#C38D9E", E: "#41B3A3",
+    F: "#6B5B95", G: "#F7CAC9", H: "#92A8D1", I: "#955251", J: "#B565A7",
+    K: "#009B77", L: "#DD4124", M: "#45B8AC", N: "#EFC050", O: "#5B5EA6",
+    P: "#9B2335", Q: "#D65076", R: "#45ADA8", S: "#9DE0AD", T: "#E1B16A",
+    U: "#2E7D32", V: "#FF6F61", W: "#88B04B", X: "#F1948A", Y: "#BB8FCE",
+    Z: "#4FC1E9",
+  };
+  return colors[initial] || "#777"; 
+}
 
+export function RightPanelVideo({ e, muted }: { e: any; muted: boolean }) {
+  const vidRef = useRef<any>(null);
 
-    useEffect(()=>{
-      // console.log("display",e.isLoading, e.isAudioStream, e.cameraStatus)
-      let vid = vidRef.current
-      // console.log("display1 ",e.videoStream , e.audioStream, e.isLoading, vid)
-      if(e.videoStream===null || e.isLoading===null || vid===null)
-      return ;
+  useEffect(() => {
+    const vid = vidRef.current;
+    if (e.videoStream === null || e.isLoading === null || vid === null) return;
 
-   
-      console.log("display 2",e.videoStream,vid)
+    if (e.isCameraAvailable === true && e.cameraStatus === true) {
+      vid.srcObject = e.videoStream;
+      const onLoaded = () => {
+        vid.play();
+      };
+      vid.addEventListener("loadedmetadata", onLoaded);
+      return () => vid.removeEventListener("loadedmetadata", onLoaded);
+    }
+  }, [e.videoStream, e.cameraStatus]);
 
-      if(e.isCameraAvailable===true)
-      vid.srcObject = e.videoStream
+  useEffect(() => {
+    if (!e.audioStream) return;
 
-      function onLoaded(){
-          vid.play()
-      }
+    let audio: any = new Audio();
 
-      vid.addEventListener('loadedmetadata',onLoaded)
+    if (e.isMicrophoneAvailable === true) audio.srcObject = e.audioStream;
 
-     
-      },[e.videoStream])
+    audio.muted = muted;
+    audio.addEventListener("canplaythrough", () => {
+      audio.play();
+    });
+  }, [e.audioStream, muted]);
 
-    useEffect(()=>{
-      //console.log("display audio",e.audioStream,muted)
-          if(!e.audioStream)
-          return ;
-     // console.log("display audio",e.audioStream,muted)
-          let audio:any =null
-          audio = new Audio();
-  
-          if(e.isMicrophoneAvailable===true)
-          audio.srcObject = e.audioStream;
-          
-          audio.muted = muted
-          audio.addEventListener("canplaythrough", () => {
-            /* the audio is now playable; play it if permissions allow */
-            audio.play()
-          });
-          
-      },[e.audioStream,muted])
-
-      function getMicIcon(){
-        if(!e?.isMicrophoneAvailable)
-          return null 
-        if(e?.microphoneStatus ===false)  
-        return <i className="fa-solid fa-microphone-slash bg-black/50 text-white p-1 rounded"></i>
-        else 
-        return <i className="fa-solid fa-microphone bg-black/50 text-white p-1 rounded"></i>
-      }
-      function getVideoIcon(){
-        if(!e?.isCameraAvailable)
-          return null 
-        if(e?.cameraStatus===false){
-          return <i className="fa-solid fa-video-slash bg-black/50 text-white p-1 rounded"></i>
-        }else{
-          return <i className="fa-solid fa-video bg-black/50 text-white p-1 rounded"></i>
-        }
-      }
-    return (
-          <>
-            <div className="relative">
-              <div className="aspect-video bg-neutral-200 rounded-lg overflow-hidden">
-                <video
-                  ref={vidRef}
-                  
-                  className="w-full h-full object-cover"
-                ></video>
-                <video />
-              </div>
-              <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-                <span className="text-sm bg-black/50 text-white px-2 py-1 rounded" style={{textTransform:'capitalize'}}>
-                  {e?.name}
-                </span>
-                <div className="flex space-x-1">
-                  {getMicIcon()}
-                  {/* <i className="fa-solid fa-microphone-slash bg-black/50 text-white p-1 rounded"></i> */}
-                  {getVideoIcon()}
-
-                </div>
-              </div>
-            </div>
-          </>  
-    )
+  function getMicIcon() {
+    if (!e?.isMicrophoneAvailable) return null;
+    if (e?.microphoneStatus === false)
+      return (
+        <i className="fa-solid fa-microphone-slash bg-black/50 text-white p-1 rounded"></i>
+      );
+    else
+      return (
+        <i className="fa-solid fa-microphone bg-black/50 text-white p-1 rounded"></i>
+      );
   }
+
+  function getVideoIcon() {
+    if (!e?.isCameraAvailable) return null;
+    if (e?.cameraStatus === false) {
+      return (
+        <i className="fa-solid fa-video-slash bg-black/50 text-white p-1 rounded"></i>
+      );
+    } else {
+      return (
+        <i className="fa-solid fa-video bg-black/50 text-white p-1 rounded"></i>
+      );
+    }
+  }
+
+  const initial = e?.name ? e.name.charAt(0).toUpperCase() : "?";
+  const bgColor = getColorFromInitial(initial);
+
+  return (
+    <>
+   <div className="relative">
+  <div className="aspect-video rounded-lg overflow-hidden flex items-center justify-center bg-neutral-200">
+    {e?.cameraStatus === false ? (
+      <div
+        className="flex items-center justify-center w-full h-full"
+        style={{
+          background: `linear-gradient(to bottom, ${bgColor}40, ${bgColor}99)`,
+        }}
+      >
+        <div
+          className="w-20 h-20 rounded-full"
+          style={{
+            backgroundColor: bgColor,
+            color: "#fff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontWeight: "600",
+            fontSize: "1.25rem",
+            textTransform: "capitalize",
+            boxShadow: "0 4px 6px rgba(0,0,0,0.2)",
+          }}
+        >
+          {initial}
+        </div>
+      </div>
+    ) : (
+      <video
+        ref={vidRef}
+        className="w-full h-full object-cover"
+        autoPlay
+        muted
+        playsInline
+      ></video>
+    )}
+  </div>
+
+  {/* Name & Icons */}
+  <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+    <span
+      className="text-sm bg-black/50 text-white px-2 py-1 rounded"
+      style={{ textTransform: "capitalize" }}
+    >
+      {e?.name}
+    </span>
+    <div className="flex space-x-1">
+      {getMicIcon()}
+      {getVideoIcon()}
+    </div>
+  </div>
+</div>
+
+    </>
+  );
+}
