@@ -172,7 +172,7 @@ export default function MainPage() {
               <div id="content-panel" className="relative grow w-10/12 p-6 overflow-y-hidden">
                 <ContentPanel isMobile={isMobile} />
               </div>
-              {isHost===false?<RightPanel /> : null}
+              <RightPanel />
             </main>
           </div>
         )

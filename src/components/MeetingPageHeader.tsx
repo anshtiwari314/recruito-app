@@ -1,14 +1,18 @@
-import { useDispatch } from "react-redux"
-import { useAppSelector } from "@/store/store"
-import { setNVclosecall, setNVaudioUploadAnimation } from "@/reducers/navigationparamReducer"
-import { useData } from "../context/DataWrapper"
-import MeetingPageHeaderTimer from "./MeetingPageHeaderTimer"
-import DraggableLiveTranscription from "./DraggableLiveTranscript" 
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useAppSelector } from "@/store/store";
+import {
+  setNVclosecall,
+  setNVaudioUploadAnimation,
+} from "@/reducers/navigationparamReducer";
+import { useData } from "../context/DataWrapper";
+import MeetingPageHeaderTimer from "./MeetingPageHeaderTimer";
+import DraggableLiveTranscription from "./DraggableLiveTranscript";
 
 export default function MeetingPageHeader() {
-  const dispatch = useDispatch()
-  const { jobTitle } = useAppSelector((state) => state.cuesReducer)
-  const { isHost } = useAppSelector((state) => state.qpReducer)
+  const dispatch = useDispatch();
+  const { jobTitle } = useAppSelector((state) => state.cuesReducer);
+  const { isHost } = useAppSelector((state) => state.qpReducer);
 
   const {
     name,
@@ -17,46 +21,42 @@ export default function MeetingPageHeader() {
     microphoneToggle,
     setMicroPhoneToggle,
     setScreenSharing,
-    stopVideoRecording,
-    chatToggle,
-    setChatToggle,
-    screenRecording,
+    stopVideoRecording,chatToggle,setChatToggle,screenRecording,
     setScreenRecording,
-    ngrokServerUrl,
-    setNgrokServerUrl,
-    interviewMetaRef,
-    unreadCount,
-    setUnreadCount,
-    transcriptionToggle,
-    setTranscriptionToggle,
-  }:any = useData()
+    ngrokServerUrl,setNgrokServerUrl,interviewMetaRef,unreadCount,setUnreadCount,
+    transcriptionToggle,setTranscriptionToggle,
+  }: any = useData();
 
-  const title = interviewMetaRef.current?.title
+  const title = interviewMetaRef.current?.title;
 
   async function handleCloseCall() {
-    const confirmQuit = window.confirm("Are you sure you want to quit?")
+    const confirmQuit = window.confirm("Are you sure you want to quit?");
     if (confirmQuit) {
-      sessionStorage.setItem("exitdone", "true")
-      setMicroPhoneToggle(false)
-      setCameraToggle(false)
-      dispatch(setNVclosecall(true))
-      dispatch(setNVaudioUploadAnimation(true))
-      console.log("Closing the call...")
+      sessionStorage.setItem("exitdone", "true");
+      setMicroPhoneToggle(false);
+      setCameraToggle(false);
+      dispatch(setNVclosecall(true));
+      dispatch(setNVaudioUploadAnimation(true));
+      console.log("Closing the call...");
     }
   }
 
-  const toggleAudio = () => setMicroPhoneToggle((p: boolean) => !p)
-  const toggleVideo = () => setCameraToggle((p: boolean) => !p)
-  const toggleScreenRecording = () => setScreenRecording((p: boolean) => !p)
+  const toggleAudio = () => setMicroPhoneToggle((p: boolean) => !p);
+  const toggleVideo = () => setCameraToggle((p: boolean) => !p);
+  const toggleScreenRecording = () =>
+    setScreenRecording((p: boolean) => !p);
   const toggleChatWindow = () => {
-    setChatToggle(true)
-    console.log(unreadCount)
-    setUnreadCount(0)
-  }
+    setChatToggle(true);
+    console.log(unreadCount);
+    setUnreadCount(0);
+  };
   const toggleLive = () => {
-    setTranscriptionToggle((prev: boolean) => !prev) // Toggle instead of just setting to true
-    console.log("Live Speech To Text")
-  }
+    setTranscriptionToggle((prev: boolean) => !prev);
+    console.log("Live Speech To Text");
+  };
+
+ //false state for quality menu
+  const [showQualityMenu, setShowQualityMenu] = useState(false);
 
   return (
     <>
@@ -85,8 +85,12 @@ export default function MeetingPageHeader() {
         style={{ height: "10vh" }}
       >
         <div className="flex place-items-center space-x-4">
-          <div className="h-8 w-[2px] bg-neutral-200"></div>
-          <img src="https://api.dicebear.com/7.x/notionists/svg?scale=200&seed=Logo" className="h-8" alt="Logo" />
+          <div className="h-8 w-[2px] bg-neutral-200" />
+          <img
+            src="https://api.dicebear.com/7.x/notionists/svg?scale=200&seed=Logo"
+            className="h-8"
+            alt="Logo"
+          />
 
           {title ? (
             <div className="text-md text-neutral-500">
@@ -106,9 +110,9 @@ export default function MeetingPageHeader() {
             onClick={toggleVideo}
           >
             {cameraToggle ? (
-              <i className="fa-solid fa-video fa-lg"></i>
+              <i className="fa-solid fa-video fa-lg" />
             ) : (
-              <i className="fa-solid fa-video-slash fa-lg"></i>
+              <i className="fa-solid fa-video-slash fa-lg" />
             )}
           </button>
           <button
@@ -116,9 +120,9 @@ export default function MeetingPageHeader() {
             onClick={toggleAudio}
           >
             {microphoneToggle ? (
-              <i className="fa-solid fa-microphone fa-lg"></i>
+              <i className="fa-solid fa-microphone fa-lg" />
             ) : (
-              <i className="fa-solid fa-microphone-slash fa-lg"></i>
+              <i className="fa-solid fa-microphone-slash fa-lg" />
             )}
           </button>
           <button
@@ -126,9 +130,9 @@ export default function MeetingPageHeader() {
             onClick={toggleScreenRecording}
           >
             {screenRecording ? (
-              <i className="fa-solid fa-circle-dot fa-lg text-red-500 animate-pulse"></i>
+              <i className="fa-solid fa-circle-dot fa-lg text-red-500 animate-pulse" />
             ) : (
-              <i className="fa-solid fa-circle-dot fa-lg text-gray-500"></i>
+              <i className="fa-solid fa-circle-dot fa-lg text-gray-500" />
             )}
           </button>
           <div className="relative">
@@ -137,9 +141,9 @@ export default function MeetingPageHeader() {
               onClick={toggleChatWindow}
             >
               {chatToggle ? (
-                <i className="fas fa-comment text-black-500 fa-lg"></i>
+                <i className="fas fa-comment text-black-500 fa-lg" />
               ) : (
-                <i className="far fa-comment text-black-500 fa-lg"></i>
+                <i className="far fa-comment text-black-500 fa-lg" />
               )}
 
               {unreadCount > 0 && !chatToggle && (
@@ -149,35 +153,77 @@ export default function MeetingPageHeader() {
               )}
             </button>
           </div>
-        {isHost && (
+
+          {isHost && (
+            <div className="relative">
+              <button
+                className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700 relative"
+                onClick={toggleLive}
+              >
+                {transcriptionToggle ? (
+                  <i className="fas fa-closed-captioning text-black-500 fa-lg" />
+                ) : (
+                  <i className="far fa-closed-captioning text-black-500 fa-lg" />
+                )}
+              </button>
+            </div>
+          )}
+
+      
           <div className="relative">
             <button
-              className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700 relative"
-              onClick={toggleLive}
+              className="py-3 px-4 bg-neutral-200 hover:bg-neutral-300 rounded-lg flex items-center space-x-2"
+              onClick={() => setShowQualityMenu(!showQualityMenu)}
+              title="Network Quality"
             >
-              {transcriptionToggle ? (
-                <i className="fas fa-closed-captioning text-black-500 fa-lg"></i>
-              ) : (
-                <i className="far fa-closed-captioning text-black-500 fa-lg"></i>
-              )}
+              <i className="fa-solid fa-signal text-green-500" />
+              <span className="text-sm">Quality</span>
             </button>
+
+            {showQualityMenu && (
+              <div className="absolute top-full mt-2 right-0 z-50 bg-white border border-neutral-200 rounded-lg shadow-lg py-2 min-w-[150px]">
+                <div className="px-3 py-1 text-xs text-neutral-500 border-b border-neutral-200 mb-2">
+                  Quality Settings
+                </div>
+
+                <button className="w-full text-left px-3 py-2 hover:bg-neutral-100 text-sm">
+                  <i className="fa-solid fa-signal text-green-500 mr-2" />
+                  HD Quality
+                </button>
+
+                <button className="w-full text-left px-3 py-2 hover:bg-neutral-100 text-sm">
+                  <i className="fa-solid fa-signal text-yellow-500 mr-2" />
+                  SD Quality
+                </button>
+
+                <button className="w-full text-left px-3 py-2 hover:bg-neutral-100 text-sm">
+                  <i className="fa-solid fa-signal text-orange-500 mr-2" />
+                  Low Quality
+                </button>
+
+                <button className="w-full text-left px-3 py-2 hover:bg-neutral-100 text-sm">
+                  <i className="fa-solid fa-signal text-red-500 mr-2" />
+                  Audio Only
+                </button>
+              </div>
+            )}
           </div>
-        )}
+     
 
+          <div className="h-8 w-[2px] bg-neutral-200" />
 
-          <div className="h-8 w-[2px] bg-neutral-200"></div>
           <button
             className="px-8 py-2 bg-neutral-600 hover:bg-neutral-700 text-white rounded-lg flex items-center text-lg"
             onClick={handleCloseCall}
           >
-            <i className="fa-solid fa-xmark mr-4 fa-lg"></i>
+            <i className="fa-solid fa-xmark mr-4 fa-lg" />
             End Call
           </button>
         </div>
 
         {isHost && <MeetingPageHeaderTimer />}
       </header>
-      {isHost &&<DraggableLiveTranscription />}
+      {isHost && <DraggableLiveTranscription />}
     </>
-  )
+  );
 }

@@ -4,6 +4,7 @@ import {
   faMicrophone,
   faMicrophoneSlash,
 } from "@fortawesome/free-solid-svg-icons";
+import { useData } from "../context/DataWrapper";
 
 // Color map for initials
 function getColorFromInitial(initial: string) {
@@ -87,6 +88,7 @@ export function TextPlaceHolder({ e }: { e: any }) {
 }
 
 export function Display({ e, isMobile }: { e: any; isMobile: boolean }) {
+  if (!e) return null;
   let vidRef = useRef<any>(null);
 
   useEffect(() => {
@@ -113,7 +115,7 @@ export function Display({ e, isMobile }: { e: any; isMobile: boolean }) {
   }, [e.videoStream, e.audioStream]);
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-[80vh]">
       {e.isLoading === true ||
       e.cameraStatus === false ||
       e.isCameraAvailable === false ? (
@@ -147,13 +149,13 @@ export function Display({ e, isMobile }: { e: any; isMobile: boolean }) {
 }
 
 export default function MyLargerVideoComp({
-  e,
   isMobile,
 }: {
-  e: any;
   isMobile: boolean;
 }) {
   let ref = useRef<any>(null);
+    const { selectedUserForLargeVideoRef }: any = useData();
+    const e=selectedUserForLargeVideoRef;
 
   return (
     <div ref={ref} className="h-full w-full flex justify-center items-center">

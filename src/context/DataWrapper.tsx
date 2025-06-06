@@ -128,6 +128,7 @@ export default function DataWrapper({
   const firstTimeConnectRef = useRef<boolean>(true);
 
   const [users, setUsers] = useState<users[]>([]);
+  const [selectedUserForLargeVideoRef,useSelectedUserForLargeVideoRef] = useState<users | null>(null);
 
   const [myStream, setMyStream] = useState<MediaStream | null | boolean>(null);
   const [myAudioStream, setMyAudioStream] = useState<
@@ -2965,6 +2966,7 @@ export default function DataWrapper({
     setScreenRecording,ngrokServerUrl,setNgrokServerUrl,interviewMetaRef,unreadCount,setUnreadCount,
     transcriptionToggle,
     setTranscriptionToggle,
+    selectedUserForLargeVideoRef,useSelectedUserForLargeVideoRef
   };
 
   return (

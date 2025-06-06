@@ -4,7 +4,7 @@ import { useData } from "../context/DataWrapper";
 import { AiOutlineDownload } from "react-icons/ai";
 
 const FooterTemp: React.FC = () => {
-  const { jobId: reduxJobId, roomId, agentId, name: agentName, candid } =
+  const { jobId, roomId, agentId, name: agentName, candid } =
     useAppSelector((state) => state.qpReducer);
   const { jobTitle } = useAppSelector((state) => state.cuesReducer);
 
@@ -31,14 +31,15 @@ const FooterTemp: React.FC = () => {
     setLoading(true);
     setStatus(null);
 
-    const data = {
-      jobid: reduxJobId,
-      roomid: roomId,
-      agentid: agentId,
-      agent_name: agentName,
-      notes,
-      candidateid: candid,
-    };
+    let data = {
+      jobid:jobId, 
+      roomid:roomId, 
+      agentid:agentId, 
+      agent_name:name, 
+      notes, 
+      candidateid: 'abc123'
+    }
+
 
     console.log("➡️ recruiter_notes_req emitted:", data);
     socket2.emit("recruiter_notes_req", data);

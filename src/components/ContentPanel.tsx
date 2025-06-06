@@ -81,7 +81,6 @@ export default function ContentPanel({
       ) : (
         largeVideo && (
           <MyLargerVideoComp
-            e={largeVideo}
             //num={4193}
             isMobile={isMobile}
           />

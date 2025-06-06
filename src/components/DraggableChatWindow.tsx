@@ -1,44 +1,48 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { useData } from "@/context/DataWrapper"
 import { useAppSelector } from "@/store/store"
 import { v4 as uuidv4 } from "uuid"
 import { addChat } from "@/reducers/chatReducer"
 import { useDispatch } from "react-redux"
-import { getTimeStamp,getTimeStampInIndian } from "@/functions/generalFn"
-import { FaTimes, FaPaperPlane, FaCopy, FaCheck } from "react-icons/fa"
+import { getTimeStampInIndian } from "@/functions/generalFn"
+import { FaTimes, FaPaperPlane, FaCopy, FaCheck, FaArrowDown } from "react-icons/fa"
 
 const DraggableChatWindow = () => {
-
   const [position, setPosition] = useState({ x: 100, y: 100 })
   const [isDragging, setIsDragging] = useState(false)
-  const [copiedId, setCopiedId] = useState(null)
+
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+
+  const [showNewIndicator, setShowNewIndicator] = useState(false)
+
   const { chatToggle, setChatToggle, setUnreadCount, socket, socket2, name } = useData()
-  console.log("chatToggle", chatToggle, "name", name, "socket", socket, "socket2", socket2)
   const { candid, isHost } = useAppSelector((state) => state.qpReducer)
+
   const isUserScrolling = useRef(false)
+
+  const chatDivRef = useRef<HTMLDivElement | null>(null)
+  const chatWindowRef = useRef<HTMLDivElement | null>(null)
+
   const dispatch = useDispatch()
   const [msg, setMsg] = useState("")
-  const chatDivRef = useRef(null)
+
   const [chats] = useAppSelector((state) => [state.chatReducer])
-  const chatWindowRef = useRef(null)
-  
- //code checker logic
-  const isCodeMessage = (message) => {
+
+  const isCodeMessage = useCallback((message: string) => {
     const codePatterns = [
-      /^```[\s\S]*```$/m, 
-      /^\s*[{}[\]();,]\s*$/m, 
-      /^\s*(function|const|let|var|if|else|for|while|return|import|export|class)\s+/m, 
-      /^\s*\/\/.*$/m, 
-      /^\s*\/\*[\s\S]*?\*\/\s*$/m, 
+      /^```[\s\S]*```$/m,
+      /^\s*[{}[\]();,]\s*$/m,
+      /^\s*(function|const|let|var|if|else|for|while|return|import|export|class)\s+/m,
+      /^\s*\/\/.*$/m,
+      /^\s*\/\*[\s\S]*?\*\/\s*$/m,
       /^[^a-zA-Z]*[{}[\]();]+[^a-zA-Z]*$/m,
     ]
 
     let codeScore = 0
-
     if (/[{}]/.test(message) && /[;]/.test(message)) codeScore += 2
     if (/^\s{2,}/m.test(message)) codeScore += 1
     if (/\b(function|const|let|var|if|else|for|while|return)\b/.test(message)) codeScore += 2
-    if (/\/\/|\/\*|\*\//.test(message)) codeScore += 2 
+    if (/\/\/|\/\*|\*\//.test(message)) codeScore += 2
     if (/=>|===|!==|\+\+|--/.test(message)) codeScore += 1
     if (/console\.(log|error|warn)/.test(message)) codeScore += 2
     if (/<\/?[a-z][^>]*>/i.test(message)) codeScore += 1
@@ -47,28 +51,28 @@ const DraggableChatWindow = () => {
     if (lines.length > 2 && lines.filter((line) => /^\s+/.test(line)).length > 1) codeScore += 1
 
     return codeScore >= 3 || codePatterns.some((pattern) => pattern.test(message))
-  }
+  }, [])
 
-  const handleMouseDown = (e) => {
+  const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true)
-    chatWindowRef.current.startX = e.clientX - position.x
-    chatWindowRef.current.startY = e.clientY - position.y
+    if (chatWindowRef.current) {
+      chatWindowRef.current.startX = e.clientX - position.x
+      chatWindowRef.current.startY = e.clientY - position.y
+    }
   }
-
-  const handleMouseMove = (e) => {
+  const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return
     setPosition({
-      x: e.clientX - chatWindowRef.current.startX,
-      y: e.clientY - chatWindowRef.current.startY,
+      x: e.clientX - (chatWindowRef.current?.startX || 0),
+      y: e.clientY - (chatWindowRef.current?.startY || 0),
     })
   }
-
   const handleMouseUp = () => {
     setIsDragging(false)
   }
 
   const handleSendMessage = () => {
-    if (socket === null || socket2 === null || msg === "") return
+    if (!socket || !socket2 || msg.trim() === "") return
 
     const tempMsg = {
       id: uuidv4(),
@@ -77,7 +81,6 @@ const DraggableChatWindow = () => {
       isOutgoing: true,
       msg,
     }
-
     const tempOb = {
       msg,
       type: isHost ? "recruiter" : "candidate",
@@ -85,7 +88,6 @@ const DraggableChatWindow = () => {
       timestamp: getTimeStampInIndian(),
       candid,
     }
-    console.log(tempOb,"to backend socket");
 
     socket.emit("send-msg", tempMsg)
     socket2.emit("chatmessage_req", tempOb)
@@ -93,39 +95,45 @@ const DraggableChatWindow = () => {
     setMsg("")
   }
 
-  const handleCopy = async (text, id) => {
+  const handleCopy = async (text: string, id: string) => {
     try {
       await navigator.clipboard.writeText(text)
       setCopiedId(id)
       setTimeout(() => setCopiedId(null), 2000)
     } catch (err) {
-      console.error("Failed to copy text: ", err)
+      console.error("Copy failed: ", err)
     }
   }
 
   const handleScroll = () => {
     const chatDiv = chatDivRef.current
-    if (chatDiv) {
-      const isAtBottom = chatDiv.scrollHeight - chatDiv.scrollTop - chatDiv.clientHeight < 20
-      isUserScrolling.current = !isAtBottom
+    if (!chatDiv) return
+
+    const isAtBottom = chatDiv.scrollHeight - chatDiv.scrollTop - chatDiv.clientHeight < 20
+    isUserScrolling.current = !isAtBottom
+
+    if (isAtBottom) {
+      setShowNewIndicator(false)
     }
   }
 
   useEffect(() => {
-    const chatDiv = chatDivRef.current
-    if (chatDiv) {
-      chatDiv.addEventListener("scroll", handleScroll)
-    }
+    const div = chatDivRef.current
+    if (div) div.addEventListener("scroll", handleScroll)
     return () => {
-      if (chatDiv) {
-        chatDiv.removeEventListener("scroll", handleScroll)
-      }
+      if (div) div.removeEventListener("scroll", handleScroll)
     }
   }, [])
 
   useEffect(() => {
-    if (chatDivRef.current && !isUserScrolling.current) {
-      chatDivRef.current.scrollTop = chatDivRef.current.scrollHeight
+    const chatDiv = chatDivRef.current
+    if (!chatDiv) return
+
+    if (!isUserScrolling.current) {
+      chatDiv.scrollTop = chatDiv.scrollHeight
+      setShowNewIndicator(false)
+    } else {
+      setShowNewIndicator(true)
     }
   }, [chats])
 
@@ -134,7 +142,7 @@ const DraggableChatWindow = () => {
     setUnreadCount(0)
   }
 
-  const handleKeyPress = (event) => {
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault()
       handleSendMessage()
@@ -143,13 +151,22 @@ const DraggableChatWindow = () => {
 
   if (!chatToggle) return null
 
+  const scrollToBottom = () => {
+    const chatDiv = chatDivRef.current
+    if (chatDiv) {
+      chatDiv.scrollTop = chatDiv.scrollHeight
+      isUserScrolling.current = false
+      setShowNewIndicator(false)
+    }
+  }
+
   return (
     <div
       ref={chatWindowRef}
       className="fixed bg-white border border-gray-600 rounded-xl shadow-2xl w-[420px] h-[580px] flex flex-col z-50"
       style={{ top: position.y, left: position.x }}
     >
-      {/* Header */}
+      
       <div
         className="bg-zinc-900 border-b border-gray-100 px-4 py-3 cursor-move rounded-t-xl flex justify-between items-center"
         onMouseDown={handleMouseDown}
@@ -169,8 +186,8 @@ const DraggableChatWindow = () => {
         </button>
       </div>
 
-
-      <div ref={chatDivRef} className="flex-1 p-4 overflow-y-auto" onScroll={handleScroll}>
+     
+      <div ref={chatDivRef} className="relative flex-1 p-4 overflow-y-auto" onScroll={handleScroll}>
         <div className="space-y-3">
           {chats.map((chat, index) => {
             const isCode = isCodeMessage(chat.msg)
@@ -178,12 +195,14 @@ const DraggableChatWindow = () => {
 
             return (
               <div key={index} className="flex flex-col">
-               
-                <div className={`text-s font-medium mb-1 ${chat.name === name ? "text-right text-gray-600" : "text-left text-gray-600"}`}>
-                    {chat.name}
-                  </div>
+                <div
+                  className={`text-s font-medium mb-1 ${
+                    chat.name === name ? "text-right text-gray-600" : "text-left text-gray-600"
+                  }`}
+                >
+                  {chat.name}
+                </div>
 
-                {/* Message bubble */}
                 <div className={`flex ${chat.name === name ? "justify-end" : "justify-start"}`}>
                   <div
                     className={`px-3 py-2 rounded-2xl max-w-[85%] ${
@@ -215,18 +234,34 @@ const DraggableChatWindow = () => {
                   </div>
                 </div>
 
-                <div className={`text-xs mt-1 text-gray-400 ${chat.isOutgoing ? "text-right" : "text-left"}`}>
+                <div
+                  className={`text-xs mt-1 text-gray-400 ${
+                    chat.isOutgoing ? "text-right" : "text-left"
+                  }`}
+                >
                   {chat.timeStamp}
                 </div>
               </div>
             )
           })}
         </div>
+
+        {showNewIndicator && (
+          <button
+            onClick={scrollToBottom}
+            className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-blue-500 hover:bg-blue-600 text-white text-xs py-1 px-3 rounded-full flex items-center space-x-1 shadow-lg"
+          >
+            <FaArrowDown size={12} />
+            <span>New Message</span>
+          </button>
+        )}
       </div>
 
-   
+     
       <div className="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl">
-        <div className="text-xs text-gray-500 mb-2">Press Enter to send • Shift + Enter for new line</div>
+        <div className="text-xs text-gray-500 mb-2">
+          Press Enter to send • Shift + Enter for new line
+        </div>
         <div className="flex items-end space-x-2">
           <textarea
             className="flex-1 px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none min-h-[40px] max-h-[100px] text-sm"
@@ -242,14 +277,16 @@ const DraggableChatWindow = () => {
               overflowY: msg.split("\n").length > 3 ? "scroll" : "hidden",
             }}
             onInput={(e) => {
-              e.target.style.height = "auto"
-              e.target.style.height = Math.min(e.target.scrollHeight, 100) + "px"
+              e.currentTarget.style.height = "auto"
+              e.currentTarget.style.height = Math.min(e.currentTarget.scrollHeight, 100) + "px"
             }}
           />
           <button
             onClick={handleSendMessage}
             className={`p-2 rounded-xl transition-colors ${
-              msg.trim() ? "bg-gray-500 hover:bg-gray-600 text-white" : "bg-gray-200 text-gray-400 cursor-not-allowed"
+              msg.trim()
+                ? "bg-gray-500 hover:bg-gray-600 text-white"
+                : "bg-gray-200 text-gray-400 cursor-not-allowed"
             }`}
             disabled={!msg.trim()}
           >
