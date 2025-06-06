@@ -5,6 +5,8 @@ import ContentPanelMain from "./ContentPanelMain";
 import ContentPanelFooter from "./ContentPanelFooter";
 import { useAppSelector } from "@/store/store";
 import DraggableChatWindow from './DraggableChatWindow';
+import ContentTemp from "./ContentTemp";
+import FooterTemp from "./FooterTemp";
 
 export default function ContentPanel({
   isMobile,
@@ -64,16 +66,17 @@ export default function ContentPanel({
       {isHost ? (
         <div style={{
         //border:'0.2rem solid green',
-        height:'100%',
+        height:'99%',
         display:'flex',
         flexDirection:'column',
         justifyContent:'space-between'
         }}>
           
 
-          <ContentPanelMain />
-
-          <ContentPanelFooter />
+          <ContentTemp/> 
+          {/* in real here will be ContentPanelMain */}
+          <FooterTemp/>
+          {/* <ContentPanelFooter /> in real  */}
         </div>
       ) : (
         largeVideo && (

@@ -186,6 +186,8 @@ export default function DataWrapper({
   const screenStreamRef = useRef(null);
   const vadEffectRender = useRef(0);
   const [chatToggle,setChatToggle] = useState(false);
+  //for transcrption 
+  const [transcriptionToggle,setTranscriptionToggle] = useState(false);
   const vadFlag = useRef(false);
   const adminMediaRecorderStatus = useRef(false);
   const [validUrl, setValidUrl] = useState("");
@@ -2960,7 +2962,9 @@ export default function DataWrapper({
     stopVideoRecording,
     startRecordingScreen,
     screenRecording,
-    setScreenRecording,ngrokServerUrl,setNgrokServerUrl,interviewMetaRef,unreadCount,setUnreadCount
+    setScreenRecording,ngrokServerUrl,setNgrokServerUrl,interviewMetaRef,unreadCount,setUnreadCount,
+    transcriptionToggle,
+    setTranscriptionToggle,
   };
 
   return (

@@ -7,15 +7,13 @@ import { useDispatch } from "react-redux"
 import { getTimeStamp,getTimeStampInIndian } from "@/functions/generalFn"
 import { FaTimes, FaPaperPlane, FaCopy, FaCheck } from "react-icons/fa"
 
-
-
-
 const DraggableChatWindow = () => {
 
   const [position, setPosition] = useState({ x: 100, y: 100 })
   const [isDragging, setIsDragging] = useState(false)
   const [copiedId, setCopiedId] = useState(null)
   const { chatToggle, setChatToggle, setUnreadCount, socket, socket2, name } = useData()
+  console.log("chatToggle", chatToggle, "name", name, "socket", socket, "socket2", socket2)
   const { candid, isHost } = useAppSelector((state) => state.qpReducer)
   const isUserScrolling = useRef(false)
   const dispatch = useDispatch()
@@ -181,17 +179,17 @@ const DraggableChatWindow = () => {
             return (
               <div key={index} className="flex flex-col">
                
-                <div
-                  className={`text-s font-medium mb-1 ${chat.isOutgoing ? "text-right text-gray-600" : "text-left text-gray-600"}`}
-                >
-                  {chat.name}
-                </div>
+                <div className={`text-s font-medium mb-1 ${chat.name === name ? "text-right text-gray-600" : "text-left text-gray-600"}`}>
+                    {chat.name}
+                  </div>
 
                 {/* Message bubble */}
-                <div className={`flex ${chat.isOutgoing ? "justify-end" : "justify-start"}`}>
+                <div className={`flex ${chat.name === name ? "justify-end" : "justify-start"}`}>
                   <div
                     className={`px-3 py-2 rounded-2xl max-w-[85%] ${
-                      chat.isOutgoing ? "bg-zinc-500 text-white" : "bg-gray-100 text-gray-800"
+                      chat.name === name
+                        ? "bg-zinc-500 text-white"
+                        : "bg-white text-black border border-gray-300"
                     }`}
                   >
                     {isCode ? (
