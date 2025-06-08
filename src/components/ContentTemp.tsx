@@ -72,7 +72,7 @@ export function VideoPanel() {
       setIsLoading(false);
     }, 2000);
     return () => clearTimeout(timer);
-  }, [cameraToggle, microphoneToggle,e]);
+  }, [cameraToggle, microphoneToggle,e?.cameraStatus,e?.isCameraAvailable,e?.isMicrophoneAvailable,e?.audioStream,e?.videoStream]);
 
   useEffect(() => {
     if (!e || !vidRef.current) return;
