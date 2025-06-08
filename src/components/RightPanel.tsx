@@ -9,8 +9,17 @@ export default function RightPanel() {
   const { isHost } = useAppSelector((state) => state.qpReducer);
 
   const handleUserSelect = (e: any) => {
+    if(e!==null)
+    {
+      useSelectedUserForLargeVideoRef(null);
+    }
     console.log("Selected user for large video:", e);
-    useSelectedUserForLargeVideoRef(e);
+    //should i add a delay here?
+    //if so, then use setTimeout
+    setTimeout(() => {
+       useSelectedUserForLargeVideoRef(e);
+    }, 1000);
+    
   };
   return (
     <div

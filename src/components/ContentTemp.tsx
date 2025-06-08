@@ -3,6 +3,7 @@ import { useAppSelector } from "@/store/store"
 import type { CuesDataType } from "@/reducers/cuesReducer"
 import { useEffect, useRef, useState } from "react"
 import parse from "html-react-parser"
+import { FaUserSlash ,FaSpinner} from "react-icons/fa";
 
 function getColorFromInitial(initial: string) {
   const colors: Record<string, string> = {
@@ -54,16 +55,24 @@ export function SingleCue({
 
 
 export function VideoPanel() {
-  const { selectedUserForLargeVideoRef, setSelectedUserForLargeVideoRef }: any = useData();
-  useEffect(() => {
-    if (!selectedUserForLargeVideoRef) {
-      console.warn("No user selected for large video");
-    }
-  }, [selectedUserForLargeVideoRef, setSelectedUserForLargeVideoRef]);
+  const {
+    selectedUserForLargeVideoRef: e,
+    cameraToggle,
+    microphoneToggle,
+  }: any = useData();
 
-  const e = selectedUserForLargeVideoRef;
-  console.log("Selected user for large video:", e);
-  const vidRef = useRef<any>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const vidRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setRefreshKey((k) => k + 1);
+      setIsLoading(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [cameraToggle, microphoneToggle,e]);
 
   useEffect(() => {
     if (!e || !vidRef.current) return;
@@ -74,27 +83,34 @@ export function VideoPanel() {
       vid.addEventListener("loadedmetadata", onLoaded);
       return () => vid.removeEventListener("loadedmetadata", onLoaded);
     }
-  }, [e]);
+  }, [e, refreshKey]);
 
   useEffect(() => {
     if (!e || !e.audioStream) return;
-    const audio: any = new Audio();
+    const audio = new Audio();
     if (e.isMicrophoneAvailable) {
       audio.srcObject = e.audioStream;
       audio.muted = true;
       audio.addEventListener("canplaythrough", () => audio.play());
     }
-  }, [e]);
+  }, [e, refreshKey]);
 
   if (!e) {
     return (
-      <div className="w-full h-full text-xl flex items-center justify-center text-neutral-500">
-        No user selected Click on a user to view their video
+      <div
+        key={refreshKey}
+        className="w-full h-full flex flex-col items-center justify-center text-neutral-500 gap-3"
+      >
+        <FaUserSlash className="w-12 h-12 text-zinc-900 animate-pulse" />
+        <p className="text-xl font-semibold text-center">No user selected</p>
+        <p className="text-m text-center text-neutral-400">
+          Tap on a user to view their video feed 🎥
+        </p>
       </div>
     );
   }
 
-  const initial = e.name ? e.name.charAt(0).toUpperCase() : "?";
+  const initial = e.name?.charAt(0).toUpperCase() || "?";
   const bgColor = getColorFromInitial(initial);
 
   const getMicIcon = () =>
@@ -116,7 +132,19 @@ export function VideoPanel() {
     ) : null;
 
   return (
-    <div className="h-full rounded-xl shadow-lg border border-white/10 overflow-hidden backdrop-blur-sm bg-white/5 transition-all relative">
+    <div
+      key={refreshKey}
+      className="h-full rounded-xl shadow-lg border border-white/10 overflow-hidden backdrop-blur-sm bg-white/5 transition-all relative"
+    >
+      {isLoading && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/50">
+          <FaSpinner className="animate-spin h-10 w-10 text-white" />
+          <span className="ml-3 text-white text-lg font-medium">
+            Loading...
+          </span>
+        </div>
+      )}
+
       <div className="aspect-video w-full flex items-center justify-center bg-black/20">
         {e.cameraStatus ? (
           <video
@@ -164,7 +192,6 @@ export function VideoPanel() {
 }
 
 
-
 const ContentTemp = () => {
   const [currentCues] = useAppSelector((state) => [state.cuesReducer.CuesList])
 
@@ -182,11 +209,8 @@ const ContentTemp = () => {
             ))}
         </div>
       </div>    
-
       <div className="w-[65%] bg-white rounded-lg shadow-sm border-1 border-neutral-100 flex flex-col">
-      
         <div className="flex-1">
-      
           <VideoPanel />
         </div>
       </div>
