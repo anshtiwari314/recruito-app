@@ -29,13 +29,13 @@ export default function RightPanel() {
       id="right-panel"
       className="w-2/12 bg-white border-l border-neutral-200 flex flex-col overflow-hidden"
     >
-      <div className="p-4 border-b border-neutral-200">
+      <div className="p-4 ">
         <h2 className="font-semibold mb-4 text-neutral-900">
           Participants ({users.length})
         </h2>
         <div
           className="space-y-4 overflow-y-auto"
-          style={{ height: "60.5vh",overflowY:"scroll" }}
+          style={{ height: "75.5vh",overflowY:"scroll" }}
         >
           {users.map((e, i) => (
             <div

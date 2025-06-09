@@ -7,7 +7,7 @@ import { FaUserSlash, FaSpinner } from "react-icons/fa";
 
 function getColorFromInitial(initial: string) {
   const colors: Record<string, string> = {
-    A: "#E27D60", B: "#85DCB", C: "#E8A87C", D: "#C38D9E", E: "#41B3A3", F: "#6B5B95", G: "#F7CAC9",
+    A: "#E27D60", B: "#92A8D1", C: "#E8A87C", D: "#C38D9E", E: "#41B3A3", F: "#6B5B95", G: "#F7CAC9",
     H: "#92A8D1", I: "#955251", J: "#B565A7", K: "#009B77", L: "#DD4124", M: "#45B8AC", N: "#EFC050",
     O: "#5B5EA6", P: "#9B2335", Q: "#D65076", R: "#45ADA8", S: "#9DE0AD", T: "#E1B16A", U: "#2E7D32",
     V: "#FF6F61", W: "#88B04B", X: "#F1948A", Y: "#BB8FCE", Z: "#4FC1E9",
@@ -189,28 +189,43 @@ export function VideoPanel() {
 
 const ContentTemp = () => {
   const [currentCues] = useAppSelector((state) => [state.cuesReducer.CuesList]);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) {
+      el.scrollTop = el.scrollHeight;
+    }
+  }, [currentCues]);
 
   return (
-    <div className="flex gap-6 h-[100vh] " >
-      <div className="w-[41%] h-[95%] flex flex-col bg-white rounded-lg shadow-sm border-2 border-zinc-500">
-        <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-300">
+    <div className="flex gap-8 h-[62vh] p-4">
+     
+      <div className="flex flex-col w-[45%] bg-white rounded-lg shadow-sm border-2 border-zinc-500">
+        <div className="flex-none px-3 py-2 border-b border-zinc-300">
           <h3 className="text-lg font-semibold text-neutral-900">AI Suggestions</h3>
         </div>
-        <div className="flex-1 overflow-y-auto px-3 py-2 space-y-3">
-          {currentCues &&
-            currentCues.map((question: CuesDataType, index: number) => (
-              <SingleCue question={question} key={index} isAnswered={question.isanswered} />
-            ))}
+       
+        <div
+          ref={scrollRef}
+          className="flex-1 overflow-y-auto h-[62vh] px-3 py-2 space-y-3"
+        >
+          {currentCues?.map((q: CuesDataType, idx: number) => (
+            <SingleCue question={q} key={idx} isAnswered={q.isanswered} />
+          ))}
         </div>
       </div>
-
-      <div className="w-[59%] h-[95%] bg-white rounded-lg shadow-sm border border-neutral-200 flex flex-col">
-        <div className="w-full aspect-video overflow-hidden">
+      <div className="flex flex-col w-[55%] h-[58vh] bg-white rounded-lg shadow-sm border border-neutral-200">
+        <div className="flex-1 overflow-hidden">
           <VideoPanel />
         </div>
       </div>
     </div>
   );
 };
+
+
+
+
 
 export default ContentTemp;

@@ -1,18 +1,17 @@
-import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { useAppSelector } from "@/store/store";
-import {
-  setNVclosecall,
-  setNVaudioUploadAnimation,
-} from "@/reducers/navigationparamReducer";
-import { useData } from "../context/DataWrapper";
-import MeetingPageHeaderTimer from "./MeetingPageHeaderTimer";
-import DraggableLiveTranscription from "./DraggableLiveTranscript";
+"use client"
+
+import { useState } from "react"
+import { useDispatch } from "react-redux"
+import { useAppSelector } from "@/store/store"
+import { setNVclosecall, setNVaudioUploadAnimation } from "@/reducers/navigationparamReducer"
+import { useData } from "../context/DataWrapper"
+import MeetingPageHeaderTimer from "./MeetingPageHeaderTimer"
+import DraggableLiveTranscription from "./DraggableLiveTranscript"
 
 export default function MeetingPageHeader() {
-  const dispatch = useDispatch();
-  const { jobTitle } = useAppSelector((state) => state.cuesReducer);
-  const { isHost } = useAppSelector((state) => state.qpReducer);
+  const dispatch = useDispatch()
+  const { jobTitle } = useAppSelector((state) => state.cuesReducer)
+  const { isHost } = useAppSelector((state) => state.qpReducer)
 
   const {
     name,
@@ -21,44 +20,55 @@ export default function MeetingPageHeader() {
     microphoneToggle,
     setMicroPhoneToggle,
     setScreenSharing,
-    stopVideoRecording,chatToggle,setChatToggle,screenRecording,
+    stopVideoRecording,
+    chatToggle,
+    setChatToggle,
+    screenRecording,
     setScreenRecording,
-    ngrokServerUrl,setNgrokServerUrl,interviewMetaRef,unreadCount,setUnreadCount,
-    transcriptionToggle,setTranscriptionToggle,
-    transcriptionIndicator,setTranscriptionIndicator
-  }: any = useData();
+    ngrokServerUrl,
+    setNgrokServerUrl,
+    interviewMetaRef,
+    unreadCount,
+    setUnreadCount,
+    transcriptionToggle,
+    setTranscriptionToggle,
+    transcriptionIndicator,
+    setTranscriptionIndicator,
+  }: any = useData()
 
-  const title = interviewMetaRef.current?.title;
+  const title = interviewMetaRef.current?.title
 
   async function handleCloseCall() {
-    const confirmQuit = window.confirm("Are you sure you want to quit?");
+    const confirmQuit = window.confirm("Are you sure you want to quit?")
     if (confirmQuit) {
-      sessionStorage.setItem("exitdone", "true");
-      setMicroPhoneToggle(false);
-      setCameraToggle(false);
-      dispatch(setNVclosecall(true));
-      dispatch(setNVaudioUploadAnimation(true));
-      console.log("Closing the call...");
+      sessionStorage.setItem("exitdone", "true")
+      setMicroPhoneToggle(false)
+      setCameraToggle(false)
+      dispatch(setNVclosecall(true))
+      dispatch(setNVaudioUploadAnimation(true))
+      console.log("Closing the call...")
     }
   }
 
-  const toggleAudio = () => setMicroPhoneToggle((p: boolean) => !p);
-  const toggleVideo = () => setCameraToggle((p: boolean) => !p);
-  const toggleScreenRecording = () =>
-    setScreenRecording((p: boolean) => !p);
+  const toggleAudio = () => setMicroPhoneToggle((p: boolean) => !p)
+  const toggleVideo = () => setCameraToggle((p: boolean) => !p)
+  const toggleScreenRecording = () => setScreenRecording((p: boolean) => !p)
   const toggleChatWindow = () => {
-    setChatToggle(true);
-    console.log(unreadCount);
-    setUnreadCount(0);
-  };
+    setChatToggle(true)
+    console.log(unreadCount)
+    // Reset unread count when opening chat
+    if (!chatToggle) {
+      setUnreadCount(0)
+    }
+  }
   const toggleLive = () => {
-    setTranscriptionToggle((prev: boolean) => !prev);
-    setTranscriptionIndicator(0);
-    console.log("Live Speech To Text");
-  };
+    setTranscriptionToggle((prev: boolean) => !prev)
+    setTranscriptionIndicator(0)
+    console.log("Live Speech To Text")
+  }
 
- //false state for quality menu
-  const [showQualityMenu, setShowQualityMenu] = useState(false);
+  // False state for quality menu
+  const [showQualityMenu, setShowQualityMenu] = useState(false)
 
   return (
     <>
@@ -88,11 +98,7 @@ export default function MeetingPageHeader() {
       >
         <div className="flex place-items-center space-x-4">
           <div className="h-8 w-[2px] bg-neutral-200" />
-          <img
-            src="https://api.dicebear.com/7.x/notionists/svg?scale=200&seed=Logo"
-            className="h-8"
-            alt="Logo"
-          />
+          <img src="https://api.dicebear.com/7.x/notionists/svg?scale=200&seed=Logo" className="h-8" alt="Logo" />
 
           {title ? (
             <div className="text-md text-neutral-500">
@@ -111,11 +117,7 @@ export default function MeetingPageHeader() {
             className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
             onClick={toggleVideo}
           >
-            {cameraToggle ? (
-              <i className="fa-solid fa-video fa-lg" />
-            ) : (
-              <i className="fa-solid fa-video-slash fa-lg" />
-            )}
+            {cameraToggle ? <i className="fa-solid fa-video fa-lg" /> : <i className="fa-solid fa-video-slash fa-lg" />}
           </button>
           <button
             className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
@@ -148,35 +150,40 @@ export default function MeetingPageHeader() {
                 <i className="far fa-comment text-black-500 fa-lg" />
               )}
 
-              {unreadCount > 0 && !chatToggle && (
-                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center shadow-md border border-white animate-bounce z-10">
+            
+              {unreadCount > 0 && (
+                <span
+                  className={`absolute -top-1 -right-1 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center shadow-md border border-white z-10 ${
+                    chatToggle
+                      ? "bg-red-500 animate-pulse"
+                      : "bg-red-600 animate-bounce"
+                  }`}
+                >
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
             </button>
           </div>
 
-              {isHost && (
-          <div className="relative">
-            <button
-              className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700 relative"
-              onClick={toggleLive}
-            >
-              {transcriptionToggle ? (
-                <i className="fas fa-closed-captioning text-black-500 fa-lg" />
-              ) : (
-                <i className="far fa-closed-captioning text-black-500 fa-lg" />
-              )}
+          {isHost && (
+            <div className="relative">
+              <button
+                className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700 relative"
+                onClick={toggleLive}
+              >
+                {transcriptionToggle ? (
+                  <i className="fas fa-closed-captioning text-black-500 fa-lg" />
+                ) : (
+                  <i className="far fa-closed-captioning text-black-500 fa-lg" />
+                )}
 
-              {transcriptionIndicator > 0 && !transcriptionToggle && (
-                <span className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-blue-500 rounded-full border-2 border-white z-10 shadow-md animate-pulse blur-[0.5px] scale-[1.1]" />
-              )}
-            </button>
-          </div>
-        )}
+                {transcriptionIndicator > 0 && !transcriptionToggle && (
+                  <span className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-blue-500 rounded-full border-2 border-white z-10 shadow-md animate-pulse blur-[0.5px] scale-[1.1]" />
+                )}
+              </button>
+            </div>
+          )}
 
-
-      
           <div className="relative">
             <button
               className="py-3 px-4 bg-neutral-200 hover:bg-neutral-300 rounded-lg flex items-center space-x-2"
@@ -215,7 +222,6 @@ export default function MeetingPageHeader() {
               </div>
             )}
           </div>
-     
 
           <div className="h-8 w-[2px] bg-neutral-200" />
 
@@ -232,5 +238,5 @@ export default function MeetingPageHeader() {
       </header>
       {isHost && <DraggableLiveTranscription />}
     </>
-  );
+  )
 }

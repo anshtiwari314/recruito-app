@@ -3,7 +3,7 @@ import React, { useRef, useEffect } from "react";
 function getColorFromInitial(initial: string) {
 
   const colors: Record<string, string> = {
-    A: "#E27D60", B: "#85DCB", C: "#E8A87C", D: "#C38D9E", E: "#41B3A3",
+    A: "#E27D60", B: "#92A8D1", C: "#E8A87C", D: "#C38D9E", E: "#41B3A3",
     F: "#6B5B95", G: "#F7CAC9", H: "#92A8D1", I: "#955251", J: "#B565A7",
     K: "#009B77", L: "#DD4124", M: "#45B8AC", N: "#EFC050", O: "#5B5EA6",
     P: "#9B2335", Q: "#D65076", R: "#45ADA8", S: "#9DE0AD", T: "#E1B16A",

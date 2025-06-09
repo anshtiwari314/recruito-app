@@ -4,35 +4,13 @@ import { FaVideoSlash } from "react-icons/fa"
 import { faMicrophone, faMicrophoneSlash } from "@fortawesome/free-solid-svg-icons"
 import { useData } from "../context/DataWrapper"
 
-
 function getColorFromInitial(initial: string) {
   const colors: Record<string, string> = {
-    A: "#E27D60",
-    B: "#85DCB",
-    C: "#E8A87C",
-    D: "#C38D9E",
-    E: "#41B3A3",
-    F: "#6B5B95",
-    G: "#F7CAC9",
-    H: "#92A8D1",
-    I: "#955251",
-    J: "#B565A7",
-    K: "#009B77",
-    L: "#DD4124",
-    M: "#45B8AC",
-    N: "#EFC050",
-    O: "#5B5EA6",
-    P: "#9B2335",
-    Q: "#D65076",
-    R: "#45ADA8",
-    S: "#9DE0AD",
-    T: "#E1B16A",
-    U: "#2E7D32",
-    V: "#FF6F61",
-    W: "#88B04B",
-    X: "#F1948A",
-    Y: "#BB8FCE",
-    Z: "#4FC1E9",
+    A: "#E27D60", B: "#92A8D1", C: "#E8A87C", D: "#C38D9E", E: "#41B3A3",
+    F: "#6B5B95", G: "#F7CAC9", H: "#92A8D1", I: "#955251",
+    J: "#B565A7", K: "#009B77", L: "#DD4124", M: "#45B8AC", N: "#EFC050", O: "#5B5EA6",
+    P: "#9B2335", Q: "#D65076", R: "#45ADA8", S: "#9DE0AD", T: "#E1B16A",
+    U: "#2E7D32", V: "#FF6F61", W: "#88B04B", X: "#F1948A", Y: "#BB8FCE", Z: "#4FC1E9",
   }
   return colors[initial] || "#777"
 }
@@ -61,7 +39,7 @@ export function TextPlaceHolder({ e }: { e: any }) {
     return () => clearTimeout(timeout)
   }, [])
 
-  if (!e || !e.name) {
+  if (!e) {
     return (
       <div className="w-full h-full absolute inset-0 flex justify-center items-center z-10 bg-neutral-900">
         <div
@@ -93,13 +71,15 @@ export function TextPlaceHolder({ e }: { e: any }) {
         }`}
         style={{ backgroundColor: darkColor }}
       >
-        <p className="text-3xl md:text-6xl text-white font-semibold">{e?.name?.substring(0, 2).toUpperCase()}</p>
+        <p className="text-3xl md:text-6xl text-white font-semibold">
+          {e?.name?.substring(0, 2).toUpperCase()}
+        </p>
       </div>
     </div>
   )
 }
 
-export function Display({ e, refreshKey }: { e: any; refreshKey: number }) {
+export function Display({ e }: { e: any }) {
   const vidRef = useRef<HTMLVideoElement>(null)
   const [videoLoaded, setVideoLoaded] = useState(false)
 
@@ -130,16 +110,16 @@ export function Display({ e, refreshKey }: { e: any; refreshKey: number }) {
         vid.removeEventListener("error", onError)
       }
     }
-  }, [e, refreshKey])
+  }, [e?.videoStream, e?.cameraStatus, e?.isCameraAvailable])
 
-  const showPlaceholder = !e?.isCameraAvailable || !e?.cameraStatus || !e?.videoStream || !videoLoaded
+  const showPlaceholder =
+    !e?.isCameraAvailable || !e?.cameraStatus || !e?.videoStream || !videoLoaded
 
   return (
     <div className="relative w-full h-full bg-black rounded-lg overflow-hidden">
       {showPlaceholder && <TextPlaceHolder e={e} />}
 
       <video
-        key={refreshKey}
         ref={vidRef}
         className="w-full h-full object-cover"
         autoPlay
@@ -152,71 +132,72 @@ export function Display({ e, refreshKey }: { e: any; refreshKey: number }) {
       />
 
       <div className="absolute left-4 bottom-4 flex gap-3 items-center z-20">
-  {e && (
-    <>
-      {/* Microphone logic */}
-      {!e.isMicrophoneAvailable ? (
-        <div className="bg-red-500/70 backdrop-blur-sm rounded-full p-2.5 flex items-center justify-center">
-          <FontAwesomeIcon icon={faMicrophoneSlash} className="text-white text-xl" title="Microphone unavailable" />
-        </div>
-      ) : e.microphoneStatus ? (
-        <div className="bg-black/50 backdrop-blur-sm rounded-full p-2.5 flex items-center justify-center hover:bg-black/70 transition-all duration-300">
-          <FontAwesomeIcon icon={faMicrophone} className="text-white text-xl" title="Microphone active" />
-        </div>
-      ) : (
-        <div className="bg-black/50 backdrop-blur-sm rounded-full p-2.5 flex items-center justify-center hover:bg-black/70 transition-all duration-300">
-          <FontAwesomeIcon icon={faMicrophoneSlash} className="text-white text-xl" title="Microphone muted" />
+        {e && (
+          <>
+            {!e.isMicrophoneAvailable ? (
+              <div className="bg-red-500/70 backdrop-blur-sm rounded-full p-2.5 flex items-center justify-center">
+                <FontAwesomeIcon
+                  icon={faMicrophoneSlash}
+                  className="text-white text-xl"
+                  title="Microphone unavailable"
+                />
+              </div>
+            ) : e.microphoneStatus ? (
+              <div className="bg-black/50 backdrop-blur-sm rounded-full p-2.5 flex items-center justify-center hover:bg-black/70 transition-all duration-300">
+                <FontAwesomeIcon
+                  icon={faMicrophone}
+                  className="text-white text-xl"
+                  title="Microphone active"
+                />
+              </div>
+            ) : (
+              <div className="bg-black/50 backdrop-blur-sm rounded-full p-2.5 flex items-center justify-center hover:bg-black/70 transition-all duration-300">
+                <FontAwesomeIcon
+                  icon={faMicrophoneSlash}
+                  className="text-white text-xl"
+                  title="Microphone muted"
+                />
+              </div>
+            )}
+            {!e.isCameraAvailable ? (
+              <div className="bg-red-500/70 backdrop-blur-sm rounded-full p-2.5 flex items-center justify-center">
+                <FaVideoSlash
+                  className="text-white text-xl"
+                  title="Camera unavailable"
+                />
+              </div>
+            ) : !e.cameraStatus ? (
+              <div className="bg-black/50 backdrop-blur-sm rounded-full p-2.5 flex items-center justify-center">
+                <FaVideoSlash
+                  className="text-white text-xl"
+                  title="Camera off"
+                />
+              </div>
+            ) : null}
+          </>
+        )}
+      </div>
+
+      {e?.name && (
+        <div className="absolute bottom-4 right-4 bg-black text-white px-4 py-2 rounded-full text-base font-semibold z-20 capitalize">
+          {e.name}
         </div>
       )}
-
-      {/* Camera logic */}
-      {!e.isCameraAvailable ? (
-        <div className="bg-red-500/70 backdrop-blur-sm rounded-full p-2.5 flex items-center justify-center">
-          <FaVideoSlash className="text-white text-xl" title="Camera unavailable" />
-        </div>
-      ) : !e.cameraStatus ? (
-        <div className="bg-black/50 backdrop-blur-sm rounded-full p-2.5 flex items-center justify-center">
-          <FaVideoSlash className="text-white text-xl" title="Camera off" />
-        </div>
-      ) : null}
-    </>
-  )}
-</div>
-
-
-     {e?.name && (
-  <div className="absolute bottom-4 right-4 bg-black text-white px-4 py-2 rounded-full text-base font-semibold z-20 capitalize">
-    {e.name}
-  </div>
-)}
-
     </div>
   )
 }
 
 export default function MyLargerVideoComp({ isMobile }: { isMobile: boolean }) {
-  const { selectedUserForLargeVideoRef, largeVideo, cameraToggle, microphoneToggle, users }: any = useData()
-
-  const [refreshKey, setRefreshKey] = useState(0)
+  const { selectedUserForLargeVideoRef, largeVideo, users }: any = useData()
 
   const getSelectedUser = () => {
-    if (selectedUserForLargeVideoRef) {
-      return selectedUserForLargeVideoRef
-    }
-    if (largeVideo) {
-      return largeVideo
-    }
-    if (users?.length > 0) {
-      return users[users.length - 1] 
-    }
+    if (selectedUserForLargeVideoRef) return selectedUserForLargeVideoRef
+    if (largeVideo) return largeVideo
+    if (users?.length > 0) return users[users.length - 1]
     return null
   }
 
   const selectedUser = getSelectedUser()
-
-  useEffect(() => {
-    setRefreshKey((k) => k + 1)
-  }, [cameraToggle, microphoneToggle, selectedUser])
 
   if (!selectedUser) {
     return (
@@ -227,8 +208,8 @@ export default function MyLargerVideoComp({ isMobile }: { isMobile: boolean }) {
   }
 
   return (
-    <div className="w-full h-full ">
-        <Display e={selectedUser} refreshKey={refreshKey} />
+    <div className="w-full h-full">
+      <Display e={selectedUser} />
     </div>
   )
 }
