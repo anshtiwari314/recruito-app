@@ -1,12 +1,9 @@
-"use client"
-
 import { useEffect, useRef, useState } from "react"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { FaVideoSlash } from "react-icons/fa"
 import { faMicrophone, faMicrophoneSlash } from "@fortawesome/free-solid-svg-icons"
 import { useData } from "../context/DataWrapper"
-// Import the AudioLevelIndicator component at the top of the file
-// import AudioLevelIndicator from "./audio-level-indicator"
+
 
 function getColorFromInitial(initial: string) {
   const colors: Record<string, string> = {
@@ -150,62 +147,49 @@ export function Display({ e, refreshKey }: { e: any; refreshKey: number }) {
         playsInline
         style={{
           display: showPlaceholder ? "none" : "block",
-          minHeight: "100%",
+          minHeight: "90%",
         }}
       />
 
-      {/* Controls overlay */}
       <div className="absolute left-4 bottom-4 flex gap-3 items-center z-20">
-        {e ? (
-          <>
-            {/* Microphone status with enhanced styling */}
-            {e.isMicrophoneAvailable ? (
-              e.microphoneStatus ? (
-                <div className="bg-black/50 backdrop-blur-sm rounded-full p-2.5 flex items-center justify-center transition-all duration-300 hover:bg-black/70">
-                  <FontAwesomeIcon icon={faMicrophone} className="text-green-400 text-xl" title="Microphone active" />
-                </div>
-              ) : (
-                <div className="bg-red-500/70 backdrop-blur-sm rounded-full p-2.5 flex items-center justify-center transition-all duration-300 animate-pulse">
-                  <FontAwesomeIcon icon={faMicrophoneSlash} className="text-white text-xl" title="Microphone muted" />
-                </div>
-              )
-            ) : (
-              <div className="bg-red-500/70 backdrop-blur-sm rounded-full p-2.5 flex items-center justify-center">
-                <FontAwesomeIcon
-                  icon={faMicrophoneSlash}
-                  className="text-white text-xl"
-                  title="Microphone unavailable"
-                />
-                
-              </div>
-            )}
-
-            {/* Camera status */}
-            {e.isCameraAvailable ? (
-              !e.cameraStatus && (
-                <div className="bg-red-500/70 backdrop-blur-sm rounded-full p-2.5 flex items-center justify-center">
-                  <FaVideoSlash className="text-white text-xl" title="Camera off" />
-                </div>
-              )
-            ) : (
-              <div className="bg-red-500/70 backdrop-blur-sm rounded-full p-2.5 flex items-center justify-center">
-                <FaVideoSlash className="text-white text-xl" title="Camera unavailable" />
-              </div>
-            )}
-          </>
-        ) : null}
-        {/* Audio level indicator */}
-        {/* {e?.isMicrophoneAvailable && e?.microphoneStatus && e?.videoStream && (
-          <AudioLevelIndicator stream={e.videoStream} isActive={e?.isMicrophoneAvailable && e?.microphoneStatus} />
-        )} */}
-      </div>
-
-      {/* User name overlay */}
-      {e?.name && (
-        <div className="absolute bottom-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-sm font-medium z-20">
-          {e.name}
+  {e && (
+    <>
+      {/* Microphone logic */}
+      {!e.isMicrophoneAvailable ? (
+        <div className="bg-red-500/70 backdrop-blur-sm rounded-full p-2.5 flex items-center justify-center">
+          <FontAwesomeIcon icon={faMicrophoneSlash} className="text-white text-xl" title="Microphone unavailable" />
+        </div>
+      ) : e.microphoneStatus ? (
+        <div className="bg-black/50 backdrop-blur-sm rounded-full p-2.5 flex items-center justify-center hover:bg-black/70 transition-all duration-300">
+          <FontAwesomeIcon icon={faMicrophone} className="text-white text-xl" title="Microphone active" />
+        </div>
+      ) : (
+        <div className="bg-black/50 backdrop-blur-sm rounded-full p-2.5 flex items-center justify-center hover:bg-black/70 transition-all duration-300">
+          <FontAwesomeIcon icon={faMicrophoneSlash} className="text-white text-xl" title="Microphone muted" />
         </div>
       )}
+
+      {/* Camera logic */}
+      {!e.isCameraAvailable ? (
+        <div className="bg-red-500/70 backdrop-blur-sm rounded-full p-2.5 flex items-center justify-center">
+          <FaVideoSlash className="text-white text-xl" title="Camera unavailable" />
+        </div>
+      ) : !e.cameraStatus ? (
+        <div className="bg-black/50 backdrop-blur-sm rounded-full p-2.5 flex items-center justify-center">
+          <FaVideoSlash className="text-white text-xl" title="Camera off" />
+        </div>
+      ) : null}
+    </>
+  )}
+</div>
+
+
+     {e?.name && (
+  <div className="absolute bottom-4 right-4 bg-black text-white px-4 py-2 rounded-full text-base font-semibold z-20 capitalize">
+    {e.name}
+  </div>
+)}
+
     </div>
   )
 }
@@ -215,7 +199,6 @@ export default function MyLargerVideoComp({ isMobile }: { isMobile: boolean }) {
 
   const [refreshKey, setRefreshKey] = useState(0)
 
-  // Better fallback logic
   const getSelectedUser = () => {
     if (selectedUserForLargeVideoRef) {
       return selectedUserForLargeVideoRef
@@ -224,7 +207,7 @@ export default function MyLargerVideoComp({ isMobile }: { isMobile: boolean }) {
       return largeVideo
     }
     if (users?.length > 0) {
-      return users[users.length - 1] // Get the most recent user
+      return users[users.length - 1] 
     }
     return null
   }
@@ -245,9 +228,7 @@ export default function MyLargerVideoComp({ isMobile }: { isMobile: boolean }) {
 
   return (
     <div className="w-full h-full ">
-      
         <Display e={selectedUser} refreshKey={refreshKey} />
-      
     </div>
   )
 }
