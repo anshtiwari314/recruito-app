@@ -118,11 +118,12 @@ const FooterTemp: React.FC = () => {
         </div>
 
        
-        <div className="w-[45%] flex border rounded-lg overflow-hidden">
+        <div className="w-[45%] flex border rounded-lg overflow-hidden" style={{border:'0.1rem solid red',height:'fit-content'}}>
          
           <div className="w-1/2 bg-white p-4 flex flex-col">
            
-            <div className="inline-block bg-white text-black rounded-md px-3 py-1 mb-4 border self-center">
+          {/* px-3 py-1 mb-4 */}
+            <div className="inline-block bg-white text-black rounded-md   border self-center">
               Resources
             </div>
 
