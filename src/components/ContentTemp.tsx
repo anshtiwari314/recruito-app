@@ -51,18 +51,30 @@ export function SingleCue({
 }
 
 export function VideoPanel() {
-  const { selectedUserForLargeVideoRef: e }: any = useData();
+  const { selectedUserForLargeVideoRef, users }: any = useData();
 
+  const [e, setE] = useState(selectedUserForLargeVideoRef || null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const vidRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (selectedUserForLargeVideoRef) {
+      setE(selectedUserForLargeVideoRef);
+    } else {
+      const availableUser = users?.find(
+        (u: any) => u?.isCameraAvailable || u?.isMicrophoneAvailable
+      );
+      setE(availableUser || null);
+    }
+  }, [selectedUserForLargeVideoRef, users]);
 
   useEffect(() => {
     setIsLoading(true);
     const timer = setTimeout(() => {
       setRefreshKey((k) => k + 1);
       setIsLoading(false);
-    }, 100);
+    }, 10);
     return () => clearTimeout(timer);
   }, [e?.cameraStatus, e?.isCameraAvailable, e?.isMicrophoneAvailable, e?.audioStream, e?.videoStream]);
 
@@ -128,13 +140,6 @@ export function VideoPanel() {
       key={refreshKey}
       className="w-full h-full rounded-xl shadow-lg border border-white/10 overflow-hidden backdrop-blur-sm bg-white/5 transition-all relative"
     >
-      {isLoading && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/50">
-          <FaSpinner className="animate-spin h-10 w-10 text-green" />
-          <span className="ml-3 text-white text-x font-medium">Loading...</span>
-        </div>
-      )}
-
       <div className="w-full h-full flex items-center justify-center bg-black/20">
         {e.cameraStatus ? (
           <video
@@ -152,12 +157,12 @@ export function VideoPanel() {
             }}
           >
             <div className="relative group">
-            <div
-              className="w-28 h-28 rounded-full text-white text-3xl font-bold shadow-md shadow-black/30 backdrop-blur-md flex items-center justify-center"
-              style={{ backgroundColor: bgColor }}
-            >
-              {initial}
-            </div>
+              <div
+                className="w-28 h-28 rounded-full text-white text-3xl font-bold shadow-md shadow-black/30 backdrop-blur-md flex items-center justify-center"
+                style={{ backgroundColor: bgColor }}
+              >
+                {initial}
+              </div>
               {e.microphoneStatus && (
                 <div className="absolute inset-0 rounded-full border-2 border-green-400 animate-pulse opacity-50 pointer-events-none" />
               )}
@@ -180,6 +185,7 @@ export function VideoPanel() {
     </div>
   );
 }
+
 
 const ContentTemp = () => {
   const [currentCues] = useAppSelector((state) => [state.cuesReducer.CuesList]);
