@@ -21,7 +21,7 @@ export default function RightPanel() {
     // slight delay before setting the selected user
     setTimeout(() => {
       useSelectedUserForLargeVideoRef(e);
-    }, 1000);
+    }, 100);
   };
 
   return (
