@@ -152,6 +152,7 @@ export default function DataWrapper({
   const [screenRecording,setScreenRecording] = useState(false)
   const [audioRecording,setaudioRecording] = useState(false)
   const [unreadCount,setUnreadCount]=useState<number>(0);
+  const [transcriptionIndicator,setTranscriptionIndicator]=useState<number>(0);
   // const [chatToggle,setChatToggle]=useState<boolean>(false)
 
   const globalRef = useRef({
@@ -1068,6 +1069,7 @@ export default function DataWrapper({
 
     function handleLiveTranscriptions(data: any) {
       console.log("handle live transcriptions", data);
+      setTranscriptionIndicator((cnt)=>cnt+1);
       let tempArr: Array<TranscriptionDataType> = [];
 
       let obj: TranscriptionDataType = { ...initialTranscriptionObj };
@@ -1078,8 +1080,8 @@ export default function DataWrapper({
       //obj.isCandidate = data.isCandidate
 
       tempArr.push(obj);
-
       dispatch(addTranscription(tempArr));
+
     }
 
     function handleJobDetails(data: any) {

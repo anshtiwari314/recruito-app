@@ -23,7 +23,7 @@ const DraggableChatWindow = () => {
   const chatDivRef = useRef<HTMLDivElement | null>(null)
   const chatWindowRef = useRef<HTMLDivElement | null>(null)
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch() 
   const [msg, setMsg] = useState("")
 
   const [chats] = useAppSelector((state) => [state.chatReducer])

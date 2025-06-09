@@ -25,6 +25,7 @@ export default function MeetingPageHeader() {
     setScreenRecording,
     ngrokServerUrl,setNgrokServerUrl,interviewMetaRef,unreadCount,setUnreadCount,
     transcriptionToggle,setTranscriptionToggle,
+    transcriptionIndicator,setTranscriptionIndicator
   }: any = useData();
 
   const title = interviewMetaRef.current?.title;
@@ -52,6 +53,7 @@ export default function MeetingPageHeader() {
   };
   const toggleLive = () => {
     setTranscriptionToggle((prev: boolean) => !prev);
+    setTranscriptionIndicator(0);
     console.log("Live Speech To Text");
   };
 
@@ -154,20 +156,25 @@ export default function MeetingPageHeader() {
             </button>
           </div>
 
-          {isHost && (
-            <div className="relative">
-              <button
-                className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700 relative"
-                onClick={toggleLive}
-              >
-                {transcriptionToggle ? (
-                  <i className="fas fa-closed-captioning text-black-500 fa-lg" />
-                ) : (
-                  <i className="far fa-closed-captioning text-black-500 fa-lg" />
-                )}
-              </button>
-            </div>
-          )}
+              {isHost && (
+          <div className="relative">
+            <button
+              className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700 relative"
+              onClick={toggleLive}
+            >
+              {transcriptionToggle ? (
+                <i className="fas fa-closed-captioning text-black-500 fa-lg" />
+              ) : (
+                <i className="far fa-closed-captioning text-black-500 fa-lg" />
+              )}
+
+              {transcriptionIndicator > 0 && !transcriptionToggle && (
+                <span className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-blue-500 rounded-full border-2 border-white z-10 shadow-md animate-pulse blur-[0.5px] scale-[1.1]" />
+              )}
+            </button>
+          </div>
+        )}
+
 
       
           <div className="relative">

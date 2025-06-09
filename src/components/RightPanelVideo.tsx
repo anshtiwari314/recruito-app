@@ -1,6 +1,5 @@
 import React, { useRef, useEffect } from "react";
 
-// Helper: Initial se ek color generate karne wala simple function
 function getColorFromInitial(initial: string) {
 
   const colors: Record<string, string> = {
@@ -45,29 +44,45 @@ export function RightPanelVideo({ e, muted }: { e: any; muted: boolean }) {
   }, [e.audioStream, muted]);
 
   function getMicIcon() {
-    if (!e?.isMicrophoneAvailable) return null;
-    if (e?.microphoneStatus === false)
-      return (
-        <i className="fa-solid fa-microphone-slash bg-black/50 text-white p-1 rounded"></i>
-      );
-    else
-      return (
-        <i className="fa-solid fa-microphone bg-black/50 text-white p-1 rounded"></i>
-      );
+  if (!e) return null;
+
+  if (!e?.isMicrophoneAvailable) {
+    return (
+      <i className="fa-solid fa-microphone-slash text-red-500 bg-black/50 p-1 rounded"></i>
+    );
   }
 
-  function getVideoIcon() {
-    if (!e?.isCameraAvailable) return null;
-    if (e?.cameraStatus === false) {
-      return (
-        <i className="fa-solid fa-video-slash bg-black/50 text-white p-1 rounded"></i>
-      );
-    } else {
-      return (
-        <i className="fa-solid fa-video bg-black/50 text-white p-1 rounded"></i>
-      );
-    }
+  if (e?.microphoneStatus === false) {
+    return (
+      <i className="fa-solid fa-microphone-slash text-white bg-black/50 p-1 rounded"></i>
+    );
   }
+
+  return (
+    <i className="fa-solid fa-microphone text-white bg-black/50 p-1 rounded"></i>
+  );
+}
+
+function getVideoIcon() {
+  if (!e) return null;
+
+  if (!e?.isCameraAvailable) {
+    return (
+      <i className="fa-solid fa-video-slash text-red-500 bg-black/50 p-1 rounded"></i>
+    );
+  }
+
+  if (e?.cameraStatus === false) {
+    return (
+      <i className="fa-solid fa-video-slash text-white bg-black/50 p-1 rounded"></i>
+    );
+  }
+
+  return (
+    <i className="fa-solid fa-video text-white bg-black/50 p-1 rounded"></i>
+  );
+}
+
 
   const initial = e?.name ? e.name.charAt(0).toUpperCase() : "?";
   const bgColor = getColorFromInitial(initial);
@@ -125,7 +140,6 @@ export function RightPanelVideo({ e, muted }: { e: any; muted: boolean }) {
     </div>
   </div>
 </div>
-
     </>
   );
 }

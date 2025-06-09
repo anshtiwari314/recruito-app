@@ -5,34 +5,37 @@ import { useData } from "../context/DataWrapper";
 import { useAppSelector } from "@/store/store";
 
 export default function RightPanel() {
-  const { users, selectedUserForLargeVideoRef,useSelectedUserForLargeVideoRef }: any = useData();
+  const {
+    users,
+    selectedUserForLargeVideoRef,
+    useSelectedUserForLargeVideoRef,
+  }: any = useData();
   const { isHost } = useAppSelector((state) => state.qpReducer);
 
   const handleUserSelect = (e: any) => {
-    if(e!==null)
-    {
+    if (e !== null) {
       useSelectedUserForLargeVideoRef(null);
     }
     console.log("Selected user for large video:", e);
-    //should i add a delay here?
-    //if so, then use setTimeout
+
+    // slight delay before setting the selected user
     setTimeout(() => {
-       useSelectedUserForLargeVideoRef(e);
+      useSelectedUserForLargeVideoRef(e);
     }, 1000);
-    
   };
+
   return (
     <div
       id="right-panel"
-      className="w-2/12 bg-white border-l border-neutral-200 flex flex-col"
+      className="w-2/12 bg-white border-l border-neutral-200 flex flex-col overflow-hidden"
     >
       <div className="p-4 border-b border-neutral-200">
         <h2 className="font-semibold mb-4 text-neutral-900">
           Participants ({users.length})
         </h2>
         <div
-          className="space-y-4"
-          style={{ height: "73.5vh" }}
+          className="space-y-4 overflow-y-auto"
+          style={{ height: "60.5vh",overflowY:"scroll" }}
         >
           {users.map((e, i) => (
             <div
