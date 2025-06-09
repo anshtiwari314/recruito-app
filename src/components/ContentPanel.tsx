@@ -43,11 +43,11 @@ export default function ContentPanel({
   console.log("users updated", users)
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col" >
       <DraggableChatWindow />
 
       {isHost ? (
-        <div className="h-full flex flex-col justify-between">
+        <div className="h-full flex flex-col justify-between p-4" >
           <ContentTemp />
           <FooterTemp />
         </div>

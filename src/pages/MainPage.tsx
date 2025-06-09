@@ -170,7 +170,8 @@ export default function MainPage() {
           <div className="overflow-y-auto w-screen min-h-screen relative bg-neutral-50" style={{ height: '85vh', width: '100vw' }}>
             <MeetingPageHeader />
             <main id="main-content" className="flex h-[calc(100vh-120px)]">
-              <div id="content-panel" className="relative grow w-10/12 p-6 overflow-y-hidden">
+            {/* grow w-10/12 p-6 */}
+              <div id="content-panel" className="relative grow w-10/12 px-3 py-4 overflow-y-hidden" >
                 <ContentPanel isMobile={isMobile} />
               </div>
               <RightPanel />

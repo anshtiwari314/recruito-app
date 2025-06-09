@@ -66,6 +66,7 @@ export function RightPanelVideo({ e, muted }: { e: any; muted: boolean }) {
 function getVideoIcon() {
   if (!e) return null;
 
+  console.log('get video icon',e)
   if (!e?.isCameraAvailable) {
     return (
       <i className="fa-solid fa-video-slash text-red-500 bg-black/50 p-1 rounded"></i>
@@ -112,7 +113,7 @@ function getVideoIcon() {
             boxShadow: "0 4px 6px rgba(0,0,0,0.2)",
           }}
         >
-          {initial}
+          {e.name.split(' ')[0].substring(0,2).toUpperCase()}
         </div>
       </div>
     ) : (

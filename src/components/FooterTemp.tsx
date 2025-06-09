@@ -72,12 +72,13 @@ const FooterTemp: React.FC = () => {
   }, [status]);
 
   return (
-    <footer className="text-white pt-4 pb-2 mb-6">
-      <div className="flex w-full mt-2 px-4">
+    // mb-6
+    <footer className="text-white" >
+      <div className="flex w-full" style={{flexDirection:'row',alignItems:'center'}}>
        
-        <div className="w-[55%] pr-4 mb-4 flex flex-col space-y-3">
-          <div id="ai-query" style={{ flex: 0.2 }}>
-            <div className="bg-white rounded-lg shadow p-4">
+        <div className="w-[55%] pr-4 flex flex-col space-y-3" >
+          <div id="ai-query" style={{ flex: 0.2, }} >
+            <div className="bg-white rounded-lg shadow p-4" >
               <div className="flex items-center text-black space-x-3">
                 <textarea
                   placeholder="Enter your notes here ..."
@@ -118,12 +119,12 @@ const FooterTemp: React.FC = () => {
         </div>
 
        
-        <div className="w-[45%] flex border rounded-lg overflow-hidden" style={{border:'0.1rem solid red',height:'fit-content'}}>
+        <div className="w-[45%] h-full bg-white flex border rounded-lg overflow-hidden" >
          
-          <div className="w-1/2 bg-white p-4 flex flex-col">
+          <div className="w-1/2 px-4 py-4  flex flex-col">
            
           {/* px-3 py-1 mb-4 */}
-            <div className="inline-block bg-white text-black rounded-md   border self-center">
+            <div className="inline-block bg-white text-black rounded-md px-2 py-1 mb-1 border self-center">
               Resources
             </div>
 
@@ -165,9 +166,12 @@ const FooterTemp: React.FC = () => {
           <div className="border-r" />
 
           {/* Right Half: Candidate Info */}
-          <div className="w-1/2 bg-white p-4 flex flex-col">
+          <div className="w-1/2 px-4 py-4 flex flex-col">
+            
+          {/* px-3 py-1 mb-4 */}
             {/* Heading: Centered Horizontally */}
-            <div className="inline-block bg-white text-black rounded-md px-3 py-1 mb-4 border self-center">
+
+            <div className="inline-block bg-white text-black rounded-md px-2 py-1 mb-1 border self-center">
               Candidate Info
             </div>
 

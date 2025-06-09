@@ -303,7 +303,7 @@ export default function DataWrapper({
 
     reader.onloadend = () => {
       let base64data = reader.result;
-      console.log(base64data?.split(",")[1],"[DEbugggggggggggggggg]");
+     // console.log(base64data?.split(",")[1],"[DEbugggggggggggggggg]");
       blob = null;
 
       console.log("inside send to server", data);

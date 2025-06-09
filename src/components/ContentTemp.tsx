@@ -25,7 +25,7 @@ export function SingleCue({
   const [toggleDetails, setToggleDetails] = useState(true);
 
   return (
-    <div className="p-3 bg-neutral-50 rounded-lg border border-neutral-200">
+    <div className="p-3 bg-neutral-50 rounded-lg border border-neutral-200" >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-3">
           {isAnswered ? (
@@ -158,10 +158,10 @@ export function VideoPanel() {
           >
             <div className="relative group">
               <div
-                className="w-28 h-28 rounded-full text-white text-3xl font-bold shadow-md shadow-black/30 backdrop-blur-md flex items-center justify-center"
-                style={{ backgroundColor: bgColor }}
+                className="rounded-full text-white text-3xl shadow-md shadow-black/30 backdrop-blur-md flex items-center justify-center"
+                style={{ backgroundColor: bgColor,width:'9rem',height:'9rem',fontSize:'2.4rem',letterSpacing:'0.1rem',fontWeight:'600' }}
               >
-                {initial}
+                {e.name.split(' ')[0].substring(0,2).toUpperCase()}
               </div>
               {e.microphoneStatus && (
                 <div className="absolute inset-0 rounded-full border-2 border-green-400 animate-pulse opacity-50 pointer-events-none" />
@@ -171,7 +171,7 @@ export function VideoPanel() {
         )}
       </div>
 
-      <div className="absolute bottom-3 left-3 bg-black text-white text-base font-semibold rounded-lg px-4 py-1.5 max-w-[180px] truncate capitalize shadow-md">
+      <div className="absolute bottom-3 left-3 bg-black text-white text-base font-semibold rounded-lg px-4 py-1.5 max-w-[180px] truncate capitalize shadow-md" >
         {e.name}
       </div>
       <div className="absolute bottom-3 right-3 flex items-center gap-3">
@@ -191,7 +191,7 @@ const ContentTemp = () => {
   const [currentCues] = useAppSelector((state) => [state.cuesReducer.CuesList]);
 
   return (
-    <div className="flex gap-6 h-[58vh] mb-2">
+    <div className="flex gap-6 h-[100vh] " >
       <div className="w-[41%] h-[95%] flex flex-col bg-white rounded-lg shadow-sm border-2 border-zinc-500">
         <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-300">
           <h3 className="text-lg font-semibold text-neutral-900">AI Suggestions</h3>
