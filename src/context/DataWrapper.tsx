@@ -29,6 +29,7 @@ import { PostReq } from "../functions/requests";
 //import * as ort from "onnxruntime-web";
 //import * as vad from "@ricky0123/vad-web";
 import { addChat } from "../reducers/chatReducer";
+import { getTimeStamp } from "../functions/generalFn";
 
 const Context = createContext("");
 
@@ -1057,8 +1058,9 @@ export default function DataWrapper({
     let url3 = 'https://temp-meeting-server-production.up.railway.app/'
     let url4 = 'https://temp-meeting-server.vercel.app/'
     let url5 = 'https://temp-meeting-server.onrender.com'
+    let url6 = 'https://babb-103-173-124-203.ngrok-free.app'
 
-    let tempSocket = io("wss://recruitonodesocket.vitti.insure");
+    let tempSocket = io(url6);
 
     //This is a socket connection with backend server to handle cues specific requests or other api requests
     let tempSocket2 = io(
@@ -1745,7 +1747,7 @@ export default function DataWrapper({
   useEffect(() => {
     if (
       socket2 === null ||
-      myStream === null ||
+      //myStream === null ||
       myId === "" ||
       name === "" ||
       meetingIsLegit === false
@@ -1753,6 +1755,8 @@ export default function DataWrapper({
       return;
 
     function connected() {
+      console.log('connected socket2')
+      socket2.emit("user_connected",{name,myId,roomId,timeStamp:getTimeStamp(),socketId:socket2?.id})
       if (isHost === true) {
         let questionsApiReqPayload = {
           // jobid:jobId,
@@ -1761,7 +1765,7 @@ export default function DataWrapper({
           roomid: "abc-123-fgh-456",
           jobid: "1",
           agentid: "1234",
-          // custemailid: custEmailId,
+          //custemailid: custEmailId,
           name: name,
         };
         // let liveQnaReqPayload= {
