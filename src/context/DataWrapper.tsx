@@ -280,7 +280,44 @@ export default function DataWrapper({
           url: 'turn:global.turn.twilio.com:443?transport=tcp',
           urls: 'turn:global.turn.twilio.com:443?transport=tcp',
           username: '17e02ce71d7a64c2073b5531281d90eb0ad3adc4b03c8562f1381cc41ea020b7'
-        }
+        },
+
+        {
+          urls: "stun:bn-turn1.xirsys.com",
+        },
+        {
+          credential: 'cc0581ea-45c6-11f0-8f0a-0242ac140004',
+          url: 'turn:bn-turn1.xirsys.com:80?transport=udp',
+          urls: 'turn:bn-turn1.xirsys.com:80?transport=udp',
+          username: 'S1My13QHDQoyOr7NPX__p-6OE7HJrClwqmowQOBNMEO44FgCGqTrnPwr1gcfUD6zAAAAAGhH1QlhbnNodGl3YXJpMzE0'
+        },
+        {
+          credential: 'cc0581ea-45c6-11f0-8f0a-0242ac140004',
+          url: 'turn:bn-turn1.xirsys.com:3478?transport=udp',
+          urls: 'turn:bn-turn1.xirsys.com:3478?transport=udp',
+          username: 'S1My13QHDQoyOr7NPX__p-6OE7HJrClwqmowQOBNMEO44FgCGqTrnPwr1gcfUD6zAAAAAGhH1QlhbnNodGl3YXJpMzE0'
+        },
+        {
+          credential: 'cc0581ea-45c6-11f0-8f0a-0242ac140004',
+          url: 'turn:bn-turn1.xirsys.com:80?transport=tcp',
+          urls: 'turn:bn-turn1.xirsys.com:80?transport=tcp',
+          username: 'S1My13QHDQoyOr7NPX__p-6OE7HJrClwqmowQOBNMEO44FgCGqTrnPwr1gcfUD6zAAAAAGhH1QlhbnNodGl3YXJpMzE0'
+        },
+        
+        {
+          credential: 'cc0581ea-45c6-11f0-8f0a-0242ac140004',
+          url: 'turns:bn-turn1.xirsys.com:443?transport=tcp',
+          urls: 'turns:bn-turn1.xirsys.com:443?transport=tcp',
+          username: 'S1My13QHDQoyOr7NPX__p-6OE7HJrClwqmowQOBNMEO44FgCGqTrnPwr1gcfUD6zAAAAAGhH1QlhbnNodGl3YXJpMzE0'
+        },
+        {
+          credential: 'cc0581ea-45c6-11f0-8f0a-0242ac140004',
+          url: 'turns:bn-turn1.xirsys.com:5349?transport=tcp',
+          urls: 'turns:bn-turn1.xirsys.com:5349?transport=tcp',
+          username: 'S1My13QHDQoyOr7NPX__p-6OE7HJrClwqmowQOBNMEO44FgCGqTrnPwr1gcfUD6zAAAAAGhH1QlhbnNodGl3YXJpMzE0'
+        },
+        
+        
       ]
     }
   }
