@@ -47,6 +47,7 @@ export function RightPanelVideo({e,muted}:{e:any,muted:boolean}) {
           
       },[e.audioStream,muted])
 
+      
       function getMicIcon(){
         if(!e?.isMicrophoneAvailable)
           return null 

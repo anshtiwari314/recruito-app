@@ -30,6 +30,7 @@ import cuesReducer, { addCuesInTopic, updateCuesInTopic } from "../reducers/cues
 import { addChat } from "../reducers/chatReducer";
 //import * as ort from "onnxruntime-web";
 //import * as vad from "@ricky0123/vad-web";
+import { getTimeStamp } from "../functions/generalFn";
 
 const Context = createContext("");
 
@@ -925,6 +926,7 @@ export default function DataWrapper({
 
 
   async function processRecordedAudio() {
+
     try {
       console.log(
         `%c just before vid to blob ${new Date().toLocaleTimeString()}`,
@@ -1015,7 +1017,7 @@ export default function DataWrapper({
     let url5 = 'https://temp-meeting-server.onrender.com'
     let url6 = 'wss://recruitonodesocket.vitti.insure'
     let url7 = 'https://be80-103-173-124-200.ngrok-free.app/'
-    let url8 = 'http://192.168.1.10:5000'
+    let url8 = 'https://babb-103-173-124-203.ngrok-free.app'
 
     //let url9 = 'http://192.168.1.10:3000'
 
@@ -1023,8 +1025,9 @@ export default function DataWrapper({
 
     //This is a socket connection with backend server to handle cues specific requests or other api requests
     let tempSocket2 = io(
-    // 'http://localhost:5000',
+     //'http://localhost:5000',
       "wss://recruito.vitti.insure",
+     //"https://df38-2401-4900-8fce-4d2a-991b-d20e-a80e-c7c7.ngrok-free.app"
     // 'https://490f-49-204-211-204.ngrok-free.app',
      //'https://a910-49-204-211-204.ngrok-free.app',
      //{ transports: ["websocket"]}
@@ -1045,6 +1048,7 @@ export default function DataWrapper({
       if (socket) {
         socket.disconnect();
         console.log("Socket disconnected");
+
       }
       if (socket2) {
         socket2.disconnect();
@@ -1053,6 +1057,9 @@ export default function DataWrapper({
     };
   }, [myId, meetingIsLegit]);
 
+  useEffect(()=>{
+    console.log('is host',isHost)
+  },[isHost])
   /* ========================================================================= */
   /* ========================================================================= */
   /* 2.1. Handle cues specific requests coming in from server via socket */
@@ -1842,6 +1849,8 @@ export default function DataWrapper({
       return;
 
     function connected() {
+      console.log('connected socket2')
+      socket2.emit("user_connected",{name,myId,roomId,timeStamp:getTimeStamp(),socketId:socket2?.id})
       if (isHost === true) {
         let questionsApiReqPayload = {
           // jobid:jobId,

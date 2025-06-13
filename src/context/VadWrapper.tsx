@@ -9,6 +9,8 @@ import { PostReq } from '../functions/requests';
 import { utils } from "@ricky0123/vad-react"
 //import { processAudioToBase64 } from '../functions/generalFn';
 //import useRequest from '../hooks/requests';
+import { useAppSelector } from "@/store/store";
+
 
 const VadContext = createContext('vadContext')
 
@@ -19,7 +21,7 @@ export function useVad(){
 export function VadWrapper({children}){
 
 
-    const {ngrokServerUrl,setMsgLoading,oneWayUrl,socket2,usersArrRef,name,isHost,myAudioStream} = useData()
+    const {ngrokServerUrl,setMsgLoading,oneWayUrl,socket2,usersArrRef,name,myAudioStream} = useData()
     //const {currentUser} = useAuth()
     const [vadRecordingOn,setVadRecordingOn] = useState<boolean>(false);
     let recordingStatus = useRef(false);
@@ -31,6 +33,8 @@ export function VadWrapper({children}){
     const [manualVadStatus,setManualVadStatus] = useState(true)
 
     const initReqStatusRef = useRef(false)
+    const { jobId, roomId, custEmailId, agentId, isHost, meetingIsLegit } = useAppSelector((state) => state.qpReducer);
+
     //const {PostReq } = useRequest()
 
     // ort.env.wasm.wasmPaths = {
@@ -39,6 +43,10 @@ export function VadWrapper({children}){
     //     "ort-wasm.wasm": `/ort-wasm.wasm`,
     //     "ort-wasm-threaded.wasm": `/ort-wasm-threaded.wasm`,
     //   }
+
+    useEffect(()=>{
+      console.log('is host',isHost)
+    },[isHost])
 
     async function processAudioToBase64(audio,url,data){
       console.log("vad stopped")
@@ -101,7 +109,7 @@ export function VadWrapper({children}){
        
       
 
-    },[socket2])
+    },[socket2,isHost])
 
 
     function VAD(cb1:CallableFunction,cb2:CallableFunction){

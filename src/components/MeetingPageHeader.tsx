@@ -69,7 +69,7 @@ export function MicIcon(){
   };
 
 
-  console.log('myAudioStream',myAudioStream)
+  console.log('myAudioStream',myAudioStream,microphoneToggle)
 
   if(myAudioStream===false || myAudioStream===null)
   return (

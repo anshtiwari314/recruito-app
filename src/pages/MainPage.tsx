@@ -12,10 +12,11 @@ import NotFound from "./NotFoundPage";
 import Leave from "./LeavePage";
 import MeetingPageHeader from "../components/MeetingPageHeader";
 import ShowMessage from "../components/ShowMessage";
+import Modal from "../components/Modal";
 
 export default function MainPage() {
   //@ts-ignore
-  const { setMyId, setName } = useData();
+  const { setMyId, setName,myId,Socket } = useData();
   const { isHost, meetingIsLegit } = useAppSelector((state) => state.qpReducer);
   const { jobTitle } = useAppSelector((state) => state.cuesReducer);
   const { closeCall } = useAppSelector((state) => state.nvReducer);
@@ -199,6 +200,24 @@ export default function MainPage() {
     //http://localhost:5173/?room_id=abc-123-fgh-456&cust_email_id=saurabhahlawat89@gmail.com&agent_id=1234&job_id=1
   //http://localhost:5173/?room_id=anuj-anuj-anuj-anuj&cust_email_id=saurabhahlawat89@gmail.com&agent_id=1234&job_id=1
 
+
+
+  const [showModal, setShowModal] = useState(null);
+
+  // Define callback functions for when the modal is dismissed or 'Fix' is clicked
+  const handleDismiss = () => {
+    console.log('Modal dismissed!');
+    // Set showModal to null to hide the modal
+    setShowModal(null);
+  };
+
+  const handleFix = () => {
+    console.log('Fix button clicked!');
+    // Perform your fix logic here
+    // Then hide the modal
+    setShowModal(null);
+  };
+
   return (
     <>
       {tempIsHost === null ? (
@@ -209,8 +228,28 @@ export default function MainPage() {
         ) : (
           <div className="overflow-y-auto w-screen min-h-screen relative bg-neutral-50" style={{height:'100vh',width:'100vw',overflow:'hidden'}}>
             {/* App header */}
+            {/* <div style={{textAlign:'center'}}>
+            {myId}
+            <br/>
+            {Socket?.id}
+            </div> */}
             
             <MeetingPageHeader/>
+            {/* <Modal
+          {...showModal} // Spreads all properties from the showModal object as props
+          onDismiss={handleDismiss} // Always pass the dismiss handler
+          x={'25%'}
+          y={'50%'}
+         // msg={'please enable microphone from your browser settings'}
+          type={'info'}
+          //time={10}
+          heading={'Microphone not available'}
+          width={'50%'}
+          height={'10%'}
+          // onFix is conditionally passed if type is 'error'
+          // If showModal.type === 'error', then showModal.onFix will be defined and passed
+          // Otherwise, it will be undefined, which is fine for the Modal component
+        /> */}
             {/* <ShowMessage/> */}
             {/* Main Content */}
             <main id="main-content" className="flex h-[calc(100vh-120px)]" 
@@ -225,6 +264,7 @@ export default function MainPage() {
                 
                 <ContentPanel isMobile={isMobile} />
                 {/**/}
+
               </div>
 
               {/* Right Panel */}

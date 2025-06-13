@@ -12,13 +12,13 @@ export default function App() {
   return (
     <Router>
         <ReduxProvider>
-        <DataWrapper>
+        
           
           <Routes>
             
             {/* <Route path="/" element={<HomePage/>}/> */}
             {/* Main Page Route */}
-            <Route path="/" element={<VadWrapper><MainPage/></VadWrapper>} />
+            <Route path="/" element={<DataWrapper><VadWrapper><MainPage/></VadWrapper></DataWrapper>} />
             {/* 404 Page Route */}
             
             <Route path="/404" element={<NotFoundPage />} />
@@ -32,7 +32,7 @@ export default function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
           
-          </DataWrapper>
+          
           
         </ReduxProvider>
     </Router>
