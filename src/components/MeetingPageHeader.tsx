@@ -129,9 +129,11 @@ export default function MeetingPageHeader() {
     setMicroPhoneToggle,
     setScreenSharing,
     stopVideoRecording,
+    setUnreadCount,
+    unreadCount,
     chatToggle,setChatToggle,
     screenRecording,setScreenRecording,ngrokServerUrl,setNgrokServerUrl
-  }:void = useData();
+  }:any = useData();
 
   async function handleCloseCall() {
     const confirmQuit = window.confirm("Are you sure you want to quit?");
@@ -164,10 +166,14 @@ export default function MeetingPageHeader() {
     console.log("toggling the screen recording...");
   };
 
-  const toggleChatWindow = ()=>{
-    setChatToggle((p:boolean)=>!p)
-    console.log("toggling the chat window...");
-  } 
+  const toggleChatWindow = () => {
+    setChatToggle(true)
+    console.log(unreadCount)
+    // Reset unread count when opening chat
+    if (!chatToggle) {
+      setUnreadCount(0)
+    }
+  }
 
   // useEffect(()=>{
   //   console.log('vad2 loading status',VAD2.loading)
@@ -264,7 +270,8 @@ export default function MeetingPageHeader() {
                 {/* <i className="fa-solid fa-microphone-slash fa-lg"></i> */}
               
             </button>
-            <button 
+     <div className="relative">
+             <button 
             className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
             onClick={toggleChatWindow}
             >
@@ -273,10 +280,20 @@ export default function MeetingPageHeader() {
               <i className="fas fa-comment text-black-500 fa-lg" ></i>:
               <i className="far fa-comment text-black-500 fa-lg" ></i>
               }
-            
-            
+              {unreadCount > 0 && (
+                <span
+                  className={`absolute -top-1 -right-1 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center shadow-md border border-white z-10 ${
+                    chatToggle
+                      ? "bg-red-500 animate-pulse"
+                      : "bg-red-600 animate-bounce"
+                  }`}
+                >
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
             
             </button>
+     </div>
             {/*
               <button
                 className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-600"

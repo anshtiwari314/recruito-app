@@ -148,7 +148,7 @@ export default function DataWrapper({
   const audioPeersArrRef = useRef<string[]>([]);
   const [screenRecording,setScreenRecording] = useState(false)
   const [audioRecording,setaudioRecording] = useState(false)
-
+  const [unreadCount,setUnreadCount]=useState<number>(0);
   const globalRef = useRef({
     recordingStatus: false,
     screenRecordingStatus:false,
@@ -2252,6 +2252,9 @@ export default function DataWrapper({
       //setMsg((prev) => [...msgArrRef.current]);
       
       dispatch(addChat(data))
+      if(chatToggle===false){
+        setUnreadCount((prev) => prev + 1);
+      }
     }
 
     /* 10.1.12. socket.on("cue-loading-receiver") event handler */
@@ -3167,6 +3170,8 @@ export default function DataWrapper({
     stopVideoRecording,
     startRecordingScreen,
     screenRecording,
+    unreadCount,
+    setUnreadCount,
     setScreenRecording,ngrokServerUrl,setNgrokServerUrl,enableDisabledCamera,enableDisabledMicrophone
   };
 
