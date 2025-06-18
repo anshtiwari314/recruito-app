@@ -1,3 +1,5 @@
+
+import type React from "react"
 import { useState, useEffect, useRef, useCallback } from "react"
 import { useData } from "@/context/DataWrapper"
 import { useAppSelector } from "@/store/store"
@@ -15,7 +17,7 @@ const DraggableChatWindow = () => {
 
   const [showNewIndicator, setShowNewIndicator] = useState(false)
 
-  const { chatToggle, setChatToggle, setUnreadCount, socket, socket2, name } = useData()
+  const { chatToggle, setChatToggle, unreadCount, setUnreadCount, socket, socket2, name } = useData()
   const { candid, isHost } = useAppSelector((state) => state.qpReducer)
 
   const isUserScrolling = useRef(false)
@@ -23,7 +25,7 @@ const DraggableChatWindow = () => {
   const chatDivRef = useRef<HTMLDivElement | null>(null)
   const chatWindowRef = useRef<HTMLDivElement | null>(null)
 
-  const dispatch = useDispatch() 
+  const dispatch = useDispatch()
   const [msg, setMsg] = useState("")
 
   const [chats] = useAppSelector((state) => [state.chatReducer])
@@ -105,15 +107,25 @@ const DraggableChatWindow = () => {
     }
   }
 
+  const [isAtBottom, setIsAtBottom] = useState(true)
+  const lastMessageCountRef = useRef(0)
+
   const handleScroll = () => {
     const chatDiv = chatDivRef.current
     if (!chatDiv) return
 
-    const isAtBottom = chatDiv.scrollHeight - chatDiv.scrollTop - chatDiv.clientHeight < 20
-    isUserScrolling.current = !isAtBottom
+    const distanceFromBottom = chatDiv.scrollHeight - chatDiv.scrollTop - chatDiv.clientHeight
+    const currentlyAtBottom = distanceFromBottom < 50
 
-    if (isAtBottom) {
+    setIsAtBottom(currentlyAtBottom)
+
+    if (currentlyAtBottom) {
+<<<<<<< Updated upstream
+=======
+      // User scrolled to bottom - clear all indicators
+>>>>>>> Stashed changes
       setShowNewIndicator(false)
+      setUnreadCount(0)
     }
   }
 
@@ -129,17 +141,43 @@ const DraggableChatWindow = () => {
     const chatDiv = chatDivRef.current
     if (!chatDiv) return
 
-    if (!isUserScrolling.current) {
-      chatDiv.scrollTop = chatDiv.scrollHeight
-      setShowNewIndicator(false)
-    } else {
-      setShowNewIndicator(true)
+    // Check if new messages arrived
+    if (chats.length > lastMessageCountRef.current) {
+      const newMessages = chats.length - lastMessageCountRef.current
+      lastMessageCountRef.current = chats.length
+
+      if (isAtBottom) {
+<<<<<<< Updated upstream
+=======
+        // User is at bottom, scroll to show new messages and clear indicators
+>>>>>>> Stashed changes
+        setTimeout(() => {
+          if (chatDiv) {
+            chatDiv.scrollTop = chatDiv.scrollHeight
+            setUnreadCount(0)
+          }
+        }, 0)
+      } else {
+        // User is scrolled up, show both indicators
+        setShowNewIndicator(true)
+        setUnreadCount((prev) => prev + newMessages)
+      }
     }
-  }, [chats])
+  }, [chats, isAtBottom, setUnreadCount])
+
+  // Clear unread count when chat window opens and user is at bottom
+  useEffect(() => {
+    if (chatToggle && isAtBottom) {
+      setUnreadCount(0)
+    }
+  }, [chatToggle, isAtBottom, setUnreadCount])
 
   const handleToCloseChatBar = () => {
     setChatToggle(false)
-    setUnreadCount(0)
+    // Don't clear unread count here if user was scrolled up
+    if (isAtBottom) {
+      setUnreadCount(0)
+    }
   }
 
   const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -155,8 +193,9 @@ const DraggableChatWindow = () => {
     const chatDiv = chatDivRef.current
     if (chatDiv) {
       chatDiv.scrollTop = chatDiv.scrollHeight
-      isUserScrolling.current = false
+      setIsAtBottom(true)
       setShowNewIndicator(false)
+      setUnreadCount(0)
     }
   }
 
@@ -166,7 +205,6 @@ const DraggableChatWindow = () => {
       className="fixed bg-white border border-gray-600 rounded-xl shadow-2xl w-[420px] h-[580px] flex flex-col z-50"
       style={{ top: position.y, left: position.x }}
     >
-      
       <div
         className="bg-zinc-900 border-b border-gray-100 px-4 py-3 cursor-move rounded-t-xl flex justify-between items-center"
         onMouseDown={handleMouseDown}
@@ -186,7 +224,6 @@ const DraggableChatWindow = () => {
         </button>
       </div>
 
-     
       <div ref={chatDivRef} className="relative flex-1 p-4 overflow-y-auto" onScroll={handleScroll}>
         <div className="space-y-3">
           {chats.map((chat, index) => {
@@ -206,9 +243,7 @@ const DraggableChatWindow = () => {
                 <div className={`flex ${chat.name === name ? "justify-end" : "justify-start"}`}>
                   <div
                     className={`px-3 py-2 rounded-2xl max-w-[85%] ${
-                      chat.name === name
-                        ? "bg-zinc-500 text-white"
-                        : "bg-white text-black border border-gray-300"
+                      chat.name === name ? "bg-zinc-500 text-white" : "bg-white text-black border border-gray-300"
                     }`}
                   >
                     {isCode ? (
@@ -234,11 +269,7 @@ const DraggableChatWindow = () => {
                   </div>
                 </div>
 
-                <div
-                  className={`text-xs mt-1 text-gray-400 ${
-                    chat.isOutgoing ? "text-right" : "text-left"
-                  }`}
-                >
+                <div className={`text-xs mt-1 text-gray-400 ${chat.isOutgoing ? "text-right" : "text-left"}`}>
                   {chat.timeStamp}
                 </div>
               </div>
@@ -249,19 +280,16 @@ const DraggableChatWindow = () => {
         {showNewIndicator && (
           <button
             onClick={scrollToBottom}
-            className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-blue-500 hover:bg-blue-600 text-white text-xs py-1 px-3 rounded-full flex items-center space-x-1 shadow-lg"
+            className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-blue-500 hover:bg-blue-600 text-white text-xs py-1 px-3 rounded-full flex items-center space-x-1 shadow-lg animate-pulse"
           >
             <FaArrowDown size={12} />
-            <span>New Message</span>
+            <span>{unreadCount > 0 ? `${unreadCount} New Message${unreadCount > 1 ? "s" : ""}` : "New Message"}</span>
           </button>
         )}
       </div>
 
-     
       <div className="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl">
-        <div className="text-xs text-gray-500 mb-2">
-          Press Enter to send • Shift + Enter for new line
-        </div>
+        <div className="text-xs text-gray-500 mb-2">Press Enter to send • Shift + Enter for new line</div>
         <div className="flex items-end space-x-2">
           <textarea
             className="flex-1 px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none min-h-[40px] max-h-[100px] text-sm"
@@ -284,9 +312,7 @@ const DraggableChatWindow = () => {
           <button
             onClick={handleSendMessage}
             className={`p-2 rounded-xl transition-colors ${
-              msg.trim()
-                ? "bg-gray-500 hover:bg-gray-600 text-white"
-                : "bg-gray-200 text-gray-400 cursor-not-allowed"
+              msg.trim() ? "bg-gray-500 hover:bg-gray-600 text-white" : "bg-gray-200 text-gray-400 cursor-not-allowed"
             }`}
             disabled={!msg.trim()}
           >

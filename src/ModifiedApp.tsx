@@ -6,17 +6,17 @@ import ReduxProvider from "@/store/Providers";
 import NotFoundPage from "./pages/NotFoundPage";
 import TempPage from './pages/TempPage'
 import Leave from "./pages/LeavePage";
+import { VadWrapper } from "./context/VadWrapper";
 
 export default function App() {
   return (
     <Router>
         <ReduxProvider>
-        <DataWrapper>
-          <Routes>
-            
+     
+          <Routes>    
             {/* <Route path="/" element={<HomePage/>}/> */}
             {/* Main Page Route */}
-            <Route path="/" element={<MainPage/>} />
+            <Route path="/" element={<DataWrapper><VadWrapper><MainPage/></VadWrapper></DataWrapper>} />
             {/* 404 Page Route */}
             
             <Route path="/404" element={<NotFoundPage />} />
@@ -29,7 +29,7 @@ export default function App() {
             {/* Catch-all Route for undefined paths */}
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
-          </DataWrapper>
+          
         </ReduxProvider>
     </Router>
     //<Leave/>
