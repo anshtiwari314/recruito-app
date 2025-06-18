@@ -120,10 +120,6 @@ const DraggableChatWindow = () => {
     setIsAtBottom(currentlyAtBottom)
 
     if (currentlyAtBottom) {
-<<<<<<< Updated upstream
-=======
-      // User scrolled to bottom - clear all indicators
->>>>>>> Stashed changes
       setShowNewIndicator(false)
       setUnreadCount(0)
     }
@@ -147,10 +143,6 @@ const DraggableChatWindow = () => {
       lastMessageCountRef.current = chats.length
 
       if (isAtBottom) {
-<<<<<<< Updated upstream
-=======
-        // User is at bottom, scroll to show new messages and clear indicators
->>>>>>> Stashed changes
         setTimeout(() => {
           if (chatDiv) {
             chatDiv.scrollTop = chatDiv.scrollHeight
