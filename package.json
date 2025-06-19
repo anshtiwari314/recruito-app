@@ -20,6 +20,7 @@
     "@mui/icons-material": "^5.14.9",
     "@mui/material": "^5.14.9",
     "@reduxjs/toolkit": "^2.5.0",
+    "@ricky0123/vad-react": "^0.0.30",
     "@ricky0123/vad-web": "^0.0.22",
     "html-react-parser": "^4.2.0",
     "onnxruntime-web": "^1.20.1",

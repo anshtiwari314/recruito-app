@@ -1,12 +1,14 @@
-"use client"
-
-import { useState } from "react"
+import React from "react"
+import { useState, useEffect } from "react"
 import { useDispatch } from "react-redux"
 import { useAppSelector } from "@/store/store"
 import { setNVclosecall, setNVaudioUploadAnimation } from "@/reducers/navigationparamReducer"
 import { useData } from "../context/DataWrapper"
 import MeetingPageHeaderTimer from "./MeetingPageHeaderTimer"
 import DraggableLiveTranscription from "./DraggableLiveTranscript"
+import { useVad } from "../context/VadWrapper"
+import rectLoading from '../assets/reactangle-loading.gif'
+import playSound from '../assets/sound-play.gif'
 
 export default function MeetingPageHeader() {
   const dispatch = useDispatch()
@@ -34,11 +36,31 @@ export default function MeetingPageHeader() {
     setTranscriptionToggle,
     transcriptionIndicator,
     setTranscriptionIndicator,
-  }: any = useData()
+  }: any = useData();
+
+  const {
+    vadRecordingOn, setVadRecordingOn,
+    manualVadStatus, setManualVadStatus,
+    vadStatus, setVadStatus, vadInstance,
+    VAD2, userSpeaking
+  }: any = useVad();
+
+  const [showQualityMenu, setShowQualityMenu] = useState(false)
+  const [vadLoadingDelayExceeded, setVadLoadingDelayExceeded] = useState(false)
 
   const title = interviewMetaRef.current?.title
 
-  async function handleCloseCall() {
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (!VAD2 || VAD2.loading) {
+      timer = setTimeout(() => setVadLoadingDelayExceeded(true), 5000);
+    } else {
+      setVadLoadingDelayExceeded(false);
+    }
+    return () => clearTimeout(timer);
+  }, [VAD2]);
+
+  const handleCloseCall = async () => {
     const confirmQuit = window.confirm("Are you sure you want to quit?")
     if (confirmQuit) {
       sessionStorage.setItem("exitdone", "true")
@@ -55,24 +77,55 @@ export default function MeetingPageHeader() {
   const toggleScreenRecording = () => setScreenRecording((p: boolean) => !p)
   const toggleChatWindow = () => {
     setChatToggle(true)
-    console.log(unreadCount)
-    // Reset unread count when opening chat
-    if (!chatToggle) {
-      setUnreadCount(0)
-    }
+    if (!chatToggle) setUnreadCount(0)
   }
+
   const toggleLive = () => {
     setTranscriptionToggle((prev: boolean) => !prev)
     setTranscriptionIndicator(0)
     console.log("Live Speech To Text")
   }
 
-  // False state for quality menu
-  const [showQualityMenu, setShowQualityMenu] = useState(false)
-
   return (
     <>
       <div style={{ textAlign: "center" }}>
+        <div style={{
+          position: "absolute",
+          top: "0.75rem",
+          left: "5rem",
+          zIndex: 9999,
+          display: "flex",
+          alignItems: "center"
+        }}>
+          {VAD2 !== undefined && !VAD2.loading ? (
+            <h3 style={{
+              margin: 0,
+              fontWeight: 600,
+              fontSize: "1.2rem",
+              color: "green",
+              textTransform: "capitalize",
+              display: "flex",
+              alignItems: "center"
+            }}>
+              VAD files loaded ✅
+            </h3>
+          ) : (
+            <>
+              <h3 style={{
+                margin: 0,
+                marginRight: "0.5rem",
+                fontWeight: 600,
+                fontSize: "1.2rem",
+                color: "red",
+                textTransform: "capitalize"
+              }}>
+                VAD is loading...
+              </h3>
+              <img src={rectLoading} style={{ height: "1.8rem", width: "1.8rem" }} />
+            </>
+          )}
+        </div>
+
         <input
           type="text"
           placeholder="Enter your ngrok url"
@@ -113,22 +166,37 @@ export default function MeetingPageHeader() {
         </div>
 
         <div className="flex items-center space-x-4">
+          {/* Video Button */}
           <button
             className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
             onClick={toggleVideo}
           >
             {cameraToggle ? <i className="fa-solid fa-video fa-lg" /> : <i className="fa-solid fa-video-slash fa-lg" />}
           </button>
+
+          {/* Mic Button with VAD Spinner */}
           <button
-            className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
+            className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700 relative"
             onClick={toggleAudio}
+            disabled={!VAD2 || VAD2.loading}
+            title={!VAD2 || VAD2.loading ? "VAD loading..." : ""}
           >
-            {microphoneToggle ? (
+            {!VAD2 || VAD2.loading ? (
+              <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-gray-600 mx-auto" />
+            ) : microphoneToggle ? (
               <i className="fa-solid fa-microphone fa-lg" />
             ) : (
               <i className="fa-solid fa-microphone-slash fa-lg" />
             )}
+
+            {vadLoadingDelayExceeded && (!VAD2 || VAD2.loading) && (
+              <span className="absolute text-[10px] text-red-500 top-full mt-1 left-1/2 -translate-x-1/2">
+                VAD taking too long...
+              </span>
+            )}
           </button>
+
+          {/* Screen Record */}
           <button
             className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
             onClick={toggleScreenRecording}
@@ -139,6 +207,8 @@ export default function MeetingPageHeader() {
               <i className="fa-solid fa-circle-dot fa-lg text-gray-500" />
             )}
           </button>
+
+          {/* Chat Button */}
           <div className="relative">
             <button
               className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700 relative"
@@ -149,8 +219,6 @@ export default function MeetingPageHeader() {
               ) : (
                 <i className="far fa-comment text-black-500 fa-lg" />
               )}
-
-            
               {unreadCount > 0 && (
                 <span
                   className={`absolute -top-1 -right-1 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center shadow-md border border-white z-10 ${
@@ -165,6 +233,7 @@ export default function MeetingPageHeader() {
             </button>
           </div>
 
+          {/* Live Transcription */}
           {isHost && (
             <div className="relative">
               <button
@@ -176,7 +245,6 @@ export default function MeetingPageHeader() {
                 ) : (
                   <i className="far fa-closed-captioning text-black-500 fa-lg" />
                 )}
-
                 {transcriptionIndicator > 0 && !transcriptionToggle && (
                   <span className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-blue-500 rounded-full border-2 border-white z-10 shadow-md animate-pulse blur-[0.5px] scale-[1.1]" />
                 )}
@@ -184,6 +252,7 @@ export default function MeetingPageHeader() {
             </div>
           )}
 
+          {/* Network Quality */}
           <div className="relative">
             <button
               className="py-3 px-4 bg-neutral-200 hover:bg-neutral-300 rounded-lg flex items-center space-x-2"
@@ -199,22 +268,18 @@ export default function MeetingPageHeader() {
                 <div className="px-3 py-1 text-xs text-neutral-500 border-b border-neutral-200 mb-2">
                   Quality Settings
                 </div>
-
                 <button className="w-full text-left px-3 py-2 hover:bg-neutral-100 text-sm">
                   <i className="fa-solid fa-signal text-green-500 mr-2" />
                   HD Quality
                 </button>
-
                 <button className="w-full text-left px-3 py-2 hover:bg-neutral-100 text-sm">
                   <i className="fa-solid fa-signal text-yellow-500 mr-2" />
                   SD Quality
                 </button>
-
                 <button className="w-full text-left px-3 py-2 hover:bg-neutral-100 text-sm">
                   <i className="fa-solid fa-signal text-orange-500 mr-2" />
                   Low Quality
                 </button>
-
                 <button className="w-full text-left px-3 py-2 hover:bg-neutral-100 text-sm">
                   <i className="fa-solid fa-signal text-red-500 mr-2" />
                   Audio Only
@@ -223,8 +288,16 @@ export default function MeetingPageHeader() {
             )}
           </div>
 
+          {/* Sound Animation */}
+          <div style={{ height: '3.5rem', width: '6rem', backgroundColor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {(userSpeaking || (VAD2?.userSpeaking && microphoneToggle)) && (
+              <img src={playSound} style={{ width: '6rem', height: '3.5rem' }} />
+            )}
+          </div>
+
           <div className="h-8 w-[2px] bg-neutral-200" />
 
+          {/* End Call */}
           <button
             className="px-8 py-2 bg-neutral-600 hover:bg-neutral-700 text-white rounded-lg flex items-center text-lg"
             onClick={handleCloseCall}

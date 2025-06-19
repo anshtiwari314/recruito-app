@@ -1066,7 +1066,7 @@ export default function DataWrapper({
     let url6 = 'wss://recruitonodesocket.vitti.insure'
 
 
-    let tempSocket = io(url6);
+    let tempSocket = io("wss://recruitonodesocket.vitti.insure");
 
     // //This is a socket connection with backend server to handle cues specific requests or other api requests
     let tempSocket2 = io(
@@ -2699,268 +2699,268 @@ export default function DataWrapper({
   /* ========================================================================= */
   /* ========================================================================= */
   /* 13.1. Declaration of the VAD function here */
-  useEffect(() => {
-    if (myAudioStream === null || users.length === 0 || socket === null) return;
-    // if(vadEffectRender.current>0)
-    // return ;
-    vadEffectRender.current++;
-    //@ts-ignore
-    let myVad = null;
+  // useEffect(() => {
+  //   if (myAudioStream === null || users.length === 0 || socket === null) return;
+  //   // if(vadEffectRender.current>0)
+  //   // return ;
+  //   vadEffectRender.current++;
+  //   //@ts-ignore
+  //   let myVad = null;
 
-    async function VAD(cb1: CallableFunction, cb2: CallableFunction) {
-      sendToServer(new Blob([]), adminUrl, {
-        ...usersArrRef.current[0],
+  //   async function VAD(cb1: CallableFunction, cb2: CallableFunction) {
+  //     sendToServer(new Blob([]), adminUrl, {
+  //       ...usersArrRef.current[0],
 
-        init: true,
-      });
+  //       init: true,
+  //     });
 
-      const myvad = await vad.MicVAD.new({
-        onSpeechStart: cb1,
-        onSpeechEnd: cb2,
-        //positiveSpeechThreshold:0.9,
-        //negativeSpeechThreshold:0.85,
-        // positiveSpeechThreshold:0.5,
-        // negativeSpeechThreshold:0.3,
-        // redemptionFrames:100
-      });
-      // myvad.start()
-      globalRef.current.myVad = myvad;
-    }
+  //     const myvad = await vad.MicVAD.new({
+  //       onSpeechStart: cb1,
+  //       onSpeechEnd: cb2,
+  //       //positiveSpeechThreshold:0.9,
+  //       //negativeSpeechThreshold:0.85,
+  //       // positiveSpeechThreshold:0.5,
+  //       // negativeSpeechThreshold:0.3,
+  //       // redemptionFrames:100
+  //     });
+  //     // myvad.start()
+  //     globalRef.current.myVad = myvad;
+  //   }
 
-    let stop;
-    let medRec = null;
-    let flag = false;
-    let start2IntervalId: any = null;
-    let stop2TimeoutId: any = null;
-    function getWavBytes(buffer: any, options: any) {
-      const type = options.isFloat ? Float32Array : Uint16Array;
-      const numFrames = buffer.byteLength / type.BYTES_PER_ELEMENT;
+  //   let stop;
+  //   let medRec = null;
+  //   let flag = false;
+  //   let start2IntervalId: any = null;
+  //   let stop2TimeoutId: any = null;
+  //   function getWavBytes(buffer: any, options: any) {
+  //     const type = options.isFloat ? Float32Array : Uint16Array;
+  //     const numFrames = buffer.byteLength / type.BYTES_PER_ELEMENT;
 
-      const headerBytes = getWavHeader(
-        Object.assign({}, options, { numFrames })
-      );
-      const wavBytes = new Uint8Array(headerBytes.length + buffer.byteLength);
+  //     const headerBytes = getWavHeader(
+  //       Object.assign({}, options, { numFrames })
+  //     );
+  //     const wavBytes = new Uint8Array(headerBytes.length + buffer.byteLength);
 
-      // prepend header, then add pcmBytes
-      wavBytes.set(headerBytes, 0);
-      wavBytes.set(new Uint8Array(buffer), headerBytes.length);
+  //     // prepend header, then add pcmBytes
+  //     wavBytes.set(headerBytes, 0);
+  //     wavBytes.set(new Uint8Array(buffer), headerBytes.length);
 
-      return wavBytes;
-    }
+  //     return wavBytes;
+  //   }
 
-    function getWavHeader(options: any) {
-      const numFrames = options.numFrames;
-      const numChannels = options.numChannels || 2;
-      const sampleRate = options.sampleRate || 44100;
-      const bytesPerSample = options.isFloat ? 4 : 2;
-      const format = options.isFloat ? 3 : 1;
+  //   function getWavHeader(options: any) {
+  //     const numFrames = options.numFrames;
+  //     const numChannels = options.numChannels || 2;
+  //     const sampleRate = options.sampleRate || 44100;
+  //     const bytesPerSample = options.isFloat ? 4 : 2;
+  //     const format = options.isFloat ? 3 : 1;
 
-      const blockAlign = numChannels * bytesPerSample;
-      const byteRate = sampleRate * blockAlign;
-      const dataSize = numFrames * blockAlign;
+  //     const blockAlign = numChannels * bytesPerSample;
+  //     const byteRate = sampleRate * blockAlign;
+  //     const dataSize = numFrames * blockAlign;
 
-      const buffer = new ArrayBuffer(44);
-      const dv = new DataView(buffer);
+  //     const buffer = new ArrayBuffer(44);
+  //     const dv = new DataView(buffer);
 
-      let p = 0;
+  //     let p = 0;
 
-      function writeString(s: string) {
-        for (let i = 0; i < s.length; i++) {
-          dv.setUint8(p + i, s.charCodeAt(i));
-        }
-        p += s.length;
-      }
+  //     function writeString(s: string) {
+  //       for (let i = 0; i < s.length; i++) {
+  //         dv.setUint8(p + i, s.charCodeAt(i));
+  //       }
+  //       p += s.length;
+  //     }
 
-      function writeUint32(d: any) {
-        dv.setUint32(p, d, true);
-        p += 4;
-      }
+  //     function writeUint32(d: any) {
+  //       dv.setUint32(p, d, true);
+  //       p += 4;
+  //     }
 
-      function writeUint16(d: any) {
-        dv.setUint16(p, d, true);
-        p += 2;
-      }
+  //     function writeUint16(d: any) {
+  //       dv.setUint16(p, d, true);
+  //       p += 2;
+  //     }
 
-      writeString("RIFF"); // ChunkID
-      writeUint32(dataSize + 36); // ChunkSize
-      writeString("WAVE"); // Format
-      writeString("fmt "); // Subchunk1ID
-      writeUint32(16); // Subchunk1Size
-      writeUint16(format); // AudioFormat https://i.stack.imgur.com/BuSmb.png
-      writeUint16(numChannels); // NumChannels
-      writeUint32(sampleRate); // SampleRate
-      writeUint32(byteRate); // ByteRate
-      writeUint16(blockAlign); // BlockAlign
-      writeUint16(bytesPerSample * 8); // BitsPerSample
-      writeString("data"); // Subchunk2ID
-      writeUint32(dataSize); // Subchunk2Size
+  //     writeString("RIFF"); // ChunkID
+  //     writeUint32(dataSize + 36); // ChunkSize
+  //     writeString("WAVE"); // Format
+  //     writeString("fmt "); // Subchunk1ID
+  //     writeUint32(16); // Subchunk1Size
+  //     writeUint16(format); // AudioFormat https://i.stack.imgur.com/BuSmb.png
+  //     writeUint16(numChannels); // NumChannels
+  //     writeUint32(sampleRate); // SampleRate
+  //     writeUint32(byteRate); // ByteRate
+  //     writeUint16(blockAlign); // BlockAlign
+  //     writeUint16(bytesPerSample * 8); // BitsPerSample
+  //     writeString("data"); // Subchunk2ID
+  //     writeUint32(dataSize); // Subchunk2Size
 
-      return new Uint8Array(buffer);
-    }
+  //     return new Uint8Array(buffer);
+  //   }
 
-    function start() {
-      let date = new Date();
-      console.log(
-        `%c vad started ${
-          date.toLocaleTimeString() + ":" + date.getMilliseconds()
-        }`,
-        "background-color:teal;color:white"
-      );
+  //   function start() {
+  //     let date = new Date();
+  //     console.log(
+  //       `%c vad started ${
+  //         date.toLocaleTimeString() + ":" + date.getMilliseconds()
+  //       }`,
+  //       "background-color:teal;color:white"
+  //     );
 
-      if (adminMediaRecorderStatus.current === false) {
-        console.log("caling the function");
-        // sendVadStreamToServer(myStream,usersArrRef.current[0],adminUrl,4000)
-      }
-      vadFlag.current = true;
-    }
-    function stop1(audio: any) {
-      //inserted here to ensure that the audio is not processed if there's only one person in the meeting.
-     // if (usersArrRef.current.length <= 1) return; 
+  //     if (adminMediaRecorderStatus.current === false) {
+  //       console.log("caling the function");
+  //       // sendVadStreamToServer(myStream,usersArrRef.current[0],adminUrl,4000)
+  //     }
+  //     vadFlag.current = true;
+  //   }
+  //   function stop1(audio: any) {
+  //     //inserted here to ensure that the audio is not processed if there's only one person in the meeting.
+  //    // if (usersArrRef.current.length <= 1) return; 
        
 
-      let speechStopDate = new Date();
-      console.log(
-        `%c vad stopped ${
-          speechStopDate.toLocaleTimeString() + ":" + speechStopDate.getMilliseconds()
-        }`,
-        "background-color:teal;color:white"
-      );
-      let date2 = new Date();
-      console.log(
-        `%c  internal processing start ${
-          date2.toLocaleTimeString() + ":" + date2.getMilliseconds()
-        }`,
-        "background-color:teal;color:white"
-      );
-      //@ts-ignore
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const source = audioCtx.createBufferSource();
+  //     let speechStopDate = new Date();
+  //     console.log(
+  //       `%c vad stopped ${
+  //         speechStopDate.toLocaleTimeString() + ":" + speechStopDate.getMilliseconds()
+  //       }`,
+  //       "background-color:teal;color:white"
+  //     );
+  //     let date2 = new Date();
+  //     console.log(
+  //       `%c  internal processing start ${
+  //         date2.toLocaleTimeString() + ":" + date2.getMilliseconds()
+  //       }`,
+  //       "background-color:teal;color:white"
+  //     );
+  //     //@ts-ignore
+  //     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  //     const source = audioCtx.createBufferSource();
 
-      const myArrayBuffer = audioCtx.createBuffer(1, audio.length, 16000);
+  //     const myArrayBuffer = audioCtx.createBuffer(1, audio.length, 16000);
 
-      let nowBuffering;
-      for (
-        let channel = 0;
-        channel < myArrayBuffer.numberOfChannels;
-        channel++
-      ) {
-        // This gives us the actual array that contains the data
-        nowBuffering = myArrayBuffer.getChannelData(channel);
-        //  console.log('array buffer length',myArrayBuffer.length)
-        for (let i = 0; i < myArrayBuffer.length; i++) {
-          // Math.random() is in [0; 1.0]
-          // audio needs to be in [-1.0; 1.0]
-          nowBuffering[i] = audio[i] * 2;
-        }
-      }
+  //     let nowBuffering;
+  //     for (
+  //       let channel = 0;
+  //       channel < myArrayBuffer.numberOfChannels;
+  //       channel++
+  //     ) {
+  //       // This gives us the actual array that contains the data
+  //       nowBuffering = myArrayBuffer.getChannelData(channel);
+  //       //  console.log('array buffer length',myArrayBuffer.length)
+  //       for (let i = 0; i < myArrayBuffer.length; i++) {
+  //         // Math.random() is in [0; 1.0]
+  //         // audio needs to be in [-1.0; 1.0]
+  //         nowBuffering[i] = audio[i] * 2;
+  //       }
+  //     }
 
-      // set the buffer in the AudioBufferSourceNode
-      //source.buffer = myArrayBuffer;
+  //     // set the buffer in the AudioBufferSourceNode
+  //     //source.buffer = myArrayBuffer;
 
-      // connect the AudioBufferSourceNode to the
-      // destination so we can hear the sound
-      //source.connect(audioCtx.destination);
+  //     // connect the AudioBufferSourceNode to the
+  //     // destination so we can hear the sound
+  //     //source.connect(audioCtx.destination);
 
-      //start the source playing
-      //console.log("ctx stream source",)
+  //     //start the source playing
+  //     //console.log("ctx stream source",)
 
-      //source.start();
+  //     //source.start();
 
-      //let stream= audioCtx.createMediaStreamDestination()
-      // stream
+  //     //let stream= audioCtx.createMediaStreamDestination()
+  //     // stream
 
-      const ch1Data = myArrayBuffer.getChannelData(0);
-      const floatArr = new Float32Array(ch1Data.length);
+  //     const ch1Data = myArrayBuffer.getChannelData(0);
+  //     const floatArr = new Float32Array(ch1Data.length);
 
-      console.log("duration", myArrayBuffer.duration);
-      const wavBytes = getWavBytes(nowBuffering?.buffer, {
-        isFloat: true, // floating point or 16-bit integer
-        numChannels: 1,
-        sampleRate: 16000,
-      });
-      const wavBlob = new Blob([wavBytes], { type: "audio/ogg" });
+  //     console.log("duration", myArrayBuffer.duration);
+  //     const wavBytes = getWavBytes(nowBuffering?.buffer, {
+  //       isFloat: true, // floating point or 16-bit integer
+  //       numChannels: 1,
+  //       sampleRate: 16000,
+  //     });
+  //     const wavBlob = new Blob([wavBytes], { type: "audio/ogg" });
 
-      downsampleToWav(wavBlob, (buffer: ArrayBuffer) => {
-        let date = new Date();
-        console.log(
-          `%c processing complete ${
-            date.toLocaleTimeString() + ":" + date.getMilliseconds()
-          }`,
-          "background-color:teal;color:white"
-        );
+  //     downsampleToWav(wavBlob, (buffer: ArrayBuffer) => {
+  //       let date = new Date();
+  //       console.log(
+  //         `%c processing complete ${
+  //           date.toLocaleTimeString() + ":" + date.getMilliseconds()
+  //         }`,
+  //         "background-color:teal;color:white"
+  //       );
 
-        const mp3Buffer = encodeMp3(buffer);
-        let blob = new Blob(mp3Buffer, { type: "audio/mp3" });
+  //       const mp3Buffer = encodeMp3(buffer);
+  //       let blob = new Blob(mp3Buffer, { type: "audio/mp3" });
 
-        // cue logo will appear at admin end
-        if (peersArrRef.current.length > 0)
-          socket.emit("cue-loading-transmitter", {
-            toPeer: peersArrRef.current[0],
-            toggle: true,
-          });
+  //       // cue logo will appear at admin end
+  //       if (peersArrRef.current.length > 0)
+  //         socket.emit("cue-loading-transmitter", {
+  //           toPeer: peersArrRef.current[0],
+  //           toggle: true,
+  //         });
         
         
-        sendToServer(blob, adminUrl, {
-          ...usersArrRef.current[0],
-          init: false,
-          speech_stop_time:`${speechStopDate.toLocaleDateString()} ${speechStopDate.toLocaleTimeString()}:${speechStopDate.getMilliseconds()}`
-        });
-      });
+  //       sendToServer(blob, adminUrl, {
+  //         ...usersArrRef.current[0],
+  //         init: false,
+  //         speech_stop_time:`${speechStopDate.toLocaleDateString()} ${speechStopDate.toLocaleTimeString()}:${speechStopDate.getMilliseconds()}`
+  //       });
+  //     });
 
-      // console.log('myArray buffer',myArrayBuffer,myArrayBuffer.length)
+  //     // console.log('myArray buffer',myArrayBuffer,myArrayBuffer.length)
 
-      // let fA = new Float32Array(audio)
-      // console.log('bufff',audio.buffer)
-      // let arrBuf = new ArrayBuffer(audio)
-      // console.log('arrBuf',arrBuf)
-      // let blob = new Blob([fA.buffer],{type:'audio/wav'})
-      // console.log('blob',URL.createObjectURL(blob))
+  //     // let fA = new Float32Array(audio)
+  //     // console.log('bufff',audio.buffer)
+  //     // let arrBuf = new ArrayBuffer(audio)
+  //     // console.log('arrBuf',arrBuf)
+  //     // let blob = new Blob([fA.buffer],{type:'audio/wav'})
+  //     // console.log('blob',URL.createObjectURL(blob))
 
-      //let stream= audioCtx.createMediaStreamDestination()
-      //console.log('context stream',stream.stream.getAudioTracks()[0])
+  //     //let stream= audioCtx.createMediaStreamDestination()
+  //     //console.log('context stream',stream.stream.getAudioTracks()[0])
 
-      // let mediaRec = new MediaRecorder(audioCtx.createMediaStreamDestination())
-      // medRec.
+  //     // let mediaRec = new MediaRecorder(audioCtx.createMediaStreamDestination())
+  //     // medRec.
 
-      // sendToServer(blob,adminUrl,usersArrRef.current[0])
-      // vadFlag.current=false
-    }
+  //     // sendToServer(blob,adminUrl,usersArrRef.current[0])
+  //     // vadFlag.current=false
+  //   }
 
-    function stop2() {
-      stop2TimeoutId = setTimeout(() => {
-        console.log(
-          `%c audio stopped ${new Date().toLocaleTimeString()}`,
-          "background-color:teal;color:white"
-        );
-        start2IntervalId ? clearInterval(start2IntervalId) : null;
-        globalRef.current.recordingStatus = false;
-        setRecordingOn(false);
-      }, 1000);
-    }
+  //   function stop2() {
+  //     stop2TimeoutId = setTimeout(() => {
+  //       console.log(
+  //         `%c audio stopped ${new Date().toLocaleTimeString()}`,
+  //         "background-color:teal;color:white"
+  //       );
+  //       start2IntervalId ? clearInterval(start2IntervalId) : null;
+  //       globalRef.current.recordingStatus = false;
+  //       setRecordingOn(false);
+  //     }, 1000);
+  //   }
 
-    //add isHost === false for client specific use-cases
-    if (users[0].isMicrophoneAvailable && microphoneToggle) {
-      //console.log("myvad if",globalRef.current.myVad,globalRef.current.myVad?.listening,microphoneToggle)
+  //   //add isHost === false for client specific use-cases
+  //   if (users[0].isMicrophoneAvailable && microphoneToggle) {
+  //     //console.log("myvad if",globalRef.current.myVad,globalRef.current.myVad?.listening,microphoneToggle)
 
-      if (globalRef.current.myVad === null) {
-        VAD(start, stop1);
-      } else {
-        globalRef.current.myVad?.start();
-      }
-    } else {
-      // myVad=null
+  //     if (globalRef.current.myVad === null) {
+  //       VAD(start, stop1);
+  //     } else {
+  //       globalRef.current.myVad?.start();
+  //     }
+  //   } else {
+  //     // myVad=null
 
-      globalRef.current.myVad?.pause();
-      // after pausing vad stop2 is not firing
-      //stop1();
-      // console.log("myvad else",globalRef.current.myVad,globalRef.current.myVad?.listening,microphoneToggle)
-    }
+  //     globalRef.current.myVad?.pause();
+  //     // after pausing vad stop2 is not firing
+  //     //stop1();
+  //     // console.log("myvad else",globalRef.current.myVad,globalRef.current.myVad?.listening,microphoneToggle)
+  //   }
 
-    return () => {
-      start2IntervalId ? clearInterval(start2IntervalId) : null;
-      stop2TimeoutId ? clearTimeout(stop2TimeoutId) : null;
-    };
-  }, [isHost, myAudioStream, users, socket, adminUrl]);
+  //   return () => {
+  //     start2IntervalId ? clearInterval(start2IntervalId) : null;
+  //     stop2TimeoutId ? clearTimeout(stop2TimeoutId) : null;
+  //   };
+  // }, [isHost, myAudioStream, users, socket, adminUrl]);
 
   console.log("MYID", myId);
 
@@ -3015,7 +3015,7 @@ export default function DataWrapper({
     setScreenRecording,ngrokServerUrl,setNgrokServerUrl,interviewMetaRef,unreadCount,setUnreadCount,
     transcriptionToggle,
     setTranscriptionToggle,
-    selectedUserForLargeVideoRef,useSelectedUserForLargeVideoRef
+    selectedUserForLargeVideoRef,useSelectedUserForLargeVideoRef,setTranscriptionIndicator
   };
 
   return (
