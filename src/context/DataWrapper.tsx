@@ -183,7 +183,7 @@ export default function DataWrapper({
   });
   const [name, setName] = useState("");
   const [cameraToggle, setCameraToggle] = useState(false);
-  const [microphoneToggle, setMicroPhoneToggle] = useState(true);
+  const [microphoneToggle, setMicroPhoneToggle] = useState(false);
   const microphoneToggleRef = useRef(true);
   const [screenSharing, setScreenSharing] = useState(false);
   const screenStreamRef = useRef(null);
@@ -232,91 +232,96 @@ export default function DataWrapper({
 
         // commenting some servers bcz it duplicating connections
          
-        { urls: 'stun:stun.l.google.com:19302' },
-        {urls:'stun:stun1.l.google.com:19302'},
-        {urls:'stun:stun2.l.google.com:19302'},
-        {urls:'stun:stun3.l.google.com:19302'},
-        {urls:'stun:stun4.l.google.com:19302'},
-        {
-          urls: "stun:stun.relay.metered.ca:80",
-        },
-        {
-          urls: "turn:global.relay.metered.ca:80",
-          username: "9a68873a2f7a5c9a9755e52e",
-          credential: "2kG2qDdT1PESBuUQ",
-        },
-        {
-          urls: "turn:global.relay.metered.ca:80?transport=tcp",
-          username: "9a68873a2f7a5c9a9755e52e",
-          credential: "2kG2qDdT1PESBuUQ",
-        },
-        {
-          urls: "turn:global.relay.metered.ca:443",
-          username: "9a68873a2f7a5c9a9755e52e",
-          credential: "2kG2qDdT1PESBuUQ",
-        },
-        {
-          urls: "turns:global.relay.metered.ca:443?transport=tcp",
-          username: "9a68873a2f7a5c9a9755e52e",
-          credential: "2kG2qDdT1PESBuUQ",
-        },
-        {
-          url: 'stun:global.stun.twilio.com:3478',
-          urls: 'stun:global.stun.twilio.com:3478'
-        },
-        {
-          credential: 'HfKcpoLwJrE9YDxR6i/hGbcrF4ok+KCbLKICgUx16/k=',
-          url: 'turn:global.turn.twilio.com:3478?transport=udp',
-          urls: 'turn:global.turn.twilio.com:3478?transport=udp',
-          username: '17e02ce71d7a64c2073b5531281d90eb0ad3adc4b03c8562f1381cc41ea020b7'
-        },
-        {
-          credential: 'HfKcpoLwJrE9YDxR6i/hGbcrF4ok+KCbLKICgUx16/k=',
-          url: 'turn:global.turn.twilio.com:3478?transport=tcp',
-          urls: 'turn:global.turn.twilio.com:3478?transport=tcp',
-          username: '17e02ce71d7a64c2073b5531281d90eb0ad3adc4b03c8562f1381cc41ea020b7'
-        },
-        {
-          credential: 'HfKcpoLwJrE9YDxR6i/hGbcrF4ok+KCbLKICgUx16/k=',
-          url: 'turn:global.turn.twilio.com:443?transport=tcp',
-          urls: 'turn:global.turn.twilio.com:443?transport=tcp',
-          username: '17e02ce71d7a64c2073b5531281d90eb0ad3adc4b03c8562f1381cc41ea020b7'
-        },
+        // {
+        //     urls: "turn:3.7.69.155:80",
+        //     username: "anuj",
+        //     credential: "bayya",
+        //  },
+        // { urls: 'stun:stun.l.google.com:19302' },
+        // {urls:'stun:stun1.l.google.com:19302'},
+        // {urls:'stun:stun2.l.google.com:19302'},
+        // {urls:'stun:stun3.l.google.com:19302'},
+        // {urls:'stun:stun4.l.google.com:19302'},
+        // {
+        //   urls: "stun:stun.relay.metered.ca:80",
+        // },
+        // {
+        //   urls: "turn:global.relay.metered.ca:80",
+        //   username: "9a68873a2f7a5c9a9755e52e",
+        //   credential: "2kG2qDdT1PESBuUQ",
+        // },
+        // {
+        //   urls: "turn:global.relay.metered.ca:80?transport=tcp",
+        //   username: "9a68873a2f7a5c9a9755e52e",
+        //   credential: "2kG2qDdT1PESBuUQ",
+        // },
+        // {
+        //   urls: "turn:global.relay.metered.ca:443",
+        //   username: "9a68873a2f7a5c9a9755e52e",
+        //   credential: "2kG2qDdT1PESBuUQ",
+        // },
+        // {
+        //   urls: "turns:global.relay.metered.ca:443?transport=tcp",
+        //   username: "9a68873a2f7a5c9a9755e52e",
+        //   credential: "2kG2qDdT1PESBuUQ",
+        // },
+        // {
+        //   url: 'stun:global.stun.twilio.com:3478',
+        //   urls: 'stun:global.stun.twilio.com:3478'
+        // },
+        // {
+        //   credential: 'HfKcpoLwJrE9YDxR6i/hGbcrF4ok+KCbLKICgUx16/k=',
+        //   url: 'turn:global.turn.twilio.com:3478?transport=udp',
+        //   urls: 'turn:global.turn.twilio.com:3478?transport=udp',
+        //   username: '17e02ce71d7a64c2073b5531281d90eb0ad3adc4b03c8562f1381cc41ea020b7'
+        // },
+        // {
+        //   credential: 'HfKcpoLwJrE9YDxR6i/hGbcrF4ok+KCbLKICgUx16/k=',
+        //   url: 'turn:global.turn.twilio.com:3478?transport=tcp',
+        //   urls: 'turn:global.turn.twilio.com:3478?transport=tcp',
+        //   username: '17e02ce71d7a64c2073b5531281d90eb0ad3adc4b03c8562f1381cc41ea020b7'
+        // },
+        // {
+        //   credential: 'HfKcpoLwJrE9YDxR6i/hGbcrF4ok+KCbLKICgUx16/k=',
+        //   url: 'turn:global.turn.twilio.com:443?transport=tcp',
+        //   urls: 'turn:global.turn.twilio.com:443?transport=tcp',
+        //   username: '17e02ce71d7a64c2073b5531281d90eb0ad3adc4b03c8562f1381cc41ea020b7'
+        // },
 
-        {
-          urls: "stun:bn-turn1.xirsys.com",
-        },
-        {
-          credential: 'cc0581ea-45c6-11f0-8f0a-0242ac140004',
-          url: 'turn:bn-turn1.xirsys.com:80?transport=udp',
-          urls: 'turn:bn-turn1.xirsys.com:80?transport=udp',
-          username: 'S1My13QHDQoyOr7NPX__p-6OE7HJrClwqmowQOBNMEO44FgCGqTrnPwr1gcfUD6zAAAAAGhH1QlhbnNodGl3YXJpMzE0'
-        },
-        {
-          credential: 'cc0581ea-45c6-11f0-8f0a-0242ac140004',
-          url: 'turn:bn-turn1.xirsys.com:3478?transport=udp',
-          urls: 'turn:bn-turn1.xirsys.com:3478?transport=udp',
-          username: 'S1My13QHDQoyOr7NPX__p-6OE7HJrClwqmowQOBNMEO44FgCGqTrnPwr1gcfUD6zAAAAAGhH1QlhbnNodGl3YXJpMzE0'
-        },
-        {
-          credential: 'cc0581ea-45c6-11f0-8f0a-0242ac140004',
-          url: 'turn:bn-turn1.xirsys.com:80?transport=tcp',
-          urls: 'turn:bn-turn1.xirsys.com:80?transport=tcp',
-          username: 'S1My13QHDQoyOr7NPX__p-6OE7HJrClwqmowQOBNMEO44FgCGqTrnPwr1gcfUD6zAAAAAGhH1QlhbnNodGl3YXJpMzE0'
-        },
+        // {
+        //   urls: "stun:bn-turn1.xirsys.com",
+        // },
+        // {
+        //   credential: 'cc0581ea-45c6-11f0-8f0a-0242ac140004',
+        //   url: 'turn:bn-turn1.xirsys.com:80?transport=udp',
+        //   urls: 'turn:bn-turn1.xirsys.com:80?transport=udp',
+        //   username: 'S1My13QHDQoyOr7NPX__p-6OE7HJrClwqmowQOBNMEO44FgCGqTrnPwr1gcfUD6zAAAAAGhH1QlhbnNodGl3YXJpMzE0'
+        // },
+        // {
+        //   credential: 'cc0581ea-45c6-11f0-8f0a-0242ac140004',
+        //   url: 'turn:bn-turn1.xirsys.com:3478?transport=udp',
+        //   urls: 'turn:bn-turn1.xirsys.com:3478?transport=udp',
+        //   username: 'S1My13QHDQoyOr7NPX__p-6OE7HJrClwqmowQOBNMEO44FgCGqTrnPwr1gcfUD6zAAAAAGhH1QlhbnNodGl3YXJpMzE0'
+        // },
+        // {
+        //   credential: 'cc0581ea-45c6-11f0-8f0a-0242ac140004',
+        //   url: 'turn:bn-turn1.xirsys.com:80?transport=tcp',
+        //   urls: 'turn:bn-turn1.xirsys.com:80?transport=tcp',
+        //   username: 'S1My13QHDQoyOr7NPX__p-6OE7HJrClwqmowQOBNMEO44FgCGqTrnPwr1gcfUD6zAAAAAGhH1QlhbnNodGl3YXJpMzE0'
+        // },
         
-        {
-          credential: 'cc0581ea-45c6-11f0-8f0a-0242ac140004',
-          url: 'turns:bn-turn1.xirsys.com:443?transport=tcp',
-          urls: 'turns:bn-turn1.xirsys.com:443?transport=tcp',
-          username: 'S1My13QHDQoyOr7NPX__p-6OE7HJrClwqmowQOBNMEO44FgCGqTrnPwr1gcfUD6zAAAAAGhH1QlhbnNodGl3YXJpMzE0'
-        },
-        {
-          credential: 'cc0581ea-45c6-11f0-8f0a-0242ac140004',
-          url: 'turns:bn-turn1.xirsys.com:5349?transport=tcp',
-          urls: 'turns:bn-turn1.xirsys.com:5349?transport=tcp',
-          username: 'S1My13QHDQoyOr7NPX__p-6OE7HJrClwqmowQOBNMEO44FgCGqTrnPwr1gcfUD6zAAAAAGhH1QlhbnNodGl3YXJpMzE0'
-        },
+        // {
+        //   credential: 'cc0581ea-45c6-11f0-8f0a-0242ac140004',
+        //   url: 'turns:bn-turn1.xirsys.com:443?transport=tcp',
+        //   urls: 'turns:bn-turn1.xirsys.com:443?transport=tcp',
+        //   username: 'S1My13QHDQoyOr7NPX__p-6OE7HJrClwqmowQOBNMEO44FgCGqTrnPwr1gcfUD6zAAAAAGhH1QlhbnNodGl3YXJpMzE0'
+        // },
+        // {
+        //   credential: 'cc0581ea-45c6-11f0-8f0a-0242ac140004',
+        //   url: 'turns:bn-turn1.xirsys.com:5349?transport=tcp',
+        //   urls: 'turns:bn-turn1.xirsys.com:5349?transport=tcp',
+        //   username: 'S1My13QHDQoyOr7NPX__p-6OE7HJrClwqmowQOBNMEO44FgCGqTrnPwr1gcfUD6zAAAAAGhH1QlhbnNodGl3YXJpMzE0'
+        // },
         
         
       ]
@@ -1058,11 +1063,12 @@ export default function DataWrapper({
     let url3 = 'https://temp-meeting-server-production.up.railway.app/'
     let url4 = 'https://temp-meeting-server.vercel.app/'
     let url5 = 'https://temp-meeting-server.onrender.com'
-    let url6 = 'https://babb-103-173-124-203.ngrok-free.app'
+    let url6 = 'wss://recruitonodesocket.vitti.insure'
+
 
     let tempSocket = io(url6);
 
-    //This is a socket connection with backend server to handle cues specific requests or other api requests
+    // //This is a socket connection with backend server to handle cues specific requests or other api requests
     let tempSocket2 = io(
       //'http://localhost:5000',
       "wss://recruito.vitti.insure",

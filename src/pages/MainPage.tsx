@@ -158,7 +158,8 @@ export default function MainPage() {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, []);
 
-  //http://localhost:5173/?a109-4dbd-8a2a&cid_7761
+  //http://localhost:5173/?anuj-anuj-anuj&cid_7761
+
   return (
     <>
       {tempIsHost === null ? (
