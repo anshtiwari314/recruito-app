@@ -15,18 +15,1467 @@
     
     <script src="./lame.min.js"></script>
     <!-- <script src="./src/lame.min.js"></script> -->
-<<<<<<< Updated upstream
-
-    <script type="module" crossorigin src="/assets/index-6d9ad9a1.js"></script>
-
-=======
-    <script type="module" crossorigin src="/assets/index-6d9ad9a1.js"></script>
->>>>>>> Stashed changes
-    <link rel="stylesheet" href="/assets/index-e295b943.css">
+    <script type="module" crossorigin src="/assets/index-cefbcc4b.js"></script>
+    <link rel="stylesheet" href="/assets/index-c7c5bad6.css">
   </head>
   <body>
     <div id="root"></div>
     
+    <script>
+
+// class NetworkMonitor {
+//     constructor() {
+//         this.totalData = 0;
+//         this.startTime = Date.now();
+//         this.setupObserver();
+//     }
+    
+//     setupObserver() {
+//         const observer = new PerformanceObserver((list) => {
+//             list.getEntries().forEach((entry) => {
+//                 if (entry.transferSize) {
+//                     this.totalData += entry.transferSize;
+//                     this.logTransfer(entry);
+//                 }
+//             });
+//         });
+        
+//         observer.observe({ entryTypes: ['resource'] });
+//     }
+    
+//     logTransfer(entry) {
+//         console.log(`📊 ${entry.name.split('/').pop()}: ${this.formatBytes(entry.transferSize)}`);
+//     }
+    
+//     getStats() {
+//         const duration = (Date.now() - this.startTime) / 1000;
+//         return {
+//             totalData: this.formatBytes(this.totalData),
+//             duration: `${duration.toFixed(1)}s`,
+//             averageSpeed: this.formatBytes(this.totalData / duration) + '/s'
+//         };
+//     }
+    
+//     formatBytes(bytes) {
+//         if (bytes === 0) return '0 Bytes';
+//         const k = 1024;
+//         const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+//         const i = Math.floor(Math.log(bytes) / Math.log(k));
+//         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+//     }
+// }
+
+// // Usage
+// const monitor = new NetworkMonitor();
+// // Check stats anytime
+// console.log(monitor.getStats());
+
+
+
+
+
+
+
+
+
+
+    </script>
+    <script>
+
+// class RealTimeNetworkMonitor {
+//     constructor(updateInterval = 1000) {
+//         this.updateInterval = updateInterval;
+//         this.isMonitoring = false;
+//         this.intervalId = null;
+//         this.observer = null;
+        
+//         // Data tracking
+//         this.lastTotalBytes = 0;
+//         this.currentTotalBytes = 0;
+//         this.totalRequests = 0;
+//         this.speedHistory = [];
+//         this.startTime = null;
+//         this.lastCheckTime = Date.now();
+        
+//         // Callbacks
+//         this.onUpdate = null;
+//         this.onRequest = null;
+        
+//         this.setupObserver();
+//         this.initializeBaseData();
+//     }
+    
+//     initializeBaseData() {
+//         this.currentTotalBytes = this.calculateTotalFromPerformanceEntries();
+//         this.lastTotalBytes = this.currentTotalBytes;
+//     }
+    
+//     calculateTotalFromPerformanceEntries() {
+//         let total = 0;
+        
+//         const navigation = performance.getEntriesByType('navigation')[0];
+//         if (navigation?.transferSize) {
+//             total += navigation.transferSize;
+//         }
+        
+//         const resources = performance.getEntriesByType('resource');
+//         resources.forEach(entry => {
+//             if (entry.transferSize) {
+//                 total += entry.transferSize;
+//             }
+//         });
+        
+//         return total;
+//     }
+    
+//     setupObserver() {
+//         if ('PerformanceObserver' in window) {
+//             this.observer = new PerformanceObserver((list) => {
+//                 list.getEntries().forEach((entry) => {
+//                     if (entry.transferSize) {
+//                         this.currentTotalBytes += entry.transferSize;
+//                         this.totalRequests++;
+                        
+//                         if (this.onRequest) {
+//                             this.onRequest({
+//                                 url: entry.name,
+//                                 size: entry.transferSize,
+//                                 duration: entry.duration,
+//                                 type: this.getResourceType(entry.name)
+//                             });
+//                         }
+//                     }
+//                 });
+//             });
+            
+//             this.observer.observe({ entryTypes: ['resource'] });
+//         }
+//     }
+    
+//     start(callbacks = {}) {
+//         if (this.isMonitoring) return;
+        
+//         this.onUpdate = callbacks.onUpdate || null;
+//         this.onRequest = callbacks.onRequest || null;
+        
+//         this.isMonitoring = true;
+//         this.startTime = Date.now();
+//         this.lastCheckTime = Date.now();
+        
+//         // Reset and get current baseline
+//         this.currentTotalBytes = this.calculateTotalFromPerformanceEntries();
+//         this.lastTotalBytes = this.currentTotalBytes;
+//         this.speedHistory = [];
+        
+//         this.intervalId = setInterval(() => {
+//             const now = Date.now();
+//             const timeDiff = (now - this.lastCheckTime) / 1000;
+            
+//             // Get fresh data to catch any missed requests
+//             const freshTotal = this.calculateTotalFromPerformanceEntries();
+            
+//             // Use the higher value (either from observer or fresh calculation)
+//             if (freshTotal > this.currentTotalBytes) {
+//                 this.currentTotalBytes = freshTotal;
+//             }
+            
+//             const bytesTransferred = this.currentTotalBytes - this.lastTotalBytes;
+//             const speedBps = timeDiff > 0 ? bytesTransferred / timeDiff : 0;
+            
+//             this.speedHistory.push(speedBps);
+//             if (this.speedHistory.length > 60) {
+//                 this.speedHistory.shift();
+//             }
+            
+//             const stats = {
+//                 currentSpeed: speedBps,
+//                 averageSpeed: this.speedHistory.reduce((a, b) => a + b, 0) / this.speedHistory.length,
+//                 totalBytes: this.currentTotalBytes,
+//                 totalRequests: this.totalRequests,
+//                 bytesThisInterval: bytesTransferred,
+//                 duration: (Date.now() - this.startTime) / 1000,
+//                 isActive: bytesTransferred > 0
+//             };
+            
+//             if (this.onUpdate) {
+//                 this.onUpdate(stats);
+//             }
+            
+//             this.lastTotalBytes = this.currentTotalBytes;
+//             this.lastCheckTime = now;
+//         }, this.updateInterval);
+//     }
+    
+//     stop() {
+//         this.isMonitoring = false;
+//         if (this.intervalId) {
+//             clearInterval(this.intervalId);
+//             this.intervalId = null;
+//         }
+//     }
+    
+//     reset() {
+//         this.stop();
+//         this.currentTotalBytes = 0;
+//         this.lastTotalBytes = 0;
+//         this.totalRequests = 0;
+//         this.speedHistory = [];
+//         this.startTime = null;
+//         this.lastCheckTime = Date.now();
+//     }
+    
+//     getResourceType(url) {
+//         if (url.match(/\.(css)$/i)) return 'CSS';
+//         if (url.match(/\.(js)$/i)) return 'JavaScript';
+//         if (url.match(/\.(png|jpg|jpeg|gif|svg|webp)$/i)) return 'Image';
+//         if (url.match(/\.(woff|woff2|ttf|eot)$/i)) return 'Font';
+//         if (url.match(/\.(mp4|webm|ogg)$/i)) return 'Video';
+//         return 'Other';
+//     }
+    
+//     formatBytes(bytes) {
+//         if (bytes === 0) return '0 B';
+//         const k = 1024;
+//         const sizes = ['B', 'KB', 'MB', 'GB'];
+//         const i = Math.floor(Math.log(bytes) / Math.log(k));
+//         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+//     }
+// }
+
+// // Usage with better testing:
+// const monitor = new RealTimeNetworkMonitor(1000);
+
+// monitor.start({
+//     onUpdate: (stats) => {
+//         console.log(`Current Speed: ${monitor.formatBytes(stats.currentSpeed)}/s`);
+//         console.log(`Total Data: ${monitor.formatBytes(stats.totalBytes)}`);
+//         console.log(`Requests: ${stats.totalRequests}`);
+//         console.log(`Bytes this second: ${monitor.formatBytes(stats.bytesThisInterval)}`);
+//         console.log(`Active: ${stats.isActive ? 'Yes' : 'No'}`);
+//         console.log('---');
+//     },
+    
+//     onRequest: (request) => {
+//         console.log(`New ${request.type}: ${request.url.split('/').pop()} (${monitor.formatBytes(request.size)})`);
+//     }
+// });
+
+// // Function to create test network activity
+// function createTestRequests() {
+//     // Create different types of requests to test the monitor
+//     const img = new Image();
+//     img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' + '?' + Date.now();
+    
+//     fetch('data:application/json,' + JSON.stringify({test: Date.now(), data: 'x'.repeat(1000)}))
+//         .catch(() => {});
+// }
+
+// // Test the monitor
+// setInterval(createTestRequests, 5000);
+    </script>
+    <!-- <script>
+      function formatBytes(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Global object to accumulate metrics within the current second
+let accumulatedMetrics = {
+    // HTTP/HTTPS metrics
+    httpSent: 0,
+    httpReceived: 0,
+    httpRequests: 0,
+    // WebSocket metrics
+    wsSent: 0,
+    wsReceived: 0,
+    wsMessages: 0,
+    // Combined totals
+    totalSent: 0,
+    totalReceived: 0,
+    totalRequests: 0
+};
+
+// References to original APIs for patching
+const originalFetch = window.fetch;
+const originalXMLHttpRequest = window.XMLHttpRequest;
+const originalWebSocket = window.WebSocket;
+
+/**
+ * Updates the accumulated metrics.
+ * @param {string} type - 'httpSent', 'httpReceived', 'httpRequest', 'wsSent', 'wsReceived', 'wsMessage'.
+ * @param {number} value - The value to add to the metric.
+ */
+function updateAccumulatedMetrics(type, value) {
+    switch(type) {
+        case 'httpSent':
+            accumulatedMetrics.httpSent += value;
+            accumulatedMetrics.totalSent += value;
+            break;
+        case 'httpReceived':
+            accumulatedMetrics.httpReceived += value;
+            accumulatedMetrics.totalReceived += value;
+            break;
+        case 'httpRequest':
+            accumulatedMetrics.httpRequests += value;
+            accumulatedMetrics.totalRequests += value;
+            break;
+        case 'wsSent':
+            accumulatedMetrics.wsSent += value;
+            accumulatedMetrics.totalSent += value;
+            break;
+        case 'wsReceived':
+            accumulatedMetrics.wsReceived += value;
+            accumulatedMetrics.totalReceived += value;
+            break;
+        case 'wsMessage':
+            accumulatedMetrics.wsMessages += value;
+            break;
+    }
+}
+
+/**
+ * Calculate the byte size of WebSocket data
+ */
+function getWebSocketDataSize(data) {
+    if (typeof data === 'string') {
+        return new Blob([data]).size;
+    } else if (data instanceof Blob) {
+        return data.size;
+    } else if (data instanceof ArrayBuffer) {
+        return data.byteLength;
+    } else if (data instanceof Uint8Array || data instanceof Int8Array) {
+        return data.length;
+    }
+    return 0;
+}
+
+/**
+ * Patches WebSocket to intercept sent/received data.
+ */
+function patchWebSocket() {
+    window.WebSocket = function(url, protocols) {
+        const ws = new originalWebSocket(url, protocols);
+        
+        console.log('WebSocket connection created:', url);
+        
+        // Patch the send method
+        const originalSend = ws.send;
+        ws.send = function(data) {
+            const dataSize = getWebSocketDataSize(data);
+            updateAccumulatedMetrics('wsSent', dataSize);
+            updateAccumulatedMetrics('wsMessage', 1);
+            
+            console.log('WebSocket sent:', dataSize, 'bytes');
+            
+            return originalSend.call(this, data);
+        };
+        
+        // Patch message reception
+        let originalOnMessage = ws.onmessage;
+        Object.defineProperty(ws, 'onmessage', {
+            get: function() {
+                return originalOnMessage;
+            },
+            set: function(handler) {
+                originalOnMessage = function(event) {
+                    const dataSize = getWebSocketDataSize(event.data);
+                    updateAccumulatedMetrics('wsReceived', dataSize);
+                    updateAccumulatedMetrics('wsMessage', 1);
+                    
+                    console.log('WebSocket received:', dataSize, 'bytes');
+                    
+                    if (handler) {
+                        handler.call(this, event);
+                    }
+                };
+            }
+        });
+        
+        // Also handle addEventListener for 'message' events
+        const originalAddEventListener = ws.addEventListener;
+        ws.addEventListener = function(type, listener, options) {
+            if (type === 'message') {
+                const wrappedListener = function(event) {
+                    const dataSize = getWebSocketDataSize(event.data);
+                    updateAccumulatedMetrics('wsReceived', dataSize);
+                    updateAccumulatedMetrics('wsMessage', 1);
+                    
+                    console.log('WebSocket received (addEventListener):', dataSize, 'bytes');
+                    
+                    if (typeof listener === 'function') {
+                        listener.call(this, event);
+                    } else if (listener && typeof listener.handleEvent === 'function') {
+                        listener.handleEvent(event);
+                    }
+                };
+                return originalAddEventListener.call(this, type, wrappedListener, options);
+            }
+            return originalAddEventListener.call(this, type, listener, options);
+        };
+        
+        return ws;
+    };
+    
+    // Copy static properties
+    Object.setPrototypeOf(window.WebSocket, originalWebSocket);
+    Object.getOwnPropertyNames(originalWebSocket).forEach(name => {
+        if (name !== 'prototype' && name !== 'name' && name !== 'length') {
+            Object.defineProperty(window.WebSocket, name, 
+                Object.getOwnPropertyDescriptor(originalWebSocket, name));
+        }
+    });
+}
+
+/**
+ * Sets up the PerformanceObserver to monitor HTTP resource loading.
+ */
+function setupPerformanceObserver() {
+    const observer = new PerformanceObserver((list) => {
+        list.getEntries().forEach((entry) => {
+            if (entry.entryType === 'resource') {
+                console.log('HTTP Resource entry:', entry.name, 'transferSize:', entry.transferSize);
+                
+                if (entry.transferSize) {
+                    updateAccumulatedMetrics('httpReceived', entry.transferSize);
+                }
+            }
+        });
+    });
+    observer.observe({ entryTypes: ['resource'] });
+    return observer;
+}
+
+/**
+ * Patches XMLHttpRequest to intercept requests and capture sent/received data.
+ */
+function patchXMLHttpRequest() {
+    window.XMLHttpRequest = function () {
+        const xhr = new originalXMLHttpRequest();
+        let requestBodySize = 0;
+
+        const originalOpen = xhr.open;
+        xhr.open = function (...args) {
+            updateAccumulatedMetrics('httpRequest', 1);
+            originalOpen.apply(this, args);
+        };
+
+        const originalSend = xhr.send;
+        xhr.send = function (data) {
+            if (data) {
+                if (typeof data === 'string') {
+                    requestBodySize = new Blob([data]).size;
+                } else if (data instanceof Blob) {
+                    requestBodySize = data.size;
+                } else if (data instanceof FormData) {
+                    requestBodySize = 1000; // Rough estimate
+                } else if (data instanceof URLSearchParams) {
+                    requestBodySize = data.toString().length;
+                }
+            }
+            
+            const totalSentSize = requestBodySize + 500; // +500 for headers estimate
+            updateAccumulatedMetrics('httpSent', totalSentSize);
+            
+            console.log('XHR Send - Body size:', requestBodySize, 'Total sent:', totalSentSize);
+            
+            originalSend.apply(this, arguments);
+        };
+
+        // Capture response size when request completes
+        const originalOnReadyStateChange = xhr.onreadystatechange;
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                const responseSize = xhr.responseText ? xhr.responseText.length : 0;
+                const responseHeadersSize = xhr.getAllResponseHeaders().length;
+                const totalReceivedSize = responseSize + responseHeadersSize;
+                
+                updateAccumulatedMetrics('httpReceived', totalReceivedSize);
+                console.log('XHR Response - Body size:', responseSize, 'Headers size:', responseHeadersSize);
+            }
+            
+            if (originalOnReadyStateChange) {
+                originalOnReadyStateChange.apply(this, arguments);
+            }
+        };
+
+        return xhr;
+    };
+}
+
+/**
+ * Patches window.fetch to intercept requests and capture sent/received data.
+ */
+function patchFetch() {
+    window.fetch = async function (input, init = {}) {
+        updateAccumulatedMetrics('httpRequest', 1);
+
+        let requestBodySize = 0;
+        if (init.body) {
+            if (typeof init.body === 'string') {
+                requestBodySize = new Blob([init.body]).size;
+            } else if (init.body instanceof Blob) {
+                requestBodySize = init.body.size;
+            } else if (init.body instanceof FormData) {
+                requestBodySize = 1000; // Rough estimate
+            } else if (init.body instanceof URLSearchParams) {
+                requestBodySize = init.body.toString().length;
+            }
+        }
+        
+        const totalSentSize = requestBodySize + 500;
+        updateAccumulatedMetrics('httpSent', totalSentSize);
+        console.log('Fetch Send - Body size:', requestBodySize, 'Total sent:', totalSentSize);
+
+        try {
+            const response = await originalFetch(input, init);
+            
+            const clonedResponse = response.clone();
+            
+            clonedResponse.text().then(text => {
+                const responseSize = text.length;
+                const headersSize = Array.from(response.headers.entries())
+                    .reduce((acc, [key, value]) => acc + key.length + value.length + 4, 0);
+                
+                const totalReceivedSize = responseSize + headersSize;
+                updateAccumulatedMetrics('httpReceived', totalReceivedSize);
+                console.log('Fetch Response - Body size:', responseSize, 'Headers size:', headersSize);
+            }).catch(err => {
+                const contentLength = response.headers.get('content-length');
+                if (contentLength) {
+                    updateAccumulatedMetrics('httpReceived', parseInt(contentLength) + 200);
+                }
+            });
+            
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    };
+}
+
+/**
+ * Logs the current second's network activity to the console.
+ */
+function logNetworkActivity() {
+    const m = accumulatedMetrics;
+    
+    console.log(`
+=== Network Activity (per second) ===
+HTTP/HTTPS: Sent: ${formatBytes(m.httpSent)}, Received: ${formatBytes(m.httpReceived)}, Requests: ${m.httpRequests}
+WebSocket:  Sent: ${formatBytes(m.wsSent)}, Received: ${formatBytes(m.wsReceived)}, Messages: ${m.wsMessages}
+TOTAL:      Sent: ${formatBytes(m.totalSent)}, Received: ${formatBytes(m.totalReceived)}, Requests: ${m.totalRequests}
+=====================================`);
+}
+
+/**
+ * Updates the metrics and logs to console.
+ */
+function displayAndLogMetrics() {
+    logNetworkActivity();
+
+    // Reset accumulators for the next second
+    accumulatedMetrics = {
+        httpSent: 0,
+        httpReceived: 0,
+        httpRequests: 0,
+        wsSent: 0,
+        wsReceived: 0,
+        wsMessages: 0,
+        totalSent: 0,
+        totalReceived: 0,
+        totalRequests: 0
+    };
+}
+
+// --- Main execution on window load ---
+window.onload = function () {
+    console.log('Network monitor initialized (HTTP/HTTPS + WebSocket)');
+    
+    // Setup Performance Observer for HTTP/HTTPS
+    const observer = setupPerformanceObserver();
+
+    // Patch all network APIs
+    patchXMLHttpRequest();
+    patchFetch();
+    patchWebSocket();
+
+    // Set up per-second aggregation and logging
+    const intervalId = setInterval(displayAndLogMetrics, 1000);
+    
+    // Test WebSocket monitoring (optional)
+    setTimeout(() => {
+        console.log('Testing WebSocket monitoring...');
+        try {
+            // Example WebSocket test - replace with your actual WebSocket URL
+            const testWs = new WebSocket('wss://echo.websocket.org');
+            testWs.onopen = () => {
+                console.log('Test WebSocket connected');
+                testWs.send('Hello WebSocket!');
+            };
+            testWs.onmessage = (event) => {
+                console.log('Test WebSocket message received:', event.data);
+                testWs.close();
+            };
+            testWs.onerror = (error) => {
+                console.log('Test WebSocket error:', error);
+            };
+        } catch (error) {
+            console.log('WebSocket test failed:', error);
+        }
+    }, 2000);
+};
+    </script> -->
+    
+    <!-- <script>
+      function formatBytes(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Global object to accumulate metrics within the current second
+let accumulatedMetrics = {
+    // HTTP/HTTPS metrics
+    httpSent: 0,
+    httpReceived: 0,
+    httpRequests: 0,
+    // WebSocket metrics
+    wsSent: 0,
+    wsReceived: 0,
+    wsMessages: 0,
+    // WebRTC metrics
+    webrtcSent: 0,
+    webrtcReceived: 0,
+    webrtcMessages: 0,
+    // Combined totals
+    totalSent: 0,
+    totalReceived: 0,
+    totalRequests: 0
+};
+
+// References to original APIs for patching
+const originalFetch = window.fetch;
+const originalXMLHttpRequest = window.XMLHttpRequest;
+const originalWebSocket = window.WebSocket;
+const originalRTCPeerConnection = window.RTCPeerConnection;
+
+// Store active WebRTC connections for stats monitoring
+const activeWebRTCConnections = new Set();
+
+/**
+ * Updates the accumulated metrics.
+ * @param {string} type - 'httpSent', 'httpReceived', 'httpRequest', 'wsSent', 'wsReceived', 'wsMessage', 'webrtcSent', 'webrtcReceived', 'webrtcMessage'.
+ * @param {number} value - The value to add to the metric.
+ */
+function updateAccumulatedMetrics(type, value) {
+    switch(type) {
+        case 'httpSent':
+            accumulatedMetrics.httpSent += value;
+            accumulatedMetrics.totalSent += value;
+            break;
+        case 'httpReceived':
+            accumulatedMetrics.httpReceived += value;
+            accumulatedMetrics.totalReceived += value;
+            break;
+        case 'httpRequest':
+            accumulatedMetrics.httpRequests += value;
+            accumulatedMetrics.totalRequests += value;
+            break;
+        case 'wsSent':
+            accumulatedMetrics.wsSent += value;
+            accumulatedMetrics.totalSent += value;
+            break;
+        case 'wsReceived':
+            accumulatedMetrics.wsReceived += value;
+            accumulatedMetrics.totalReceived += value;
+            break;
+        case 'wsMessage':
+            accumulatedMetrics.wsMessages += value;
+            break;
+        case 'webrtcSent':
+            accumulatedMetrics.webrtcSent += value;
+            accumulatedMetrics.totalSent += value;
+            break;
+        case 'webrtcReceived':
+            accumulatedMetrics.webrtcReceived += value;
+            accumulatedMetrics.totalReceived += value;
+            break;
+        case 'webrtcMessage':
+            accumulatedMetrics.webrtcMessages += value;
+            break;
+    }
+}
+
+/**
+ * Calculate the byte size of WebSocket data
+ */
+function getWebSocketDataSize(data) {
+    if (typeof data === 'string') {
+        return new Blob([data]).size;
+    } else if (data instanceof Blob) {
+        return data.size;
+    } else if (data instanceof ArrayBuffer) {
+        return data.byteLength;
+    } else if (data instanceof Uint8Array || data instanceof Int8Array) {
+        return data.length;
+    }
+    return 0;
+}
+
+/**
+ * Calculate the byte size of WebRTC data channel data
+ */
+function getWebRTCDataSize(data) {
+    if (typeof data === 'string') {
+        return new Blob([data]).size;
+    } else if (data instanceof Blob) {
+        return data.size;
+    } else if (data instanceof ArrayBuffer) {
+        return data.byteLength;
+    } else if (data instanceof Uint8Array || data instanceof Int8Array) {
+        return data.length;
+    }
+    return 0;
+}
+
+/**
+ * Patches RTCPeerConnection to monitor WebRTC data channels and stats.
+ */
+function patchRTCPeerConnection() {
+    if (!originalRTCPeerConnection) {
+        console.log('RTCPeerConnection not available in this browser');
+        return;
+    }
+
+    window.RTCPeerConnection = function(configuration, constraints) {
+        const pc = new originalRTCPeerConnection(configuration, constraints);
+        
+        console.log('RTCPeerConnection created');
+        activeWebRTCConnections.add(pc);
+        
+        // Store previous stats for delta calculation
+        pc._previousStats = null;
+        
+        // Patch createDataChannel
+        const originalCreateDataChannel = pc.createDataChannel;
+        pc.createDataChannel = function(label, dataChannelDict) {
+            const dataChannel = originalCreateDataChannel.call(this, label, dataChannelDict);
+            
+            console.log('WebRTC DataChannel created:', label);
+            
+            // Patch send method
+            const originalSend = dataChannel.send;
+            dataChannel.send = function(data) {
+                const dataSize = getWebRTCDataSize(data);
+                updateAccumulatedMetrics('webrtcSent', dataSize);
+                updateAccumulatedMetrics('webrtcMessage', 1);
+                
+                console.log('WebRTC DataChannel sent (direct):', dataSize, 'bytes, label:', dataChannel.label);
+                
+                return originalSend.call(this, data);
+            };
+            
+            // Monitor incoming messages
+            let originalOnMessage = dataChannel.onmessage;
+            Object.defineProperty(dataChannel, 'onmessage', {
+                get: function() {
+                    return originalOnMessage;
+                },
+                set: function(handler) {
+                    originalOnMessage = function(event) {
+                        const dataSize = getWebRTCDataSize(event.data);
+                        updateAccumulatedMetrics('webrtcReceived', dataSize);
+                        updateAccumulatedMetrics('webrtcMessage', 1);
+                        
+                        console.log('WebRTC DataChannel received (direct):', dataSize, 'bytes, label:', dataChannel.label);
+                        
+                        if (handler) {
+                            handler.call(this, event);
+                        }
+                    };
+                }
+            });
+            
+            // Also handle addEventListener for 'message' events
+            const originalAddEventListener = dataChannel.addEventListener;
+            dataChannel.addEventListener = function(type, listener, options) {
+                if (type === 'message') {
+                    const wrappedListener = function(event) {
+                        const dataSize = getWebRTCDataSize(event.data);
+                        updateAccumulatedMetrics('webrtcReceived', dataSize);
+                        updateAccumulatedMetrics('webrtcMessage', 1);
+                        
+                        console.log('WebRTC DataChannel received (addEventListener):', dataSize, 'bytes');
+                        
+                        if (typeof listener === 'function') {
+                            listener.call(this, event);
+                        } else if (listener && typeof listener.handleEvent === 'function') {
+                            listener.handleEvent(event);
+                        }
+                    };
+                    return originalAddEventListener.call(this, type, wrappedListener, options);
+                }
+                return originalAddEventListener.call(this, type, listener, options);
+            };
+            
+            return dataChannel;
+        };
+        
+        // Patch ondatachannel for incoming data channels
+        let originalOnDataChannel = pc.ondatachannel;
+        Object.defineProperty(pc, 'ondatachannel', {
+            get: function() {
+                return originalOnDataChannel;
+            },
+            set: function(handler) {
+                originalOnDataChannel = function(event) {
+                    const dataChannel = event.channel;
+                    console.log('WebRTC DataChannel received:', dataChannel.label);
+                    
+                    // Patch the received data channel's send method
+                    const originalSend = dataChannel.send;
+                    dataChannel.send = function(data) {
+                        const dataSize = getWebRTCDataSize(data);
+                        updateAccumulatedMetrics('webrtcSent', dataSize);
+                        updateAccumulatedMetrics('webrtcMessage', 1);
+                        
+                        console.log('WebRTC DataChannel sent:', dataSize, 'bytes');
+                        
+                        return originalSend.call(this, data);
+                    };
+                    
+                    // Monitor incoming messages on received data channel
+                    dataChannel.addEventListener('message', function(msgEvent) {
+                        const dataSize = getWebRTCDataSize(msgEvent.data);
+                        updateAccumulatedMetrics('webrtcReceived', dataSize);
+                        updateAccumulatedMetrics('webrtcMessage', 1);
+                        
+                        console.log('WebRTC DataChannel received:', dataSize, 'bytes');
+                    });
+                    
+                    if (handler) {
+                        handler.call(this, event);
+                    }
+                };
+            }
+        });
+        
+        // Clean up when connection is closed
+        pc.addEventListener('connectionstatechange', function() {
+            if (pc.connectionState === 'closed' || pc.connectionState === 'failed') {
+                activeWebRTCConnections.delete(pc);
+                console.log('RTCPeerConnection removed from monitoring');
+            }
+        });
+        
+        return pc;
+    };
+    
+    // Copy static properties
+    Object.setPrototypeOf(window.RTCPeerConnection, originalRTCPeerConnection);
+    Object.getOwnPropertyNames(originalRTCPeerConnection).forEach(name => {
+        if (name !== 'prototype' && name !== 'name' && name !== 'length') {
+            try {
+                Object.defineProperty(window.RTCPeerConnection, name, 
+                    Object.getOwnPropertyDescriptor(originalRTCPeerConnection, name));
+            } catch (e) {
+                // Some properties might not be configurable
+            }
+        }
+    });
+}
+
+/**
+ * Monitor WebRTC stats for additional metrics (bandwidth, packets, etc.)
+ */
+async function monitorWebRTCStats() {
+    for (const pc of activeWebRTCConnections) {
+        try {
+            const stats = await pc.getStats();
+            let totalDataChannelBytesSent = 0;
+            let totalDataChannelBytesReceived = 0;
+            let totalTransportBytesSent = 0;
+            let totalTransportBytesReceived = 0;
+            let candidatePairBytesSent = 0;
+            let candidatePairBytesReceived = 0;
+            
+            // Track different types of stats separately for debugging
+            const statsDebug = {
+                dataChannelReports: 0,
+                transportReports: 0,
+                candidatePairReports: 0,
+                allReportTypes: new Set()
+            };
+            
+            stats.forEach((report) => {
+                statsDebug.allReportTypes.add(report.type);
+                
+                // Monitor data channel stats (most reliable for data channel traffic)
+                if (report.type === 'data-channel') {
+                    statsDebug.dataChannelReports++;
+                    if (report.bytesSent !== undefined) {
+                        totalDataChannelBytesSent += report.bytesSent;
+                    }
+                    if (report.bytesReceived !== undefined) {
+                        totalDataChannelBytesReceived += report.bytesReceived;
+                    }
+                    if (report.messagesSent !== undefined && pc._previousDataChannelStats) {
+                        const deltaMessages = report.messagesSent - (pc._previousDataChannelStats.messagesSent || 0);
+                        if (deltaMessages > 0) {
+                            updateAccumulatedMetrics('webrtcMessage', deltaMessages);
+                        }
+                    }
+                }
+                
+                // Monitor transport stats
+                if (report.type === 'transport') {
+                    statsDebug.transportReports++;
+                    if (report.bytesSent !== undefined) {
+                        totalTransportBytesSent += report.bytesSent;
+                    }
+                    if (report.bytesReceived !== undefined) {
+                        totalTransportBytesReceived += report.bytesReceived;
+                    }
+                }
+                
+                // Monitor candidate pair stats (most comprehensive but includes all traffic)
+                if (report.type === 'candidate-pair' && report.state === 'succeeded') {
+                    statsDebug.candidatePairReports++;
+                    if (report.bytesSent !== undefined) {
+                        candidatePairBytesSent += report.bytesSent;
+                    }
+                    if (report.bytesReceived !== undefined) {
+                        candidatePairBytesReceived += report.bytesReceived;
+                    }
+                }
+                
+                // Monitor outbound-rtp and inbound-rtp for media streams
+                if (report.type === 'outbound-rtp' && report.mediaType === 'video') {
+                    // This would capture video data, but we focus on data channels
+                }
+                if (report.type === 'inbound-rtp' && report.mediaType === 'video') {
+                    // This would capture video data, but we focus on data channels
+                }
+            });
+            
+            // Use data channel stats as primary source, fallback to transport, then candidate pair
+            let finalBytesSent = totalDataChannelBytesSent || totalTransportBytesSent || candidatePairBytesSent;
+            let finalBytesReceived = totalDataChannelBytesReceived || totalTransportBytesReceived || candidatePairBytesReceived;
+            
+            // Calculate delta from previous stats
+            if (pc._previousStats) {
+                const deltaBytesSent = finalBytesSent - pc._previousStats.bytesSent;
+                const deltaBytesReceived = finalBytesReceived - pc._previousStats.bytesReceived;
+                
+                if (deltaBytesSent > 0) {
+                    updateAccumulatedMetrics('webrtcSent', deltaBytesSent);
+                    console.log(`WebRTC Stats: Sent ${deltaBytesSent} bytes (Source: ${totalDataChannelBytesSent ? 'data-channel' : totalTransportBytesSent ? 'transport' : 'candidate-pair'})`);
+                }
+                if (deltaBytesReceived > 0) {
+                    updateAccumulatedMetrics('webrtcReceived', deltaBytesReceived);
+                    console.log(`WebRTC Stats: Received ${deltaBytesReceived} bytes (Source: ${totalDataChannelBytesReceived ? 'data-channel' : totalTransportBytesReceived ? 'transport' : 'candidate-pair'})`);
+                }
+            }
+            
+            // Store current stats for next comparison
+            pc._previousStats = {
+                bytesSent: finalBytesSent,
+                bytesReceived: finalBytesReceived
+            };
+            
+            // Store data channel specific stats
+            pc._previousDataChannelStats = {
+                messagesSent: totalDataChannelBytesSent > 0 ? 1 : 0 // Simplified tracking
+            };
+            
+            // Debug logging (can be removed in production)
+            if (statsDebug.dataChannelReports === 0 && statsDebug.transportReports === 0 && statsDebug.candidatePairReports === 0) {
+                console.log('WebRTC Stats Debug: No relevant reports found. Available types:', Array.from(statsDebug.allReportTypes));
+            }
+            
+        } catch (error) {
+            console.log('Error getting WebRTC stats:', error);
+        }
+    }
+}
+
+/**
+ * Patches WebSocket to intercept sent/received data.
+ */
+function patchWebSocket() {
+    window.WebSocket = function(url, protocols) {
+        const ws = new originalWebSocket(url, protocols);
+        
+        console.log('WebSocket connection created:', url);
+        
+        // Patch the send method
+        const originalSend = ws.send;
+        ws.send = function(data) {
+            const dataSize = getWebSocketDataSize(data);
+            updateAccumulatedMetrics('wsSent', dataSize);
+            updateAccumulatedMetrics('wsMessage', 1);
+            
+            console.log('WebSocket sent:', dataSize, 'bytes');
+            
+            return originalSend.call(this, data);
+        };
+        
+        // Patch message reception
+        let originalOnMessage = ws.onmessage;
+        Object.defineProperty(ws, 'onmessage', {
+            get: function() {
+                return originalOnMessage;
+            },
+            set: function(handler) {
+                originalOnMessage = function(event) {
+                    const dataSize = getWebSocketDataSize(event.data);
+                    updateAccumulatedMetrics('wsReceived', dataSize);
+                    updateAccumulatedMetrics('wsMessage', 1);
+                    
+                    console.log('WebSocket received:', dataSize, 'bytes');
+                    
+                    if (handler) {
+                        handler.call(this, event);
+                    }
+                };
+            }
+        });
+        
+        // Also handle addEventListener for 'message' events
+        const originalAddEventListener = ws.addEventListener;
+        ws.addEventListener = function(type, listener, options) {
+            if (type === 'message') {
+                const wrappedListener = function(event) {
+                    const dataSize = getWebSocketDataSize(event.data);
+                    updateAccumulatedMetrics('wsReceived', dataSize);
+                    updateAccumulatedMetrics('wsMessage', 1);
+                    
+                    console.log('WebSocket received (addEventListener):', dataSize, 'bytes');
+                    
+                    if (typeof listener === 'function') {
+                        listener.call(this, event);
+                    } else if (listener && typeof listener.handleEvent === 'function') {
+                        listener.handleEvent(event);
+                    }
+                };
+                return originalAddEventListener.call(this, type, wrappedListener, options);
+            }
+            return originalAddEventListener.call(this, type, listener, options);
+        };
+        
+        return ws;
+    };
+    
+    // Copy static properties
+    Object.setPrototypeOf(window.WebSocket, originalWebSocket);
+    Object.getOwnPropertyNames(originalWebSocket).forEach(name => {
+        if (name !== 'prototype' && name !== 'name' && name !== 'length') {
+            Object.defineProperty(window.WebSocket, name, 
+                Object.getOwnPropertyDescriptor(originalWebSocket, name));
+        }
+    });
+}
+
+/**
+ * Sets up the PerformanceObserver to monitor HTTP resource loading.
+ */
+function setupPerformanceObserver() {
+    const observer = new PerformanceObserver((list) => {
+        list.getEntries().forEach((entry) => {
+            if (entry.entryType === 'resource') {
+                console.log('HTTP Resource entry:', entry.name, 'transferSize:', entry.transferSize);
+                
+                if (entry.transferSize) {
+                    updateAccumulatedMetrics('httpReceived', entry.transferSize);
+                }
+            }
+        });
+    });
+    observer.observe({ entryTypes: ['resource'] });
+    return observer;
+}
+
+/**
+ * Patches XMLHttpRequest to intercept requests and capture sent/received data.
+ */
+function patchXMLHttpRequest() {
+    window.XMLHttpRequest = function () {
+        const xhr = new originalXMLHttpRequest();
+        let requestBodySize = 0;
+
+        const originalOpen = xhr.open;
+        xhr.open = function (...args) {
+            updateAccumulatedMetrics('httpRequest', 1);
+            originalOpen.apply(this, args);
+        };
+
+        const originalSend = xhr.send;
+        xhr.send = function (data) {
+            if (data) {
+                if (typeof data === 'string') {
+                    requestBodySize = new Blob([data]).size;
+                } else if (data instanceof Blob) {
+                    requestBodySize = data.size;
+                } else if (data instanceof FormData) {
+                    requestBodySize = 1000; // Rough estimate
+                } else if (data instanceof URLSearchParams) {
+                    requestBodySize = data.toString().length;
+                }
+            }
+            
+            const totalSentSize = requestBodySize + 500; // +500 for headers estimate
+            updateAccumulatedMetrics('httpSent', totalSentSize);
+            
+            console.log('XHR Send - Body size:', requestBodySize, 'Total sent:', totalSentSize);
+            
+            originalSend.apply(this, arguments);
+        };
+
+        // Capture response size when request completes
+        const originalOnReadyStateChange = xhr.onreadystatechange;
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                const responseSize = xhr.responseText ? xhr.responseText.length : 0;
+                const responseHeadersSize = xhr.getAllResponseHeaders().length;
+                const totalReceivedSize = responseSize + responseHeadersSize;
+                
+                updateAccumulatedMetrics('httpReceived', totalReceivedSize);
+                console.log('XHR Response - Body size:', responseSize, 'Headers size:', responseHeadersSize);
+            }
+            
+            if (originalOnReadyStateChange) {
+                originalOnReadyStateChange.apply(this, arguments);
+            }
+        };
+
+        return xhr;
+    };
+}
+
+/**
+ * Patches window.fetch to intercept requests and capture sent/received data.
+ */
+function patchFetch() {
+    window.fetch = async function (input, init = {}) {
+        updateAccumulatedMetrics('httpRequest', 1);
+
+        let requestBodySize = 0;
+        if (init.body) {
+            if (typeof init.body === 'string') {
+                requestBodySize = new Blob([init.body]).size;
+            } else if (init.body instanceof Blob) {
+                requestBodySize = init.body.size;
+            } else if (init.body instanceof FormData) {
+                requestBodySize = 1000; // Rough estimate
+            } else if (init.body instanceof URLSearchParams) {
+                requestBodySize = init.body.toString().length;
+            }
+        }
+        
+        const totalSentSize = requestBodySize + 500;
+        updateAccumulatedMetrics('httpSent', totalSentSize);
+        console.log('Fetch Send - Body size:', requestBodySize, 'Total sent:', totalSentSize);
+
+        try {
+            const response = await originalFetch(input, init);
+            
+            const clonedResponse = response.clone();
+            
+            clonedResponse.text().then(text => {
+                const responseSize = text.length;
+                const headersSize = Array.from(response.headers.entries())
+                    .reduce((acc, [key, value]) => acc + key.length + value.length + 4, 0);
+                
+                const totalReceivedSize = responseSize + headersSize;
+                updateAccumulatedMetrics('httpReceived', totalReceivedSize);
+                console.log('Fetch Response - Body size:', responseSize, 'Headers size:', headersSize);
+            }).catch(err => {
+                const contentLength = response.headers.get('content-length');
+                if (contentLength) {
+                    updateAccumulatedMetrics('httpReceived', parseInt(contentLength) + 200);
+                }
+            });
+            
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    };
+}
+
+/**
+ * Logs the current second's network activity to the console.
+ */
+function logNetworkActivity() {
+    const m = accumulatedMetrics;
+    
+    console.log(`
+=== Network Activity (per second) ===
+HTTP/HTTPS: Sent: ${formatBytes(m.httpSent)}, Received: ${formatBytes(m.httpReceived)}, Requests: ${m.httpRequests}
+WebSocket:  Sent: ${formatBytes(m.wsSent)}, Received: ${formatBytes(m.wsReceived)}, Messages: ${m.wsMessages}
+WebRTC:     Sent: ${formatBytes(m.webrtcSent)}, Received: ${formatBytes(m.webrtcReceived)}, Messages: ${m.webrtcMessages}
+TOTAL:      Sent: ${formatBytes(m.totalSent)}, Received: ${formatBytes(m.totalReceived)}, Requests: ${m.totalRequests}
+Active WebRTC Connections: ${activeWebRTCConnections.size}
+=====================================`);
+}
+
+/**
+ * Updates the metrics and logs to console.
+ */
+function displayAndLogMetrics() {
+    logNetworkActivity();
+
+    // Reset accumulators for the next second
+    accumulatedMetrics = {
+        httpSent: 0,
+        httpReceived: 0,
+        httpRequests: 0,
+        wsSent: 0,
+        wsReceived: 0,
+        wsMessages: 0,
+        webrtcSent: 0,
+        webrtcReceived: 0,
+        webrtcMessages: 0,
+        totalSent: 0,
+        totalReceived: 0,
+        totalRequests: 0
+    };
+}
+
+// --- Main execution on window load ---
+window.onload = function () {
+    console.log('Network monitor initialized (HTTP/HTTPS + WebSocket + WebRTC)');
+    
+    // Setup Performance Observer for HTTP/HTTPS
+    const observer = setupPerformanceObserver();
+
+    // Patch all network APIs
+    patchXMLHttpRequest();
+    patchFetch();
+    patchWebSocket();
+    patchRTCPeerConnection();
+
+    // Set up per-second aggregation and logging
+    const intervalId = setInterval(displayAndLogMetrics, 1000);
+    
+    // Monitor WebRTC stats more frequently for better capture
+    const webrtcStatsInterval = setInterval(monitorWebRTCStats, 500);
+    
+    // Test WebSocket monitoring (optional)
+    setTimeout(() => {
+        console.log('Testing WebSocket monitoring...');
+        try {
+            // Example WebSocket test - replace with your actual WebSocket URL
+            const testWs = new WebSocket('wss://echo.websocket.org');
+            testWs.onopen = () => {
+                console.log('Test WebSocket connected');
+                testWs.send('Hello WebSocket!');
+            };
+            testWs.onmessage = (event) => {
+                console.log('Test WebSocket message received:', event.data);
+                testWs.close();
+            };
+            testWs.onerror = (error) => {
+                console.log('Test WebSocket error:', error);
+            };
+        } catch (error) {
+            console.log('WebSocket test failed:', error);
+        }
+    }, 2000);
+    
+    // Test WebRTC monitoring (optional)
+    setTimeout(() => {
+        console.log('Testing WebRTC monitoring...');
+        try {
+            const pc1 = new RTCPeerConnection();
+            const pc2 = new RTCPeerConnection();
+            
+            const dataChannel = pc1.createDataChannel('test', { ordered: true });
+            
+            pc2.ondatachannel = (event) => {
+                const receivedChannel = event.channel;
+                receivedChannel.onmessage = (event) => {
+                    console.log('WebRTC test message received:', event.data);
+                };
+            };
+            
+            dataChannel.onopen = () => {
+                console.log('WebRTC test data channel opened');
+                dataChannel.send('Hello WebRTC!');
+            };
+            
+            // Simple connection setup for testing
+            pc1.onicecandidate = (event) => {
+                if (event.candidate) {
+                    pc2.addIceCandidate(event.candidate);
+                }
+            };
+            
+            pc2.onicecandidate = (event) => {
+                if (event.candidate) {
+                    pc1.addIceCandidate(event.candidate);
+                }
+            };
+            
+            pc1.createOffer().then(offer => {
+                pc1.setLocalDescription(offer);
+                pc2.setRemoteDescription(offer);
+                return pc2.createAnswer();
+            }).then(answer => {
+                pc2.setLocalDescription(answer);
+                pc1.setRemoteDescription(answer);
+            }).catch(error => {
+                console.log('WebRTC test setup failed:', error);
+            });
+            
+        } catch (error) {
+            console.log('WebRTC test failed:', error);
+        }
+    }, 3000);
+};
+    </script> -->
+
+
+    <!-- <script>
+
+        this code is to send live logs to server
+        (function() {
+    // Store a reference to the original console methods
+    const originalConsole = {
+        log: console.log,
+        warn: console.warn,
+        error: console.error
+    };
+
+    // Configuration for the logging endpoint
+    const LOGGING_ENDPOINT = 'http://localhost:3001/api/log'; // Your server endpoint
+    const BATCH_INTERVAL_MS = 2000;      // Send logs every 2 seconds
+    const MAX_BATCH_SIZE = 10;           // Max logs per batch
+    const LOG_LEVELS = {                 // Map console methods to log levels
+        log: 'INFO',
+        warn: 'WARN',
+        error: 'ERROR'
+    };
+
+    let logQueue = [];
+    let timeoutId = null;
+
+    /**
+     * Sends a batch of logs to the server.
+     */
+    function sendLogsToServer() {
+        if (logQueue.length === 0) {
+            return;
+        }
+
+        // Take a slice of the queue to send
+        const logsToSend = logQueue.splice(0, MAX_BATCH_SIZE);
+        // Clear any pending timeout if this was triggered manually
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+        }
+
+        fetch(LOGGING_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            // Stringify the array of log entries
+            body: JSON.stringify({ logs: logsToSend }),
+            keepalive: true // Try to send even if the page is closing
+        })
+        .then(response => {
+            if (!response.ok) {
+                // Log to original console if server call fails
+                originalConsole.error('Failed to send logs to server:', response.statusText);
+            }
+        })
+        .catch(error => {
+            originalConsole.error('Error sending logs to server:', error);
+        });
+
+        // If there are still logs in the queue, schedule the next send
+        if (logQueue.length > 0) {
+            timeoutId = setTimeout(sendLogsToServer, BATCH_INTERVAL_MS);
+        }
+    }
+
+    /**
+     * Queues a log message and schedules batch sending.
+     * @param {string} level - The log level (e.g., 'INFO', 'WARN', 'ERROR').
+     * @param {Array<any>} args - The arguments passed to the console method.
+     */
+    function queueLog(level, args) {
+        // Convert arguments to a readable string, handling objects gracefully
+        const message = args.map(arg => {
+            if (typeof arg === 'object' && arg !== null) {
+                try {
+                    return JSON.stringify(arg);
+                } catch (e) {
+                    return `[Circular Object or Unserializable: ${String(arg)}]`;
+                }
+            }
+            return String(arg);
+        }).join(' ');
+
+        logQueue.push({
+            timestamp: new Date().toISOString(),
+            level: level,
+            message: message,
+            // Optionally add more context
+            userAgent: navigator.userAgent,
+            url: window.location.href,
+            // You might want to capture stack traces for errors
+            stack: level === 'ERROR' && new Error().stack ? new Error().stack : undefined
+        });
+
+        // Schedule sending if not already scheduled or if batch size reached
+        if (!timeoutId) {
+            timeoutId = setTimeout(sendLogsToServer, BATCH_INTERVAL_MS);
+        } else if (logQueue.length >= MAX_BATCH_SIZE) {
+            sendLogsToServer(); // Send immediately if batch size is met
+        }
+    }
+
+    // Override console.log
+    console.log = function(...args) {
+        originalConsole.log.apply(this, args); // Call original console.log first
+        queueLog(LOG_LEVELS.log, args);
+    };
+
+    // Override console.warn
+    console.warn = function(...args) {
+        originalConsole.warn.apply(this, args); // Call original console.warn
+        queueLog(LOG_LEVELS.warn, args);
+    };
+
+    // Override console.error
+    console.error = function(...args) {
+        originalConsole.error.apply(this, args); // Call original console.error
+        queueLog(LOG_LEVELS.error, args);
+    };
+
+    // Optionally, capture uncaught errors (not just console.error calls)
+    window.addEventListener('error', (event) => {
+        queueLog('ERROR', [`Uncaught Error: ${event.message}`, `File: ${event.filename}`, `Line: ${event.lineno}, Col: ${event.colno}`]);
+        // Prevent default error handling if you want, but usually you don't for uncaught errors
+    });
+
+    window.addEventListener('unhandledrejection', (event) => {
+        queueLog('ERROR', [`Unhandled Promise Rejection: ${event.reason}`]);
+    });
+
+    originalConsole.log("Client-side console logger initialized.");
+
+})();
+
+    </script> -->
     <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.7/dist/bundle.min.js"></script> 
     

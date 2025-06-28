@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FaStar } from "react-icons/fa";
 import {PostReq} from '../functions/requests'
 import { useData } from "../context/DataWrapper";
+import { useAppSelector } from "@/store/store";
 
 function RatingsComp({text,ratings,setRatings}){
   const [hover, setHover] = useState(ratings[text.toLowerCase().split(' ').join('-')]);
@@ -38,16 +39,21 @@ const FeedbackModel = ({isOpen,setIsOpen}) => {
   
   const [feedback, setFeedback] = useState("");
   const [ratings,setRatings] = useState({})
-  
+  const feedbackServerUrl = 'https://wpv7kxos9g.execute-api.ap-south-1.amazonaws.com/test/recruito-upload-apis'
+ 
   //@ts-ignore
   const {socket2,name,ngrokServerUrl} = useData()
+  const { jobId, roomId, candid, agentId, isHost, meetingIsLegit } =
+    useAppSelector((state) => state.qpReducer);
+  const [feedbackList,setFeedbackList] = useState([])
 
-  let feedbackList = [
-    'Problem Solving Ability',
-    'Technical Competency',
-    'Communication skills',
-    'Adaptability'
-  ]
+  // let feedbackList = [
+  //   // 'Problem Solving Ability',
+  //   // 'Technical Competency',
+  //   // 'Communication skills',
+  //   // 'Adaptability'
+
+  // ]
 
   const handleSubmit = async () => {
     if(socket2===null)
@@ -67,9 +73,14 @@ const FeedbackModel = ({isOpen,setIsOpen}) => {
       feedback_form :{...feedBackObj,
         ...ratings,
         feedback},
-      roomid:'abc-123-fgh-456',
-      name
-
+      roomid:roomId,
+      jobid:jobId,
+      agentid:agentId,
+      isHost:isHost,
+      //custemailid:candid,
+      name,
+     // route_name: '/main_router',
+      trigger_func: "save_feedback_form"
     }
     console.log(data)
     //socket2.emit('feedback_form_req',data)
@@ -78,15 +89,34 @@ const FeedbackModel = ({isOpen,setIsOpen}) => {
     setRatings({});
     setIsOpen(false);
 
-   let result = await PostReq(`${ngrokServerUrl}/feedback_form_req`,data)
+   let result = await PostReq(`${feedbackServerUrl}/main_router`,data)
       console.log('feedback form req result',result)
+
   };
 
   useEffect(()=>{
     console.log('ratings is ',ratings)
   },[ratings])
 
-  
+  useEffect(()=>{
+
+    
+    let data = {
+      trigger_func: "assesment_metircs",
+      roomid:roomId,
+      jobid:jobId,
+      agentid:agentId,
+      isHost:isHost,
+      //custemailid:candid,
+      name,
+    }
+
+    PostReq(`${feedbackServerUrl}/main_router`,data).then(resp=>{
+      console.log('resp from',resp)
+    })
+  },[])
+
+
   return (
     <>
       {isOpen ? (

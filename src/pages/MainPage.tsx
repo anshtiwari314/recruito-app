@@ -25,6 +25,300 @@ export default function MainPage() {
   const [isMobile, setIsMobile] = useState(false);
   const [tempIsHost, setTempIsHost] = useState<boolean | null>(null);
 
+
+
+  function overRideConsoleLogsOld(initialRoomId, initialUserId, initialUsername) {
+      let currentRoomId = initialRoomId || 'default_room';
+      let currentUserId = initialUserId || 'anonymous_user';
+      let currentUsername = initialUsername || 'browser_logs'; // Default username for log file part
+  
+      // Store a reference to the original console methods
+      const originalConsole = {
+          log: console.log,
+          warn: console.warn,
+          error: console.error
+      };
+  
+      // Configuration for the logging endpoint
+      const LOGGING_ENDPOINT = 'http://localhost:3001/api/log'; // Ensure this matches your server
+      const BATCH_INTERVAL_MS = 2000;      // Send logs every 2 seconds
+      const MAX_BATCH_SIZE = 10;           // Max logs per batch
+      const LOG_LEVELS = {                 // Map console methods to log levels
+          log: 'INFO',
+          warn: 'WARN',
+          error: 'ERROR'
+      };
+  
+      let logQueue = [];
+      let timeoutId = null;
+  
+      /**
+       * Sends a batch of logs to the server.
+       */
+      function sendLogsToServer() {
+          if (logQueue.length === 0) {
+              return;
+          }
+  
+          const logsToSend = logQueue.splice(0, MAX_BATCH_SIZE);
+          if (timeoutId) {
+              clearTimeout(timeoutId);
+              timeoutId = null;
+          }
+  
+          fetch(LOGGING_ENDPOINT, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ logs: logsToSend }),
+              keepalive: true
+          })
+          .then(response => {
+              if (!response.ok) {
+                  originalConsole.error('Failed to send logs to server:', response.status, response.statusText);
+              }
+          })
+          .catch(error => {
+              originalConsole.error('Error sending logs to server:', error);
+          });
+  
+          if (logQueue.length > 0) {
+              timeoutId = setTimeout(sendLogsToServer, BATCH_INTERVAL_MS);
+          }
+      }
+  
+      /**
+       * Queues a log message and schedules batch sending.
+       * @param {string} level - The log level (e.g., 'INFO', 'WARN', 'ERROR').
+       * @param {Array<any>} args - The arguments passed to the console method.
+       */
+      function queueLog(level, args) {
+          const message = args.map(arg => {
+              if (typeof arg === 'object' && arg !== null) {
+                  try {
+                      return JSON.stringify(arg);
+                  } catch (e) {
+                      return `[Circular Object or Unserializable: ${String(arg)}]`;
+                  }
+              }
+              return String(arg);
+          }).join(' ');
+  
+          logQueue.push({
+              timestamp: new Date().toISOString(),
+              level: level,
+              message: message,
+              roomId: currentRoomId,
+              userId: currentUserId,   // Include userId
+              username: currentUsername, // Include username (replaces logName)
+              userAgent: navigator.userAgent,
+              url: window.location.href,
+              stack: level === 'ERROR' && new Error().stack ? new Error().stack : undefined
+          });
+  
+          if (!timeoutId) {
+              timeoutId = setTimeout(sendLogsToServer, BATCH_INTERVAL_MS);
+          } else if (logQueue.length >= MAX_BATCH_SIZE) {
+              sendLogsToServer();
+          }
+      }
+  
+      // Override console.log
+      console.log = function(...args) {
+          originalConsole.log.apply(this, args);
+          queueLog(LOG_LEVELS.log, args);
+      };
+  
+      // Override console.warn
+      console.warn = function(...args) {
+          originalConsole.warn.apply(this, args);
+          queueLog(LOG_LEVELS.warn, args);
+      };
+  
+      // Override console.error
+      console.error = function(...args) {
+          originalConsole.error.apply(this, args);
+          queueLog(LOG_LEVELS.error, args);
+      };
+  
+      // Capture uncaught errors and unhandled promise rejections
+      window.addEventListener('error', (event) => {
+          queueLog('ERROR', [`Uncaught Error: ${event.message}`, `File: ${event.filename}`, `Line: ${event.lineno}, Col: ${event.colno}`]);
+      });
+  
+      window.addEventListener('unhandledrejection', (event) => {
+          queueLog('ERROR', [`Unhandled Promise Rejection: ${event.reason}`]);
+      });
+  
+      // New function to update the logger context (roomId, userId, username)
+      window.setClientLoggerContext = function(newRoomId, newUserId, newUsername) {
+          currentRoomId = newRoomId || currentRoomId;
+          currentUserId = newUserId || currentUserId;
+          currentUsername = newUsername || currentUsername; // Update username
+          originalConsole.log(`Client-side logger context updated: RoomID=${currentRoomId}, UserID=${currentUserId}, Username=${currentUsername}`);
+      };
+  
+      originalConsole.log("Client-side console logger initialized.");
+  
+      //(window.initialPeerId, window.initialUserId, window.initialUsername);
+  }
+
+  function overRideConsoleLogs(initialRoomId, initialUserId, initialUsername) {
+     let currentRoomId = initialRoomId || 'default_room';
+     let currentUserId = initialUserId || 'anonymous_user';
+     let currentUsername = initialUsername || 'browser_logs'; // Default username for log file part
+ 
+     // Store a reference to the original console methods
+     const originalConsole = {
+         log: console.log,
+         warn: console.warn,
+         error: console.error
+     };
+ 
+     // Configuration for the logging endpoint
+     const LOGGING_ENDPOINT = 'http://localhost:3005/api/log'; // Ensure this matches your server
+     const BATCH_INTERVAL_MS = 2000;      // Send logs every 2 seconds
+     const MAX_BATCH_SIZE = 10;           // Max logs per batch
+     const LOG_LEVELS = {                 // Map console methods to log levels
+         log: 'INFO',
+         warn: 'WARN',
+         error: 'ERROR'
+     };
+ 
+     let logQueue = [];
+     let timeoutId = null;
+ 
+     /**
+      * Sends a batch of logs to the server.
+      */
+     function sendLogsToServer() {
+         if (logQueue.length === 0) {
+             return;
+         }
+ 
+         const logsToSend = logQueue.splice(0, MAX_BATCH_SIZE);
+         if (timeoutId) {
+             clearTimeout(timeoutId);
+             timeoutId = null;
+         }
+ 
+         fetch(LOGGING_ENDPOINT, {
+             method: 'POST',
+             headers: {
+                 'Content-Type': 'application/json',
+             },
+             body: JSON.stringify({ logs: logsToSend }),
+             keepalive: true
+         })
+         .then(response => {
+             if (!response.ok) {
+                 originalConsole.error('Failed to send logs to server:', response.status, response.statusText);
+             }
+         })
+         .catch(error => {
+             originalConsole.error('Error sending logs to server:', error);
+         });
+ 
+         if (logQueue.length > 0) {
+             timeoutId = setTimeout(sendLogsToServer, BATCH_INTERVAL_MS);
+         }
+     }
+ 
+     /**
+      * Queues a log message and schedules batch sending.
+      * @param {string} level - The log level (e.g., 'INFO', 'WARN', 'ERROR').
+      * @param {Array<any>} args - The arguments passed to the console method.
+      */
+     function queueLog(level, args) {
+         // The 'message' field will contain a joined string for simpler display if originalArgs are not used.
+         // This is primarily for backward compatibility or simpler parsing if needed.
+         const message = args.map(arg => {
+             if (typeof arg === 'object' && arg !== null) {
+                 try {
+                     return JSON.stringify(arg);
+                 } catch (e) {
+                     return `[Circular Object or Unserializable: ${String(arg)}]`;
+                 }
+             }
+             return String(arg);
+         }).join(' ');
+ 
+         logQueue.push({
+             timestamp: new Date().toLocaleString(), // Changed from toISOString() to toLocaleString()
+             level: level,
+             message: message, // A flattened string representation of the log
+             // Store the original arguments array to preserve type information for console coloring
+             originalArgs: args.map(arg => {
+                 // For objects, deep clone them or serialize/deserialize to handle circular references
+                 // and ensure they are independent copies for storage.
+                 if (typeof arg === 'object' && arg !== null) {
+                     try {
+                         // Using JSON.parse(JSON.stringify(arg)) for a simple deep copy,
+                         // handle cases where it might fail (e.g., functions, complex types).
+                         return JSON.parse(JSON.stringify(arg));
+                     } catch (e) {
+                         return `[Circular Object or Unserializable: ${String(arg)}]`;
+                     }
+                 }
+                 return arg; // Primitives (string, number, boolean) can be stored directly
+             }),
+             roomId: currentRoomId,
+             userId: currentUserId,
+             username: currentUsername, // Include username
+             userAgent: navigator.userAgent,
+             url: window.location.href,
+             stack: level === 'ERROR' && new Error().stack ? new Error().stack : undefined
+         });
+ 
+         if (!timeoutId) {
+             timeoutId = setTimeout(sendLogsToServer, BATCH_INTERVAL_MS);
+         } else if (logQueue.length >= MAX_BATCH_SIZE) {
+             sendLogsToServer();
+         }
+     }
+ 
+     // Override console.log
+     console.log = function(...args) {
+         originalConsole.log.apply(this, args);
+         queueLog(LOG_LEVELS.log, args);
+     };
+ 
+     // Override console.warn
+     console.warn = function(...args) {
+         originalConsole.warn.apply(this, args);
+         queueLog(LOG_LEVELS.warn, args);
+     };
+ 
+     // Override console.error
+     console.error = function(...args) {
+         originalConsole.error.apply(this, args);
+         queueLog(LOG_LEVELS.error, args);
+     };
+ 
+     // Capture uncaught errors and unhandled promise rejections
+     window.addEventListener('error', (event) => {
+         // Pass the full error object or relevant parts to capture stack trace
+         queueLog('ERROR', [`Uncaught Error: ${event.message}`, `File: ${event.filename}`, `Line: ${event.lineno}, Col: ${event.colno}`, event.error]);
+     });
+ 
+     window.addEventListener('unhandledrejection', (event) => {
+         // Capture the reason of the unhandled promise rejection
+         queueLog('ERROR', [`Unhandled Promise Rejection: ${event.reason}`]);
+     });
+ 
+     // New function to update the logger context (roomId, userId, username)
+     window.setClientLoggerContext = function(newRoomId, newUserId, newUsername) {
+         currentRoomId = newRoomId || currentRoomId;
+         currentUserId = newUserId || currentUserId;
+         currentUsername = newUsername || currentUsername; // Update username
+         originalConsole.log(`Client-side logger context updated: RoomID=${currentRoomId}, UserID=${currentUserId}, Username=${currentUsername}`);
+     };
+ 
+     originalConsole.log("Client-side console logger initialized.");
+ 
+ }
+ 
   // Handle viewport resizing
   useEffect(() => {
     function handleResize() {
@@ -66,6 +360,8 @@ export default function MainPage() {
       }
       sessionStorage.setItem("userName", myName);
     }
+
+    
     setName(myName);
 
     // Authentication flow
@@ -138,7 +434,10 @@ export default function MainPage() {
         meetingIsLegit: true,
       };
       dispatch(setQP(qParams));
-      setMyId(uuidv4());
+      let id = uuidv4()
+      console.log('initialization',roomParam,id,myName)
+      //overRideConsoleLogs(roomParam,id,myName)
+      setMyId(id);
     };
 
     initialize();

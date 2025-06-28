@@ -1,17 +1,26 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import { useAppSelector } from "@/store/store";
 import "./leavepage.css";
 import FeedbackModel from '../components/FeedbackModel';
 
 export default function Leave() {
 
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   console.log("Leave Page");
   const { audioUploadAnimation } = useAppSelector((state) => state.nvReducer);
+  const { jobId, roomId, candid, agentId, isHost, meetingIsLegit } =
+    useAppSelector((state) => state.qpReducer);
+
   console.log(audioUploadAnimation);
   console.log(!audioUploadAnimation);
 
-  
+  useEffect(()=>{
+    if(isHost===false)
+      return ;
+
+      setIsOpen(true)
+  },[isHost])
+
   return (
     <>
       {audioUploadAnimation ? (

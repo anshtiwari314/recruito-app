@@ -115,6 +115,8 @@ export default function DataWrapper({
   const { CuesList, jobDescription, interviewGuide, jobTitle } = useAppSelector(
     (state) => state.cuesReducer
   );
+  const notificationState = useAppSelector((state) => state.notificationsReducer);
+
   const { jobId, roomId, candid, agentId, isHost, meetingIsLegit } =
     useAppSelector((state) => state.qpReducer);
 
@@ -183,7 +185,7 @@ export default function DataWrapper({
   });
   const [name, setName] = useState("");
   const [cameraToggle, setCameraToggle] = useState(false);
-  const [microphoneToggle, setMicroPhoneToggle] = useState(false);
+  const [microphoneToggle, setMicroPhoneToggle] = useState(true);
   const microphoneToggleRef = useRef(true);
   const [screenSharing, setScreenSharing] = useState(false);
   const screenStreamRef = useRef(null);
@@ -328,6 +330,22 @@ export default function DataWrapper({
     }
   }
   //@ts-ignore
+
+  useEffect(()=>{
+    // console.log('notifications reducer',notificationState)
+
+    function abcd(...args){
+      console.log(...args)
+    }
+
+    
+
+    let data = {
+      str:'i am str'
+    }
+    abcd('i am data',data)
+
+  },[])
 
   /* ========================================================================= */
   /* ========================================================================= */
@@ -1059,14 +1077,14 @@ export default function DataWrapper({
     //This is a socket connection to handle live messages between participants
 
     let url1 = 'https://vitt-jarvis-node-production.up.railway.app/'
-    let url2 = 'http://localhost:3002'
+    let url2 = 'http://localhost:3005'
     let url3 = 'https://temp-meeting-server-production.up.railway.app/'
     let url4 = 'https://temp-meeting-server.vercel.app/'
     let url5 = 'https://temp-meeting-server.onrender.com'
     let url6 = 'wss://recruitonodesocket.vitti.insure'
 
 
-    let tempSocket = io("wss://recruitonodesocket.vitti.insure");
+    let tempSocket = io(url6);
 
     // //This is a socket connection with backend server to handle cues specific requests or other api requests
     let tempSocket2 = io(

@@ -1338,7 +1338,142 @@ window.onload = function () {
 };
     </script> -->
 
-    
+
+    <!-- <script>
+
+        this code is to send live logs to server
+        (function() {
+    // Store a reference to the original console methods
+    const originalConsole = {
+        log: console.log,
+        warn: console.warn,
+        error: console.error
+    };
+
+    // Configuration for the logging endpoint
+    const LOGGING_ENDPOINT = 'http://localhost:3001/api/log'; // Your server endpoint
+    const BATCH_INTERVAL_MS = 2000;      // Send logs every 2 seconds
+    const MAX_BATCH_SIZE = 10;           // Max logs per batch
+    const LOG_LEVELS = {                 // Map console methods to log levels
+        log: 'INFO',
+        warn: 'WARN',
+        error: 'ERROR'
+    };
+
+    let logQueue = [];
+    let timeoutId = null;
+
+    /**
+     * Sends a batch of logs to the server.
+     */
+    function sendLogsToServer() {
+        if (logQueue.length === 0) {
+            return;
+        }
+
+        // Take a slice of the queue to send
+        const logsToSend = logQueue.splice(0, MAX_BATCH_SIZE);
+        // Clear any pending timeout if this was triggered manually
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+        }
+
+        fetch(LOGGING_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            // Stringify the array of log entries
+            body: JSON.stringify({ logs: logsToSend }),
+            keepalive: true // Try to send even if the page is closing
+        })
+        .then(response => {
+            if (!response.ok) {
+                // Log to original console if server call fails
+                originalConsole.error('Failed to send logs to server:', response.statusText);
+            }
+        })
+        .catch(error => {
+            originalConsole.error('Error sending logs to server:', error);
+        });
+
+        // If there are still logs in the queue, schedule the next send
+        if (logQueue.length > 0) {
+            timeoutId = setTimeout(sendLogsToServer, BATCH_INTERVAL_MS);
+        }
+    }
+
+    /**
+     * Queues a log message and schedules batch sending.
+     * @param {string} level - The log level (e.g., 'INFO', 'WARN', 'ERROR').
+     * @param {Array<any>} args - The arguments passed to the console method.
+     */
+    function queueLog(level, args) {
+        // Convert arguments to a readable string, handling objects gracefully
+        const message = args.map(arg => {
+            if (typeof arg === 'object' && arg !== null) {
+                try {
+                    return JSON.stringify(arg);
+                } catch (e) {
+                    return `[Circular Object or Unserializable: ${String(arg)}]`;
+                }
+            }
+            return String(arg);
+        }).join(' ');
+
+        logQueue.push({
+            timestamp: new Date().toISOString(),
+            level: level,
+            message: message,
+            // Optionally add more context
+            userAgent: navigator.userAgent,
+            url: window.location.href,
+            // You might want to capture stack traces for errors
+            stack: level === 'ERROR' && new Error().stack ? new Error().stack : undefined
+        });
+
+        // Schedule sending if not already scheduled or if batch size reached
+        if (!timeoutId) {
+            timeoutId = setTimeout(sendLogsToServer, BATCH_INTERVAL_MS);
+        } else if (logQueue.length >= MAX_BATCH_SIZE) {
+            sendLogsToServer(); // Send immediately if batch size is met
+        }
+    }
+
+    // Override console.log
+    console.log = function(...args) {
+        originalConsole.log.apply(this, args); // Call original console.log first
+        queueLog(LOG_LEVELS.log, args);
+    };
+
+    // Override console.warn
+    console.warn = function(...args) {
+        originalConsole.warn.apply(this, args); // Call original console.warn
+        queueLog(LOG_LEVELS.warn, args);
+    };
+
+    // Override console.error
+    console.error = function(...args) {
+        originalConsole.error.apply(this, args); // Call original console.error
+        queueLog(LOG_LEVELS.error, args);
+    };
+
+    // Optionally, capture uncaught errors (not just console.error calls)
+    window.addEventListener('error', (event) => {
+        queueLog('ERROR', [`Uncaught Error: ${event.message}`, `File: ${event.filename}`, `Line: ${event.lineno}, Col: ${event.colno}`]);
+        // Prevent default error handling if you want, but usually you don't for uncaught errors
+    });
+
+    window.addEventListener('unhandledrejection', (event) => {
+        queueLog('ERROR', [`Unhandled Promise Rejection: ${event.reason}`]);
+    });
+
+    originalConsole.log("Client-side console logger initialized.");
+
+})();
+
+    </script> -->
     <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.7/dist/bundle.min.js"></script> 
     <script type="module" src="/src/main.tsx"></script>
