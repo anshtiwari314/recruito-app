@@ -223,7 +223,7 @@ export default function CandidateView({ state }: any) {
             <TableHead>Status</TableHead>
             <TableHead>Score</TableHead>
             <TableHead>Action</TableHead>
-            <TableHead>Postfacto Dashboard</TableHead>
+            <TableHead>Dashboard</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -278,7 +278,7 @@ export default function CandidateView({ state }: any) {
                         className="bg-gray-500 hover:bg-zinc-900"
                         onClick={() => showLinkToast(candidate.postfacto_link)}
                       >
-                        Postfacto Link
+                        Insight Link
                       </Button>
                     ) : (
                       <Button
@@ -303,7 +303,7 @@ export default function CandidateView({ state }: any) {
                           }
                         }}
                       >
-                        Generate Postfacto
+                        Generate Insight
                       </Button>
                     )
                   ) : (
