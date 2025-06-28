@@ -76,7 +76,7 @@ const FooterTemp: React.FC = () => {
     <footer className="text-white" >
       <div className="flex w-full" style={{flexDirection:'row',alignItems:'center'}}>
        
-        <div className="w-[55%] pr-4 flex flex-col space-y-3" >
+        <div className="w-[45%] pr-4 flex flex-col space-y-3" >
           <div id="ai-query" style={{ flex: 0.2, }} >
             <div className="bg-white rounded-lg shadow p-4" >
               <div className="flex items-center text-black space-x-3">
@@ -119,7 +119,7 @@ const FooterTemp: React.FC = () => {
         </div>
 
        
-        <div className="w-[45%] h-full bg-white flex border rounded-lg overflow-hidden" >
+        <div className="w-[52%] ml-5 h-full bg-white flex border rounded-lg overflow-hidden" >
          
           <div className="w-1/2 px-4 py-4  flex flex-col">
            

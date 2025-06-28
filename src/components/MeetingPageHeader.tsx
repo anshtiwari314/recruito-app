@@ -9,8 +9,10 @@ import DraggableLiveTranscription from "./DraggableLiveTranscript"
 import { useVad } from "../context/VadWrapper"
 import rectLoading from '../assets/reactangle-loading.gif'
 import playSound from '../assets/sound-play.gif'
+import useNetworkMonitor from "./SpeedTestComponent"
 
 export default function MeetingPageHeader() {
+  // useNetworkMonitor();
   const dispatch = useDispatch()
   const { jobTitle } = useAppSelector((state) => state.cuesReducer)
   const { isHost } = useAppSelector((state) => state.qpReducer)
@@ -36,6 +38,7 @@ export default function MeetingPageHeader() {
     setTranscriptionToggle,
     transcriptionIndicator,
     setTranscriptionIndicator,
+    connStatus
   }: any = useData();
 
   const {
@@ -44,6 +47,8 @@ export default function MeetingPageHeader() {
     vadStatus, setVadStatus, vadInstance,
     VAD2, userSpeaking
   }: any = useVad();
+
+  useEffect(()=>{console.log(connStatus)},[connStatus])
 
   const [showQualityMenu, setShowQualityMenu] = useState(false)
   const [vadLoadingDelayExceeded, setVadLoadingDelayExceeded] = useState(false)
@@ -140,6 +145,7 @@ export default function MeetingPageHeader() {
             boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
             outline: "none",
             transition: "border-color 0.3s",
+            visibility: "hidden"
           }}
         />
       </div>
@@ -253,39 +259,19 @@ export default function MeetingPageHeader() {
           )}
 
           {/* Network Quality */}
-          <div className="relative">
-            <button
-              className="py-3 px-4 bg-neutral-200 hover:bg-neutral-300 rounded-lg flex items-center space-x-2"
-              onClick={() => setShowQualityMenu(!showQualityMenu)}
-              title="Network Quality"
-            >
-              <i className="fa-solid fa-signal text-green-500" />
-              <span className="text-sm">Quality</span>
-            </button>
-
-            {showQualityMenu && (
-              <div className="absolute top-full mt-2 right-0 z-50 bg-white border border-neutral-200 rounded-lg shadow-lg py-2 min-w-[150px]">
-                <div className="px-3 py-1 text-xs text-neutral-500 border-b border-neutral-200 mb-2">
-                  Quality Settings
-                </div>
-                <button className="w-full text-left px-3 py-2 hover:bg-neutral-100 text-sm">
-                  <i className="fa-solid fa-signal text-green-500 mr-2" />
-                  HD Quality
-                </button>
-                <button className="w-full text-left px-3 py-2 hover:bg-neutral-100 text-sm">
-                  <i className="fa-solid fa-signal text-yellow-500 mr-2" />
-                  SD Quality
-                </button>
-                <button className="w-full text-left px-3 py-2 hover:bg-neutral-100 text-sm">
-                  <i className="fa-solid fa-signal text-orange-500 mr-2" />
-                  Low Quality
-                </button>
-                <button className="w-full text-left px-3 py-2 hover:bg-neutral-100 text-sm">
-                  <i className="fa-solid fa-signal text-red-500 mr-2" />
-                  Audio Only
-                </button>
-              </div>
-            )}
+           <div className="py-3 px-4 bg-neutral-200 rounded-lg flex items-center space-x-2" title={`Network: ${connStatus}`}>
+            <i className={`fa-solid fa-signal ${
+              connStatus === "stable"
+                ? "text-green-500"
+                : connStatus === "unstable"
+                ? "text-yellow-500"
+                : "text-red-500"
+            }`} />
+            <span className={`text-sm ${
+              connStatus === "critical" ? "font-bold text-red-600 animate-pulse" : ""
+            }`}>
+              {connStatus.charAt(0).toUpperCase() + connStatus.slice(1)}
+            </span>
           </div>
 
           {/* Sound Animation */}
