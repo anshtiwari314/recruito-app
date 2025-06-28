@@ -39,6 +39,8 @@ const FeedbackModel = ({isOpen,setIsOpen}) => {
   
   const [feedback, setFeedback] = useState("");
   const [ratings,setRatings] = useState({})
+
+ // const feedbackServerUrl = 'https://c164-106-200-25-80.ngrok-free.app'
   const feedbackServerUrl = 'https://wpv7kxos9g.execute-api.ap-south-1.amazonaws.com/test/recruito-upload-apis'
  
   //@ts-ignore
@@ -70,15 +72,18 @@ const FeedbackModel = ({isOpen,setIsOpen}) => {
     }
 
     let data ={
-      feedback_form :{...feedBackObj,
-        ...ratings,
-        feedback},
-      roomid:roomId,
+      
+      params:{
+        feedback_form :{...feedBackObj,
+          ...ratings,
+          feedback},
+        roomid:candid,
       jobid:jobId,
       agentid:agentId,
       isHost:isHost,
       //custemailid:candid,
       name,
+      },
      // route_name: '/main_router',
       trigger_func: "save_feedback_form"
     }
@@ -89,6 +94,7 @@ const FeedbackModel = ({isOpen,setIsOpen}) => {
     setRatings({});
     setIsOpen(false);
 
+    console.log('before executing save_feedback_form')
    let result = await PostReq(`${feedbackServerUrl}/main_router`,data)
       console.log('feedback form req result',result)
 
@@ -102,17 +108,22 @@ const FeedbackModel = ({isOpen,setIsOpen}) => {
 
     
     let data = {
-      trigger_func: "assesment_metircs",
-      roomid:roomId,
-      jobid:jobId,
-      agentid:agentId,
-      isHost:isHost,
-      //custemailid:candid,
-      name,
+      trigger_func: "assesment_metrics",
+      params:{
+        roomid:candid,
+        jobid:jobId,
+        agentid:agentId,
+        isHost:isHost,
+        //custemailid:candid,
+        name,
+      }
     }
 
+    console.log('before executing assement_metircs')
     PostReq(`${feedbackServerUrl}/main_router`,data).then(resp=>{
       console.log('resp from',resp)
+      setFeedbackList(resp.metricslist)
+      
     })
   },[])
 

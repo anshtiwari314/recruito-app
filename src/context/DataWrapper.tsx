@@ -1096,25 +1096,25 @@ export default function DataWrapper({
     );
     // https://vitt-ai-request-broadcaster-production.up.railway.app
 
-    
 
     let tempPeer = new Peer(uuidv4(),peerOptions);
     let tempAudioPeer = new Peer(uuidv4(),peerOptions);
 
+   
     setSocket(tempSocket);
     setSocket2(tempSocket2);
     setPeer2(tempPeer);
     setAudioPeer(tempAudioPeer);
 
     return () => {
-      if (socket) {
-        socket.disconnect();
-        console.log("Socket disconnected");
-      }
-      if (socket2) {
-        socket2.disconnect();
-        console.log("Socket2 disconnected");
-      }
+      // if (socket) {
+      //   socket.disconnect();
+      //   console.log("Socket disconnected");
+      // }
+      // if (socket2) {
+      //   socket2.disconnect();
+      //   console.log("Socket2 disconnected");
+      // }
     };
   }, [myId, meetingIsLegit]);
 
@@ -1770,7 +1770,7 @@ export default function DataWrapper({
   /* 7.3. Handling of events from socket2 server i.e. API server - for connection, and disconnection */
   useEffect(() => {
     if (
-      socket2 === null ||
+      socket2===null||
       //myStream === null ||
       myId === "" ||
       name === "" ||
@@ -1778,9 +1778,18 @@ export default function DataWrapper({
     )
       return;
 
+      // let tempSocket2 = io(
+      //   //'http://localhost:5000',
+      //   "wss://recruito.vitti.insure",
+      //  // 'https://7615-2409-40f0-2c-4693-7849-e792-7e8e-b8a0.ngrok-free.app'
+      //  //'https://a910-49-204-211-204.ngrok-free.app',
+      //  { transports: ["websocket"]}
+      // );
+
     function connected() {
       console.log('connected socket2')
       socket2.emit("user_connected",{name,myId,roomId,timeStamp:getTimeStamp(),socketId:socket2?.id})
+      socket2.emit("register_copilot_event",{roomid:candid})
       if (isHost === true) {
         let questionsApiReqPayload = {
           // jobid:jobId,
@@ -1817,11 +1826,12 @@ export default function DataWrapper({
 
     socket2.on("disconnect", disconnect);
 
+   // setSocket2(tempSocket2)
     return () => {
-      socket2.off("connect", connected);
+     socket2.off("connect", connected);
       socket2.off("disconnect", disconnect);
     };
-  }, [socket2, myStream, myId, name, meetingIsLegit]);
+  }, [myStream, myId, name, meetingIsLegit]);
 
   useEffect(() => {
     if (

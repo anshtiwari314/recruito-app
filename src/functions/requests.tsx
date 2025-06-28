@@ -37,13 +37,15 @@ export function PostReq(url,data){
     
     return new Promise((resolve,reject)=>{
         fetch(url,{
-            method:'POST',
-            headers:{
-               'Accept':'application.json',
-               'Content-Type':'application/json',
-               'mode': 'no-cors'
-            },
-    
+            // method:'POST',
+            // headers:{
+            //    'Accept':'application.json',
+            //    'Content-Type':'application/json',
+            //  //  'mode': 'no-cors'
+            // },
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            
             body:JSON.stringify(data),
             cache:'default',})
             .then(res=>{
