@@ -223,7 +223,7 @@ export default function CandidateView({ state }: any) {
             <TableHead>Status</TableHead>
             <TableHead>Score</TableHead>
             <TableHead>Action</TableHead>
-            <TableHead>Dashboard</TableHead>
+            <TableHead>Interview Insight</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
