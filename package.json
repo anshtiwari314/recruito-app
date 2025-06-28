@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --host",
     "build": "tsc && vite build && cp ./lame.min.js ./dist/",
+   "winbuild": "tsc && vite build && copy .\\lame.min.js .\\dist\\",
     "copy": "mv dist/index.html dist/meeting.html && cp dist/meeting.html combined_dist && cp dist/assets/*.js combined_dist/assets && cp dist/assets/*.css combined_dist/assets",
     "preview": "vite preview"
   },

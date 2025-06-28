@@ -67,6 +67,7 @@ type InterviewMeta = {
   title: Title;
   resources: Resource[];
 };
+type internet = 'stable' | 'unstable' | 'critical';
 
 export default function DataWrapper({
   children,
@@ -122,7 +123,7 @@ export default function DataWrapper({
 
   const [socket, setSocket] = useState<any>(null);
   const [socket2, setSocket2] = useState<any>(null);
-
+  const [connStatus, setConnStatus] = useState<internet>('stable');
   const [myId, setMyId] = useState<string>("");
 
   const [peer, setPeer] = useState<Peer | null>(null);
@@ -231,6 +232,13 @@ export default function DataWrapper({
       iceServers: [
 
         // commenting some servers bcz it duplicating connections
+        //new one 
+         {
+          urls: "turn:3.7.69.155:3478",
+          username: "anuj",
+          credential: "bayya",
+        },
+        //old one 
          
         { urls: 'stun:stun.l.google.com:19302' },
         {urls:'stun:stun1.l.google.com:19302'},
@@ -2959,8 +2967,6 @@ export default function DataWrapper({
   console.log("MYID", myId);
 
   let values = {
-    
-
     validUrl,
     setValidUrl,
     myId,
@@ -3009,7 +3015,8 @@ export default function DataWrapper({
     setScreenRecording,ngrokServerUrl,setNgrokServerUrl,interviewMetaRef,unreadCount,setUnreadCount,
     transcriptionToggle,
     setTranscriptionToggle,
-    selectedUserForLargeVideoRef,useSelectedUserForLargeVideoRef,setTranscriptionIndicator
+    selectedUserForLargeVideoRef,useSelectedUserForLargeVideoRef,setTranscriptionIndicator,
+    connStatus,setConnStatus
   };
 
   return (
