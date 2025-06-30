@@ -79,7 +79,12 @@ export default function MeetingPageHeader() {
     }
   }
 
-  const toggleAudio = () => setMicroPhoneToggle((p: boolean) => !p)
+  const toggleAudio = () => {
+    setMicroPhoneToggle((p: boolean) => !p);
+    setManualVadStatus((p) => !p)
+    console.log("toggling the audio...");
+  };
+  
   const toggleVideo = () => setCameraToggle((p: boolean) => !p)
   const toggleScreenRecording = () => setScreenRecording((p: boolean) => !p)
   const toggleChatWindow = () => {
