@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 import { useState, useEffect, useRef, useCallback } from "react"
 import { useData } from "@/context/DataWrapper"
@@ -13,9 +11,8 @@ import { FaTimes, FaPaperPlane, FaCopy, FaCheck, FaArrowDown, FaExpand, FaCompre
 const DraggableChatWindow = () => {
   const [position, setPosition] = useState({ x: 100, y: 100 })
   const [isDragging, setIsDragging] = useState(false)
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
-  const [initialPosition, setInitialPosition] = useState({ x: 0, y: 0 })
-  const dragRef = useRef<HTMLDivElement | null>(null)
+  const windowRef = useRef<HTMLDivElement>(null)
+  const dragOffset = useRef({ x: 0, y: 0 })
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [showNewIndicator, setShowNewIndicator] = useState(false)
   const [isResized, setIsResized] = useState(false)
@@ -92,85 +89,58 @@ const DraggableChatWindow = () => {
     })
   }
 
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      // Prevent default to avoid text selection
-      e.preventDefault()
-      e.stopPropagation()
+  // Improved drag handlers using the LiveTranscription approach
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!windowRef.current) return
 
-      const rect = dragRef.current?.getBoundingClientRect()
-      if (!rect) return
+    e.preventDefault()
+    e.stopPropagation()
 
-      setDragStart({ x: e.clientX, y: e.clientY })
-      setInitialPosition({ x: position.x, y: position.y })
-      setIsDragging(true)
+    setIsDragging(true)
+    const rect = windowRef.current.getBoundingClientRect()
+    dragOffset.current = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    }
 
-      // Add dragging class to body to prevent text selection globally
-      document.body.classList.add("dragging")
-      document.body.style.userSelect = "none"
-      document.body.style.cursor = "grabbing"
-    },
-    [position],
-  )
+    // Add dragging class to body to prevent text selection globally
+    document.body.classList.add("dragging")
+    document.body.style.userSelect = "none"
+    document.body.style.cursor = "grabbing"
+  }
 
-  // Improved mouse move handler with requestAnimationFrame for smooth performance
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging) return
+
+    const newPosition = {
+      x: e.clientX - dragOffset.current.x,
+      y: e.clientY - dragOffset.current.y,
+    }
+
+    setPosition(constrainPosition(newPosition))
+  }
+
+  const handleMouseUp = () => {
+    setIsDragging(false)
+
+    // Remove dragging styles
+    document.body.classList.remove("dragging")
+    document.body.style.userSelect = ""
+    document.body.style.cursor = ""
+  }
+
+  // Event listeners for drag
   useEffect(() => {
-    let animationFrameId: number
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDragging) return
-
-      e.preventDefault()
-
-      // Cancel previous animation frame
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId)
-      }
-
-      // Use requestAnimationFrame for smooth updates
-      animationFrameId = requestAnimationFrame(() => {
-        const deltaX = e.clientX - dragStart.x
-        const deltaY = e.clientY - dragStart.y
-
-        const newPosition = {
-          x: initialPosition.x + deltaX,
-          y: initialPosition.y + deltaY,
-        }
-
-        setPosition(constrainPosition(newPosition))
-      })
-    }
-
-    const handleMouseUp = (e: MouseEvent) => {
-      if (!isDragging) return
-
-      e.preventDefault()
-      setIsDragging(false)
-
-      // Remove dragging styles
-      document.body.classList.remove("dragging")
-      document.body.style.userSelect = ""
-      document.body.style.cursor = ""
-
-      // Cancel any pending animation frame
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId)
-      }
-    }
-
     if (isDragging) {
-      document.addEventListener("mousemove", handleMouseMove, { passive: false })
-      document.addEventListener("mouseup", handleMouseUp, { passive: false })
+      document.addEventListener("mousemove", handleMouseMove)
+      document.addEventListener("mouseup", handleMouseUp)
     }
 
     return () => {
       document.removeEventListener("mousemove", handleMouseMove)
       document.removeEventListener("mouseup", handleMouseUp)
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId)
-      }
     }
-  }, [isDragging, dragStart, initialPosition, constrainPosition])
+  }, [isDragging, constrainPosition])
 
   // Handle window resize to keep chat window in bounds
   useEffect(() => {
@@ -311,21 +281,18 @@ const DraggableChatWindow = () => {
       `}</style>
 
       <div
-        ref={dragRef}
-        className={`fixed bg-white border border-gray-600 rounded-xl shadow-2xl flex flex-col z-[9999] transition-all duration-150 ease-in-out ${
+        ref={windowRef}
+        className={`fixed bg-white border border-gray-600 rounded-xl shadow-2xl flex flex-col z-[9999] select-none ${
           isResized ? "w-[840px]" : "w-[420px]"
-        } h-[580px] ${isDragging ? "select-none" : ""}`}
+        } h-[580px]`}
         style={{
           top: position.y,
           left: position.x,
-          transform: isDragging ? "none" : undefined, // Prevent transform during drag for better performance
-          willChange: isDragging ? "transform" : "auto",
+          cursor: isDragging ? "grabbing" : "grab",
         }}
       >
         <div
-          className={`bg-zinc-900 border-b border-gray-100 px-4 py-3 rounded-t-xl flex justify-between items-center select-none ${
-            isDragging ? "cursor-grabbing" : "cursor-grab"
-          }`}
+          className="bg-zinc-900 border-b border-gray-100 px-4 py-3 rounded-t-xl flex justify-between items-center select-none"
           onMouseDown={handleMouseDown}
           style={{
             userSelect: "none",

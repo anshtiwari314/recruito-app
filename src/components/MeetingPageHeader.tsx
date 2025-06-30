@@ -12,7 +12,9 @@ import playSound from '../assets/sound-play.gif'
 import useNetworkMonitor from "./SpeedTestComponent"
 
 export default function MeetingPageHeader() {
-  // useNetworkMonitor();
+  // const {statuss,downloadSpeed,uploadSpeed}=useNetworkMonitor();
+  
+ const statuss=true
   const dispatch = useDispatch()
   const { jobTitle } = useAppSelector((state) => state.cuesReducer)
   const { isHost } = useAppSelector((state) => state.qpReducer)
@@ -261,7 +263,7 @@ export default function MeetingPageHeader() {
           {/* Network Quality */}
            <div className="py-3 px-4 bg-neutral-200 rounded-lg flex items-center space-x-2" title={`Network: ${connStatus}`}>
             <i className={`fa-solid fa-signal ${
-              connStatus === "stable"
+              statuss === "stable"
                 ? "text-green-500"
                 : connStatus === "unstable"
                 ? "text-yellow-500"

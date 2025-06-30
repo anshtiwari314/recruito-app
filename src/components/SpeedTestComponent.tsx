@@ -1,170 +1,152 @@
-import { useEffect, useRef, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useData } from '../context/DataWrapper';
 
-const WS_URL = 'http://localhost:3000';
-const INTERVAL_MS = 2000;
-const RECONNECT_DELAY = 60000;
 
-const WINDOW_SIZE = 10;
-const VIDEO_THRESHOLD = 1.5;
-const AUDIO_THRESHOLD = 0.3;
-const JITTER_THRESHOLD = 3.0;
+const DOWNLOAD_TEST_FILE = 'https://kxytpwitbuwkchaj.public.blob.vercel-storage.com/speed-test-500kb-NVk9REqSp88VepQoOcMrPuv022R0es.txt';
+const DOWNLOAD_FILE_SIZE_BITS = 500 * 1024 * 8; 
+const UPLOAD_TEST_ENDPOINT = 'http://localhost:8080/api/upload-test';
+const UPLOAD_FILE_SIZE_BITS = 1 * 1024 * 1024 * 8; 
+const INTERVAL = 8000; 
 
-const PACKET_SIZES = [4 * 1024, 8 * 1024, 16 * 1024];
+const SPEED_THRESHOLDS = {
+  CRITICAL: 1.5, 
+  UNSTABLE: 5,   
+};
 
-const DEBUG = false; // 🔕 set to true to see logs
+export default function useNetworkMonitor() {
+  const { setConnStatus: setGlobalConnStatus, connStatus: globalConnStatus }: any = useData();
+  
+  const [downloadSpeed, setDownloadSpeed] = useState<number>(0); 
+  const [uploadSpeed, setUploadSpeed] = useState<number>(0);
 
-const useNetworkMonitor = () => {
-  const { setConnStatus }: any = useData();
-  const [socket, setSocket] = useState<Socket | null>(null);
-  const [connected, setConnected] = useState(false);
+ 
+  const setConnStatus = useCallback((status: string) => {
+    setGlobalConnStatus(status);
+    console.log(`Connection status: ${status}`);
+  }, [setGlobalConnStatus]);
 
-  const historyRef = useRef<number[]>([]);
-  const reconnectTimeout = useRef<NodeJS.Timeout | null>(null);
-  const lastStatus = useRef<string | null>(null);
-  const sameStatusCount = useRef<number>(0);
-  const currentSizeIndex = useRef(0);
+  const measureDownloadSpeed = useCallback(async () => {
+    try {
+      const startTime = Date.now();
+  
+      const response = await fetch(DOWNLOAD_TEST_FILE + '?_=' + Date.now());
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error during download test! Status: ${response.status}`);
+      }
 
-  const debugLog = (...args: any[]) => {
-    if (DEBUG) console.log(...args);
-  };
+      await response.blob(); 
+      
+      const endTime = Date.now();
+      const durationSeconds = (endTime - startTime) / 1000; 
+      if (durationSeconds < 0.1) { 
+          setConnStatus('stable'); 
+          setDownloadSpeed(100); 
+          return;
+      }
 
-  const applyConnStatus = (newStatus: 'stable' | 'unstable' | 'critical') => {
-    if (lastStatus.current === newStatus) {
-      sameStatusCount.current++;
-    } else {
-      sameStatusCount.current = 1;
-      lastStatus.current = newStatus;
-    }
+     
+      const calculatedDownloadSpeed = DOWNLOAD_FILE_SIZE_BITS / durationSeconds / 1_000_000; 
+      
+      setDownloadSpeed(parseFloat(calculatedDownloadSpeed.toFixed(2)));
 
-    if (sameStatusCount.current >= 2) {
-      debugLog('📶 Updated connStatus:', newStatus);
-      setConnStatus(newStatus);
-    }
-  };
-
-  const scheduleReconnect = () => {
-    if (reconnectTimeout.current) return;
-    reconnectTimeout.current = setTimeout(() => {
-      reconnectTimeout.current = null;
-      debugLog('🔁 Attempting socket reconnect...');
-      connectSocket();
-    }, RECONNECT_DELAY);
-  };
-
-  const connectSocket = () => {
-    if (socket?.connected) return;
-
-    if (socket) {
-      socket.disconnect();
-    }
-
-    const sock = io(WS_URL, {
-      transports: ['websocket'],
-      reconnection: false,
-    });
-
-    sock.on('connect', () => {
-      debugLog('✅ Connected to server');
-      setConnected(true);
-      applyConnStatus('stable');
-    });
-
-    sock.on('disconnect', () => {
-      debugLog('❌ Disconnected from server');
-      setConnected(false);
-      applyConnStatus('critical');
-      scheduleReconnect();
-    });
-
-    sock.on('speed-pong', (data) => {
-      const sentTime = data.timestamp;
-      const now = performance.now();
-      const duration = (now - sentTime) / 1000;
-
-      const packetSizeBits = (data.size || 16 * 1024) * 8;
-      const mbps = packetSizeBits / duration / 1024 / 1024;
-
-      const next = [...historyRef.current.slice(-WINDOW_SIZE + 1), mbps];
-      historyRef.current = next;
-
-      const avg = next.reduce((a, b) => a + b, 0) / next.length;
-      const max = Math.max(...next);
-      const min = Math.min(...next);
-      const jitter = max - min;
-
-      debugLog(
-        `📡 Speed: ${mbps.toFixed(2)} Mbps | Avg: ${avg.toFixed(2)} | Jitter: ${jitter.toFixed(2)}`
-      );
-
-      if (avg < AUDIO_THRESHOLD) {
-        applyConnStatus('critical');
-      } else if (avg < VIDEO_THRESHOLD || jitter > JITTER_THRESHOLD) {
-        applyConnStatus('unstable');
+      if (calculatedDownloadSpeed < SPEED_THRESHOLDS.CRITICAL) {
+        setConnStatus('critical');
+      } else if (calculatedDownloadSpeed < SPEED_THRESHOLDS.UNSTABLE) {
+        setConnStatus('unstable');
       } else {
-        applyConnStatus('stable');
+        setConnStatus('stable');
       }
-    });
+    } catch (error) {
+      setConnStatus('critical');
+      setDownloadSpeed(0);
+      console.error('Download speed test failed:', error);
+    }
+  }, [setConnStatus]); 
 
-    setSocket(sock);
-  };
+  const measureUploadSpeed = useCallback(async () => {
+    try {
+      const startTime = Date.now();
 
-  useEffect(() => {
-    connectSocket();
-    return () => {
-      socket?.disconnect();
-      if (reconnectTimeout.current) clearTimeout(reconnectTimeout.current);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    
+      const uploadData = new Blob([new ArrayBuffer(UPLOAD_FILE_SIZE_BITS / 8)], { type: 'application/octet-stream' });
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (!navigator.onLine) {
-        debugLog('⚠️ navigator.onLine = false');
-        applyConnStatus('critical');
-        return;
-      }
-
-      if (!socket || !socket.connected) {
-        applyConnStatus('critical');
-        return;
-      }
-
-      const currentSize = PACKET_SIZES[currentSizeIndex.current];
-      socket.emit('speed-ping', {
-        timestamp: performance.now(),
-        size: currentSize,
+      const response = await fetch(UPLOAD_TEST_ENDPOINT + '?_=' + Date.now(), {
+        method: 'POST',
+        body: uploadData, 
+        headers: {
+          'Content-Type': 'application/octet-stream', 
+        },
       });
 
-      debugLog('📤 Sent speed-ping with size:', currentSize);
+      if (!response.ok) {
+        throw new Error(`Upload HTTP error! Status: ${response.status}`);
+      }
 
-      currentSizeIndex.current =
-        (currentSizeIndex.current + 1) % PACKET_SIZES.length;
-    }, INTERVAL_MS);
+      const endTime = Date.now();
+      const durationSeconds = (endTime - startTime) / 1000; 
+      if (durationSeconds < 0.1) {
+        setUploadSpeed(100); 
+        return;
+      }
 
-    return () => clearInterval(interval);
-  }, [socket]);
+      const calculatedUploadSpeed = UPLOAD_FILE_SIZE_BITS / durationSeconds / 1_000_000;
+      setUploadSpeed(parseFloat(calculatedUploadSpeed.toFixed(2)));
+
+      if (calculatedUploadSpeed < SPEED_THRESHOLDS.CRITICAL) {
+        setConnStatus('critical'); 
+      } else if (calculatedUploadSpeed < SPEED_THRESHOLDS.UNSTABLE && globalConnStatus !== 'critical') {
+        setConnStatus('unstable');
+      }
+
+    } catch (error) {
+      setUploadSpeed(0);
+      setConnStatus('critical'); 
+      console.error('Upload speed test failed:', error);
+    }
+  }, [setConnStatus, globalConnStatus]); 
+
 
   useEffect(() => {
     const handleOffline = () => {
-      debugLog('🌐 Browser detected offline');
-      applyConnStatus('critical');
+      setConnStatus('critical'); // Set overall status to critical
+      setDownloadSpeed(0);        // Reset download speed
+      setUploadSpeed(0);          // Reset upload speed
     };
+
     const handleOnline = () => {
-      debugLog('🌐 Browser back online');
-      applyConnStatus('unstable');
+      setConnStatus('unstable'); // On reconnect, assume unstable initially
+      measureDownloadSpeed();    // Immediately test download speed
+      measureUploadSpeed();      // Immediately test upload speed
     };
 
     window.addEventListener('offline', handleOffline);
     window.addEventListener('online', handleOnline);
 
+    const iv = setInterval(() => {
+      if (!navigator.onLine) {
+        handleOffline();
+      } else {
+        measureDownloadSpeed();
+        measureUploadSpeed();
+      }
+    }, INTERVAL);
+    
+    if (navigator.onLine) {
+        measureDownloadSpeed();
+        measureUploadSpeed();
+    } else {
+        handleOffline(); // If already offline on mount, set critical
+    }
+
     return () => {
+      clearInterval(iv);
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('online', handleOnline);
     };
-  }, []);
-};
+  }, [measureDownloadSpeed, measureUploadSpeed, setConnStatus]); // Dependencies for useEffect: ensures effect re-runs if these functions change (due to useCallback dependencies)
 
-export default useNetworkMonitor;
+  return { statuss: globalConnStatus, downloadSpeed, uploadSpeed };
+}
+
+

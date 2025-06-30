@@ -10,6 +10,7 @@ const DraggableLiveTranscription = () => {
   const windowRef = useRef<HTMLDivElement>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null); 
   const [transcriptions] = useAppSelector((state) => [state.trcpReducer.TranscriptionList]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -41,6 +42,19 @@ const DraggableLiveTranscription = () => {
     };
   }, [isDragging]);
 
+  useEffect(() => {
+    if (transcriptionToggle && scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      container.scrollTop = container.scrollHeight;
+    }
+  }, [transcriptionToggle]);
+
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
+  }, [transcriptions]);
+
   if (!transcriptionToggle) return null;
 
   return (
@@ -64,12 +78,17 @@ const DraggableLiveTranscription = () => {
         </button>
       </div>
 
-      {/* Body */}
-      <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5 bg-white rounded-b-xl scrollbar-thin scrollbar-thumb-indigo-400 scrollbar-track-indigo-100">
+      
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto px-5 py-4 space-y-5 bg-white rounded-b-xl scrollbar-thin scrollbar-thumb-indigo-400 scrollbar-track-indigo-100"
+      >
         {transcriptions.length === 0 ? (
           <p className="text-center text-gray-400 italic">No transcriptions yet...</p>
         ) : (
-          transcriptions.map((transcription, i) => <SingleTranscription data={transcription} key={i} />)
+          transcriptions.map((transcription, i) => (
+            <SingleTranscription data={transcription} key={i} />
+          ))
         )}
       </div>
     </div>
