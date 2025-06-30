@@ -170,7 +170,7 @@ export default function ScheduleMeetingForm() {
           <select
             value={jobId}
             onChange={(e) => setJobId(e.target.value)}
-            className="mt-1 block w-full border-gray-600 rounded-md shadow-sm border h-10"
+            className="mt-1 block w-full border-gray-600 rounded-md shadow-sm border h-10 font-mono"
           >
             <option value="">Select a job</option>
             {apiJobs.map((job) => (

@@ -61,12 +61,13 @@ export default function NewJobForm() {
   };
 
   try {
+    console.log(qs,"question");
     const res = await axios.post(`${ngrokL}/add_job_details`, {
       job_id: jobId,
       job_title: jobTitle,
       job_description: jobDesc,
       key_criteria: jobCriteria,
-      sample_questions: qs.length > 0 ? qs.join("\n") : null,
+      sample_questions:qs.join("\n"),
     },{
       headers: {
         "Content-Type": "application/json",
@@ -84,12 +85,13 @@ export default function NewJobForm() {
 
       alert("Job created successfully!");
     } else {
+      console.log("failed");
       alert("Failed to create job.");
     }
 
   } catch (err) {
     console.error("Error while creating job:", err);
-    alert("Failed to create job.");
+    alert("Failed to create job.here");
   } finally {
     dispatch(addJob(payload));
   }
@@ -104,7 +106,7 @@ export default function NewJobForm() {
           <Input
             value={`Job ID: ${jobId}`}
             readOnly
-            className="bg-gray-100 cursor-not-allowed"
+              className="bg-gray-100 cursor-not-allowed text-gray-700 font-mono"
           />
           <Input
             placeholder="Job Title (min 8 chars)"

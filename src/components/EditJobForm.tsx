@@ -113,7 +113,7 @@ export default function EditJobForm() {
       <CardContent>
         <h2 className="text-xl font-semibold mb-4">{cameForEdit.current ? "Edit Job" : "New Job"}</h2>
         <div className="space-y-4">
-          <Input value={`Job ID: ${jobId}`} readOnly className="bg-gray-100" />
+          <Input value={`Job ID: ${jobId}`} readOnly    className="bg-gray-100 cursor-not-allowed text-gray-700 font-mono" />
           <Input
             placeholder="Job Title (min 8 chars)"
             value={jobTitle}
