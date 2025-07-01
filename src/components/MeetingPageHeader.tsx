@@ -1,4 +1,3 @@
-import React from "react"
 import { useState, useEffect } from "react"
 import { useDispatch } from "react-redux"
 import { useAppSelector } from "@/store/store"
@@ -7,18 +6,18 @@ import { useData } from "../context/DataWrapper"
 import MeetingPageHeaderTimer from "./MeetingPageHeaderTimer"
 import DraggableLiveTranscription from "./DraggableLiveTranscript"
 import { useVad } from "../context/VadWrapper"
-import rectLoading from '../assets/reactangle-loading.gif'
-import playSound from '../assets/sound-play.gif'
+import rectLoading from "../assets/reactangle-loading.gif"
+import playSound from "../assets/sound-play.gif"
 import useNetworkMonitor from "./SpeedTestComponent"
 
 export default function MeetingPageHeader() {
-  // const {statuss,downloadSpeed,uploadSpeed}=useNetworkMonitor();
-  
- const statuss=true
+  const { statuss, downloadSpeed } = useNetworkMonitor()
+  console.log("Speed", downloadSpeed)
+  // const statuss="stable"
+
   const dispatch = useDispatch()
   const { jobTitle } = useAppSelector((state) => state.cuesReducer)
   const { isHost } = useAppSelector((state) => state.qpReducer)
-
   const {
     name,
     cameraToggle,
@@ -40,17 +39,24 @@ export default function MeetingPageHeader() {
     setTranscriptionToggle,
     transcriptionIndicator,
     setTranscriptionIndicator,
-    connStatus
-  }: any = useData();
+    connStatus,
+  }: any = useData()
 
   const {
-    vadRecordingOn, setVadRecordingOn,
-    manualVadStatus, setManualVadStatus,
-    vadStatus, setVadStatus, vadInstance,
-    VAD2, userSpeaking
-  }: any = useVad();
+    vadRecordingOn,
+    setVadRecordingOn,
+    manualVadStatus,
+    setManualVadStatus,
+    vadStatus,
+    setVadStatus,
+    vadInstance,
+    VAD2,
+    userSpeaking,
+  }: any = useVad()
 
-  useEffect(()=>{console.log(connStatus)},[connStatus])
+  useEffect(() => {
+    console.log(connStatus)
+  }, [connStatus])
 
   const [showQualityMenu, setShowQualityMenu] = useState(false)
   const [vadLoadingDelayExceeded, setVadLoadingDelayExceeded] = useState(false)
@@ -58,14 +64,14 @@ export default function MeetingPageHeader() {
   const title = interviewMetaRef.current?.title
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: NodeJS.Timeout
     if (!VAD2 || VAD2.loading) {
-      timer = setTimeout(() => setVadLoadingDelayExceeded(true), 5000);
+      timer = setTimeout(() => setVadLoadingDelayExceeded(true), 5000)
     } else {
-      setVadLoadingDelayExceeded(false);
+      setVadLoadingDelayExceeded(false)
     }
-    return () => clearTimeout(timer);
-  }, [VAD2]);
+    return () => clearTimeout(timer)
+  }, [VAD2])
 
   const handleCloseCall = async () => {
     const confirmQuit = window.confirm("Are you sure you want to quit?")
@@ -80,11 +86,11 @@ export default function MeetingPageHeader() {
   }
 
   const toggleAudio = () => {
-    setMicroPhoneToggle((p: boolean) => !p);
+    setMicroPhoneToggle((p: boolean) => !p)
     setManualVadStatus((p) => !p)
-    console.log("toggling the audio...");
-  };
-  
+    console.log("toggling the audio...")
+  }
+
   const toggleVideo = () => setCameraToggle((p: boolean) => !p)
   const toggleScreenRecording = () => setScreenRecording((p: boolean) => !p)
   const toggleChatWindow = () => {
@@ -101,43 +107,48 @@ export default function MeetingPageHeader() {
   return (
     <>
       <div style={{ textAlign: "center" }}>
-        <div style={{
-          position: "absolute",
-          top: "0.75rem",
-          left: "5rem",
-          zIndex: 9999,
-          display: "flex",
-          alignItems: "center"
-        }}>
+        <div
+          style={{
+            position: "absolute",
+            top: "0.75rem",
+            left: "5rem",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
           {VAD2 !== undefined && !VAD2.loading ? (
-            <h3 style={{
-              margin: 0,
-              fontWeight: 600,
-              fontSize: "1.2rem",
-              color: "green",
-              textTransform: "capitalize",
-              display: "flex",
-              alignItems: "center"
-            }}>
+            <h3
+              style={{
+                margin: 0,
+                fontWeight: 600,
+                fontSize: "1.2rem",
+                color: "green",
+                textTransform: "capitalize",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
               VAD files loaded ✅
             </h3>
           ) : (
             <>
-              <h3 style={{
-                margin: 0,
-                marginRight: "0.5rem",
-                fontWeight: 600,
-                fontSize: "1.2rem",
-                color: "red",
-                textTransform: "capitalize"
-              }}>
+              <h3
+                style={{
+                  margin: 0,
+                  marginRight: "0.5rem",
+                  fontWeight: 600,
+                  fontSize: "1.2rem",
+                  color: "red",
+                  textTransform: "capitalize",
+                }}
+              >
                 VAD is loading...
               </h3>
-              <img src={rectLoading} style={{ height: "1.8rem", width: "1.8rem" }} />
+              <img src={rectLoading || "/placeholder.svg"} style={{ height: "1.8rem", width: "1.8rem" }} />
             </>
           )}
         </div>
-
         <input
           type="text"
           placeholder="Enter your ngrok url"
@@ -152,7 +163,7 @@ export default function MeetingPageHeader() {
             boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
             outline: "none",
             transition: "border-color 0.3s",
-            visibility: "hidden"
+            visibility: "hidden",
           }}
         />
       </div>
@@ -165,7 +176,6 @@ export default function MeetingPageHeader() {
         <div className="flex place-items-center space-x-4">
           <div className="h-8 w-[2px] bg-neutral-200" />
           <img src="https://api.dicebear.com/7.x/notionists/svg?scale=200&seed=Logo" className="h-8" alt="Logo" />
-
           {title ? (
             <div className="text-md text-neutral-500">
               <div className="text-neutral-600 z-index-[9999] space-around-12px">
@@ -201,7 +211,6 @@ export default function MeetingPageHeader() {
             ) : (
               <i className="fa-solid fa-microphone-slash fa-lg" />
             )}
-
             {vadLoadingDelayExceeded && (!VAD2 || VAD2.loading) && (
               <span className="absolute text-[10px] text-red-500 top-full mt-1 left-1/2 -translate-x-1/2">
                 VAD taking too long...
@@ -235,9 +244,7 @@ export default function MeetingPageHeader() {
               {unreadCount > 0 && (
                 <span
                   className={`absolute -top-1 -right-1 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center shadow-md border border-white z-10 ${
-                    chatToggle
-                      ? "bg-red-500 animate-pulse"
-                      : "bg-red-600 animate-bounce"
+                    chatToggle ? "bg-red-500 animate-pulse" : "bg-red-600 animate-bounce"
                   }`}
                 >
                   {unreadCount > 9 ? "9+" : unreadCount}
@@ -266,25 +273,33 @@ export default function MeetingPageHeader() {
           )}
 
           {/* Network Quality */}
-           <div className="py-3 px-4 bg-neutral-200 rounded-lg flex items-center space-x-2" title={`Network: ${connStatus}`}>
-            <i className={`fa-solid fa-signal ${
-              statuss === "stable"
-                ? "text-green-500"
-                : connStatus === "unstable"
-                ? "text-yellow-500"
-                : "text-red-500"
-            }`} />
-            <span className={`text-sm ${
-              connStatus === "critical" ? "font-bold text-red-600 animate-pulse" : ""
-            }`}>
+          <div
+            className="py-3 px-4 bg-neutral-200 rounded-lg flex items-center space-x-2"
+            title={`Network: ${connStatus} | Speed: ${downloadSpeed ? `${downloadSpeed.toFixed(2)} Mbps` : "Testing..."}`}
+          >
+            <i
+              className={`fa-solid fa-signal ${
+                statuss === "stable" ? "text-green-500" : connStatus === "unstable" ? "text-yellow-500" : "text-red-500"
+              }`}
+            />
+            <span className={`text-sm ${connStatus === "critical" ? "font-bold text-red-600 animate-pulse" : ""}`}>
               {connStatus.charAt(0).toUpperCase() + connStatus.slice(1)}
             </span>
           </div>
 
           {/* Sound Animation */}
-          <div style={{ height: '3.5rem', width: '6rem', backgroundColor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div
+            style={{
+              height: "3.5rem",
+              width: "6rem",
+              backgroundColor: "white",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
             {(userSpeaking || (VAD2?.userSpeaking && microphoneToggle)) && (
-              <img src={playSound} style={{ width: '6rem', height: '3.5rem' }} />
+              <img src={playSound || "/placeholder.svg"} style={{ width: "6rem", height: "3.5rem" }} />
             )}
           </div>
 
@@ -302,6 +317,7 @@ export default function MeetingPageHeader() {
 
         {isHost && <MeetingPageHeaderTimer />}
       </header>
+
       {isHost && <DraggableLiveTranscription />}
     </>
   )
