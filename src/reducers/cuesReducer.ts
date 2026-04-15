@@ -143,7 +143,7 @@ let CuesListLoadState= [
     audiofiletimestamp: "2022-01-01T00:00:00Z",
     common_id: "2",
     similarity_query: "Changes Required in Implementation Checklist",
-    isanswered: true,
+    isanswered: false,
   },
   {
     content: `
@@ -336,9 +336,9 @@ let initialCuesLoadState: CuesState = {
   jobTitle: "EDI Developer",
   jobDescription: "https://arxiv.org/pdf/2301.12652", //pdf
   interviewGuide: "https://arxiv.org/pdf/2410.08174", //pdf
-  topics: [{id:'1',topic:'insurance',CuesList:CuesListLoadState},
-    {id:'2',topic:'covers',CuesList:CuesListLoadState},
-    {id:'3',topic:'benefits',CuesList:CuesListLoadState}],
+  topics: [{topic_id:'1',topic:'insurance',CuesList:CuesListLoadState},
+    {topic_id:'2',topic:'covers',CuesList:CuesListLoadState},
+    {topic_id:'3',topic:'benefits',CuesList:CuesListLoadState}],
   selectedTopic :'insurance',
   
 };
@@ -376,7 +376,7 @@ const cuesSlice = createSlice({
   initialState: {...initialCuesState},
   reducers: {
     addCues: (state, action: PayloadAction<CuesDataType[]>) => {
-      console.log('add cues called',action)
+     // console.log('add cues called',action)
       // Declare default value for state.CuesList
       let data: CuesDataType = { ...initialCuesObj };
 
@@ -425,34 +425,37 @@ const cuesSlice = createSlice({
     },
     updateSelectedTopic:(state,action)=>{
       let tempTopic = action.payload
-      console.log('tempTopic at updadteSelectedTopic',tempTopic)
+      //console.log('tempTopic at updadteSelectedTopic',tempTopic)
       return {...state,selectedTopic:tempTopic}
     },
     addCuesInTopic :(state,action)=>{
-      console.log('add cues in topic',action.payload)
+      //console.log('add cues in topic',action.payload)
       let topicId = action.payload.topic_id
 
+      
       //search topic 
       let updatedTopics=state.topics.map((topic)=>{
         let tempTopic = {...topic}
         if(topic.topic_id ===topicId){
-          let tempCuesList = [...tempTopic.CuesList]
-          tempCuesList.push(action.payload)
+          let tempCuesList = [action.payload,...tempTopic.CuesList]
+          
           tempTopic.CuesList = tempCuesList
         }
         return tempTopic
       })
 
-      console.log('updated topics in reducer',updatedTopics)
+      //console.log('updated topics in reducer',updatedTopics)
       return {...state,topics:updatedTopics}
     },
     updateCuesInTopic :(state,action)=>{
-      console.log('add cues in topic',action.payload)
-      // let id = action.payload.common_id
+     // console.log('add cues in topic',action.payload)
+
+        // let id = action.payload.common_id
        let topicId = action.payload.topic_id
        let msgId = action.payload.message_id
       
-       //search topic 
+
+       //search topic verify if it exists or not 
 
       // find particular topic 
       let updatedTopics=state.topics.map((topic)=>{
@@ -478,7 +481,7 @@ const cuesSlice = createSlice({
         return tempTopic
       })
       //let updatedTopics = []
-       console.log('updated topics in reducer',updatedTopics)
+      // console.log('updated topics in reducer',updatedTopics)
       return {...state,topics:updatedTopics}
     }
   },

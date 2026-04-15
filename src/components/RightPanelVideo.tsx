@@ -61,7 +61,7 @@ export function RightPanelVideo({ e, muted }: { e: any; muted: boolean }) {
       function getVideoIcon() {
         if (!e) return null;
 
-        console.log('get video icon',e)
+        //console.log('get video icon',e)
         if (!e?.isCameraAvailable) {
           return (
             <i className="fa-solid fa-video-slash text-red-500 bg-black/50 p-1 rounded"></i>

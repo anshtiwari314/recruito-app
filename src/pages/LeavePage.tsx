@@ -37,26 +37,25 @@ export default function Leave() {
               </svg>
               <span className="sr-only">Loading...</span>
             </div>
-            <p className="text-center text-white w-full text-[2.5rem]">
+            {/* <p className="text-center text-white w-full text-[2.5rem]">
               Your interview is currently being processed.
             </p>
             <div className="mt-12 flex justify-center flex-wrap text-center text-white">
               Thank you for participating in the interview. Please wait while we
               process your interview.
-            </div>
+            </div> */}
           </div>
         </div>
       ) : (
         <div className="flex justify-center items-center h-[98vh] w-full">
-          <FeedbackModel isOpen={isOpen} setIsOpen={setIsOpen}/>
+          {/* <FeedbackModel isOpen={isOpen} setIsOpen={setIsOpen}/> */}
           <div className="w-[80%] h-[20vh] -translate-y-1/2 transform">
             
             <p className="text-center text-white w-full text-[2.5rem]">
-              You have completed the interview.
+              Meeting is Ended
             </p>
             <div className="mt-12 flex justify-center flex-wrap text-center text-white">
-              Thank you for participating in the interview. You have
-              completed the interview.
+              Thanks for joining the meeting
             </div>
           </div>
         </div>

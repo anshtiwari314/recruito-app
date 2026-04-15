@@ -13,7 +13,6 @@ export default function App() {
     <Router>
         <ReduxProvider>
         
-          
           <Routes>
             
             {/* <Route path="/" element={<HomePage/>}/> */}

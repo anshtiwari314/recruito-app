@@ -69,7 +69,7 @@ export function MicIcon(){
   };
 
 
-  console.log('myAudioStream',myAudioStream,microphoneToggle)
+  //console.log('myAudioStream',myAudioStream,microphoneToggle)
 
   if(myAudioStream===false || myAudioStream===null)
   return (
@@ -236,7 +236,7 @@ export default function MeetingPageHeader() {
                 <div style={{ textTransform: "capitalize" }}>{name}</div>
               </div>
             ) : (
-              <div className="text-md text-neutral-500">Recruiter Copilot</div>
+              <div className="text-md text-neutral-500"></div>
             )}
             {/*<div className="text-md text-neutral-500">Recruiter Copilot</div>*/}
             

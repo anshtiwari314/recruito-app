@@ -220,9 +220,9 @@ export default function DataWrapper({
 
         // commenting some servers bcz it duplicating connections
         {
-          urls: "turn:3.7.69.155:3478",
-          username: "anuj",
-          credential: "bayya",
+          urls: "turn:34.100.145.102:3478",
+          username: "anshtiwari314",
+          credential: "bayya2",
         },
         // { urls: 'stun:stun.l.google.com:19302' },
         // {urls:'stun:stun1.l.google.com:19302'},
@@ -932,10 +932,10 @@ export default function DataWrapper({
   async function processRecordedAudio() {
 
     try {
-      console.log(
-        `%c just before vid to blob ${new Date().toLocaleTimeString()}`,
-        "background-color:teal;color:white"
-      );
+      // console.log(
+      //   `%c just before vid to blob ${new Date().toLocaleTimeString()}`,
+      //   "background-color:teal;color:white"
+      // );
       dispatch(setNVaudioUploadAnimation(true));
       // let blob = new Blob(arrayofChunks, { type: "video/mpeg" }); // video blob
       const audioBlob = new Blob(arrayOfChunks, { type: "audio/wav" });
@@ -1122,6 +1122,7 @@ export default function DataWrapper({
             (interviewGuide === "" ? null : interviewGuide) ??
             data?.interviewGuide,
           jobTitle: (jobTitle === "" ? null : jobTitle) ?? data?.jobTitle,
+          topics: data.topics,
         })
       );
 
@@ -1140,12 +1141,52 @@ export default function DataWrapper({
     };
   }, [myId, custEmailId, socket2, meetingIsLegit]);
 
+  function formatContent(input) {
+    // 1. Strict Gatekeeper: Only proceed if the text contains "[if customer" (case-insensitive)
+    if (!input.toLowerCase().includes('[if customer')) {
+      return input;
+  }
+
+  let htmlOutput = "<div>\n";
+
+  // 2. Capture any plain text that might exist before the first '['
+  const firstBracketIndex = input.indexOf('[');
+  if (firstBracketIndex > 0) {
+      const leadingText = input.substring(0, firstBracketIndex).trim();
+      if (leadingText) {
+          htmlOutput += `  <p>${leadingText}</p>\n`;
+      }
+  }
+
+  // 3. Process the bracketed sections
+  const regex = /\[([^\]]+)\]([\s\S]*?)(?=\[|$)/g;
+  let match;
+  let hasValidPairs = false;
+
+  while ((match = regex.exec(input)) !== null) {
+      hasValidPairs = true;
+      const title = match[1].trim();
+      const body = match[2].trim();
+
+      htmlOutput += `  <br/>\n`;
+      htmlOutput += `  <h3 style="font-weight: bold; font-size: 16px; color: #333333; margin-bottom: 5px; margin-top: 15px;">${title}</h3>\n`;
+      htmlOutput += `  <p>${body}</p>\n\n`;
+  }
+
+  // Fallback just in case the string had "[if customer" but no closing bracket
+  if (!hasValidPairs) {
+      return input;
+  }
+
+  htmlOutput += "</div>";
+  return htmlOutput;
+}
   useEffect(() => {
     if (socket2 === null) return;
 
     function handleLiveQna(data: CuesDataType) {
       console.log("handle qna", data);
-
+      data.content=formatContent(data.content)
       
 
 

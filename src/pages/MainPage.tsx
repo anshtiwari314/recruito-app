@@ -29,6 +29,7 @@ export default function MainPage() {
   const [isMobile, setIsMobile] = useState(false);
   const [tempIsHost, settempIsHost] = useState<boolean | null>(null);
 
+  
   useEffect(() => {
     function Resizing() {
       // Use window.innerWidth to get the current viewport width
@@ -52,6 +53,7 @@ export default function MainPage() {
   }, []);
 
   useEffect(() => {
+   
     let params = new URL(window.location.href).searchParams;
     let isMounted = true;
 
@@ -94,14 +96,21 @@ export default function MainPage() {
         // ✅ Step 1. Make a post api call here to check if user is present in server database -
         try {
           const response = await fetch(
-            "https://qhpv9mvz1h.execute-api.ap-south-1.amazonaws.com/prod/check-jarvis-login",
+            "https://recruito.vitti.insure/lms_router",
             {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify({ client: "recruito", userid: myName }),
-            }
+              body: JSON.stringify({
+                  "route_name": "main_router", 
+                  "json_data": {
+                    "trigger_func": "check_userid", 
+                    "params": {"userid": myName}}
+                  
+                  }),
+                }
+                
           );
 
           const data = await response.json();
@@ -109,17 +118,18 @@ export default function MainPage() {
           if (data.result === true) {
             let password = prompt("Please provide the password") ?? "";
             const passwordResponse = await fetch(
-              "https://qhpv9mvz1h.execute-api.ap-south-1.amazonaws.com/prod/check-jarvis-login",
+              "https://recruito.vitti.insure/lms_router",
               {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                  client: "recruito",
-                  userid: myName,
-                  password,
-                }),
+                  "route_name": "main_router", 
+                  "json_data": {
+                    "trigger_func": "check_password", 
+                    "params": {password}}
+                  }),
               }
             );
 
@@ -171,6 +181,7 @@ export default function MainPage() {
         }
       };
 
+      console.log("control reached here 55")
       checkLoginData();
     }
 
@@ -218,6 +229,7 @@ export default function MainPage() {
     setShowModal(null);
   };
 
+  
   return (
     <>
       {tempIsHost === null ? (

@@ -35,6 +35,23 @@ export function VadWrapper({children}){
     const initReqStatusRef = useRef(false)
     const { jobId, roomId, custEmailId, agentId, isHost, meetingIsLegit } = useAppSelector((state) => state.qpReducer);
 
+    const VAD_SPEECH_SAMPLE_RATE_HZ = 16000
+    
+    
+    // const VAD2_MIN_SPEECH_FRAMES = 12
+    // const VAD2_FRAME_SAMPLES = Math.ceil(
+    //   (VAD2_TARGET_MIN_SPEECH_MS / 1000) *
+    //   (VAD_SPEECH_SAMPLE_RATE_HZ / VAD2_MIN_SPEECH_FRAMES)
+    // )
+
+    //setting for 0.8 sec of audio filter
+    const VAD2_TARGET_MIN_SPEECH_MS = 120
+    const VAD2_FRAME_SAMPLES = 512
+    const VAD2_MIN_SPEECH_FRAMES = Math.max(
+      1,
+      Math.ceil((VAD2_TARGET_MIN_SPEECH_MS / 1000) * (16000 / VAD2_FRAME_SAMPLES))
+    )
+    const vadMicStreamRef = useRef<MediaStream | null>(null)
     //const {PostReq } = useRequest()
 
     // ort.env.wasm.wasmPaths = {
@@ -81,10 +98,9 @@ export function VadWrapper({children}){
       //init req 
 
       let data = {
-        
-        roomid: "abc-123-fgh-456",
-        jobid: "1",
-        agentid: "1234",
+        roomid: roomId,
+        jobid: jobId,
+        agentid: agentId,
         //custemailid: custEmailId,
         isHost: isHost,
         name: name,
@@ -118,8 +134,8 @@ export function VadWrapper({children}){
             const myvad = await vad.MicVAD.new({
               onSpeechStart: cb1,
               onSpeechEnd: cb2,
-              positiveSpeechThreshold:0.9 ,
-              negativeSpeechThreshold:0.85
+              // positiveSpeechThreshold:0.4 ,
+              // negativeSpeechThreshold:0.35
           // redemptionFrames:100
             })
             resolve(myvad)
@@ -128,12 +144,93 @@ export function VadWrapper({children}){
         
       }
     
-    
+      function getMetaDataOfSpeechSegment(audio: Float32Array) {
+        if (!(audio instanceof Float32Array)) {
+          console.warn('getMetaDataOfSpeechSegment: expected Float32Array', audio)
+          return
+        }
+      
+        const sampleRate = VAD_SPEECH_SAMPLE_RATE_HZ
+        const sampleCount = audio.length
+        const durationSec = sampleCount / sampleRate
+        const pcmByteLength = audio.byteLength
+        const wavBuffer = utils.encodeWAV(audio)
+        const wavByteLength = wavBuffer.byteLength
+      
+        let min = Infinity
+        let max = -Infinity
+        let sumSq = 0
+        for (let i = 0; i < audio.length; i++) {
+          const v = audio[i]
+          if (v < min) min = v
+          if (v > max) max = v
+          sumSq += v * v
+        }
+        const rms = audio.length > 0 ? Math.sqrt(sumSq / audio.length) : 0
+      
+        console.log('[speech segment metadata]', {
+          sampleCount,
+          sampleRateHz: sampleRate,
+          channels: 1,
+          durationSec: Number(durationSec.toFixed(4)),
+          durationMs: Math.round(durationSec * 1000),
+          pcmByteLength,
+          wavByteLength,
+          float32Min: Number(min.toFixed(6)),
+          float32Max: Number(max.toFixed(6)),
+          rms,
+        })
+      }
+
       const VAD2 = useMicVAD({
         workletURL: `./vad.worklet.bundle.min.js`,
         //modelURL: "http://localhost:8080/silero_vad.onnx",
         //@ts-ignore
         modelURL:`./silero_vad.onnx`,
+        positiveSpeechThreshold: 0.6,
+        negativeSpeechThreshold:0.7,
+        submitUserSpeechOnPause:true,
+        // //model:"v5" as const,
+        frameSamples: VAD2_FRAME_SAMPLES,
+        minSpeechFrames: VAD2_MIN_SPEECH_FRAMES,
+         redemptionFrames:10,
+        getStream: async () => {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              channelCount: 2,
+              echoCancellation: true,
+              autoGainControl: false,
+              noiseSuppression: true,
+            },
+          })
+          vadMicStreamRef.current = stream
+          return stream
+        },
+        pauseStream: async (stream: MediaStream) => {
+          stream.getTracks().forEach((track) => {
+            track.enabled = false
+            track.stop()
+          })
+          vadMicStreamRef.current?.getTracks().forEach((track) => {
+            track.enabled = false
+            track.stop()
+          })
+          if (vadMicStreamRef.current === stream) {
+            vadMicStreamRef.current = null
+          }
+        },
+        resumeStream: async () => {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              channelCount: 2,
+              echoCancellation: true,
+              autoGainControl: false,
+              noiseSuppression: true,
+            },
+          })
+          vadMicStreamRef.current = stream
+          return stream
+        },
         onVADMisfire: () => {
           console.log("Vad misfire")
         },
@@ -141,14 +238,14 @@ export function VadWrapper({children}){
           console.log("Speech start")
         },
         onSpeechEnd:(audio)=>{
-          console.log('getting data from vad2')
+          console.log('getting data from vad2');
+          getMetaDataOfSpeechSegment(audio)
           let speechStopDate = new Date();
 
             let data = {
-              
-              roomid: "abc-123-fgh-456",
-              jobid: "1",
-              agentid: "1234",
+              roomid: roomId,
+              jobid: jobId,
+              agentid: agentId,
               //custemailid: custEmailId,
               isHost: isHost,
               name: name, 
@@ -272,9 +369,33 @@ export function VadWrapper({children}){
       //VAD2?.pause()
     },[])
 
+    // useEffect(()=>{
+    //   console.log('vad2 changed',VAD2)
+    // },[VAD2])
+
     useEffect(()=>{
-      console.log('vad2 changed',VAD2)
-    },[VAD2])
+      if(VAD2.loading) return
+
+      console.log('useEffect manual vad paused runs',VAD2)
+      console.log("[VAD2 object keys]", Object.keys((VAD2 as any) || {}))
+
+      const micVAD = (VAD2 as any)?.micVAD
+      if (micVAD?.options) {
+        console.log("[VAD2 runtime fields]", micVAD.options)
+      } else {
+        console.log("[VAD2 runtime fields] micVAD/options not available yet", {
+          micVADExists: !!micVAD,
+          loading: VAD2.loading,
+        })
+      }
+
+    },[VAD2?.loading, (VAD2 as any)?.micVAD])
+
+    useEffect(() => {
+      if ((VAD2 as any)?.errored) {
+        console.log("[VAD2 error]", (VAD2 as any).errored)
+      }
+    }, [(VAD2 as any)?.errored])
 
       useEffect(()=>{
 

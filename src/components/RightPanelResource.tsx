@@ -21,7 +21,7 @@ export function RightPanelResource() {
             <div className="text-sm text-neutral-600 mt-1">
               {/* {jobTitle} Position Details */}
               {/* Traya Health Position Details */}
-              Checklist Guideline 
+              Call Script & FAQs 
             </div>
           </div>
           <button className="p-2 hover:bg-neutral-100 rounded-lg text-neutral-600">
@@ -36,7 +36,7 @@ export function RightPanelResource() {
           </button>
         </div>
       </div>
-      <div className="p-3 bg-neutral-50 rounded-lg">
+      {/* <div className="p-3 bg-neutral-50 rounded-lg">
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center">
@@ -60,7 +60,7 @@ export function RightPanelResource() {
             </a>
           </button>
         </div>
-      </div>
+      </div> */}
     </>
   );
 }

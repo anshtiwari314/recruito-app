@@ -116,6 +116,7 @@ export function ClickableTopic({ topic, selectedTopic, isAnswered = false }) {
       style={{
         height: isExpanded ? "auto" : "80px", 
         minHeight: "60px",
+        //border:'0.2rem solid tomato'
       }}
     >
       <div className="flex items-center justify-between p-3">
@@ -212,8 +213,8 @@ export function QnaTopic({ topic, selectedTopic, isAnswered = false }) {
   //  console.log(cuesList);
   useEffect(() => {
     if (QnaRef.current) {
-      //console.log('transcriptions inside content panel is changed')
-      QnaRef.current.scrollTop = QnaRef.current.scrollHeight;
+      console.log('transcriptions inside content panel is changed')
+      QnaRef.current.scrollTop = 0;
     }
   }, [cuesList]);
 
@@ -251,6 +252,7 @@ useEffect(() => {
       style={{
         height: isExpanded ? "auto" : "80px",
         minHeight: "60px",
+        //border:'0.2rem solid blue'
       }}
     >
       <div className="flex items-center justify-between mb-2 ">
@@ -419,7 +421,8 @@ export default function ContentPanelMain() {
 
   return (
     <div className={`${!isExpanded ? "flex justify-between" : "flex flex-col"}`} style={{ flex: 0.75, height: "75%" }}>
-      <div
+      
+      {/* <div
         id="transcription"
         style={{ overflowY: "hidden", height: "60vh", padding: "0 0.8rem" }}
         className={`${!isExpanded ? "flex-grow-0 flex-shrink-0 w-1/4 min-h-96 max-h-lvh mr-6" : "max-h-96 w-full"} mb-6 bg-white rounded-lg shadow-sm border-2 border-zinc-500 `}
@@ -437,12 +440,12 @@ export default function ContentPanelMain() {
             <SingleTranscription data={transcription} key={i} />
           ))}
         </div>
-      </div>
+      </div> */}
 
       <div
         id="ai-suggestions"
         style={{ overflowY: "hidden", height: "60vh", padding: "0 0.8rem", paddingBottom: "5rem" }}
-        className={`${!isExpanded ? "flex-grow-0 w-3/4 min-h-96 max-h-lvh" : "w-full max-h-96"} mb-6 bg-white rounded-lg shadow-sm border-2 border-zinc-500 overflow-y-auto`}
+        className={`${!isExpanded ? "flex-grow-0 w-full min-h-96 max-h-lvh" : "w-full max-h-96"} mb-6 bg-white rounded-lg shadow-sm border-2 border-zinc-500 overflow-y-auto`}
         ref={fullscreenElement}
       >
         <div className="flex items-center justify-between mb-4" style={{ height: "10%" }}>
