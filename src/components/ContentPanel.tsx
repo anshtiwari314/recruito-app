@@ -59,29 +59,18 @@ export default function ContentPanel({
   //console.log("users updated", users);
 
   return (
-    <div>
-      <DraggableChatWindow/>
+    <div className="h-full flex flex-col min-h-0">
+      <DraggableChatWindow />
       {isHost ? (
-        <div style={{
-        //border:'0.2rem solid green',
-        height:'100%',
-        display:'flex',
-        flexDirection:'column',
-        justifyContent:'space-between'
-        }}>
-          
-
+        <div className="h-full flex flex-col min-h-0 gap-0">
           <ContentPanelMain />
-
           <ContentPanelFooter />
         </div>
       ) : (
         largeVideo && (
-          <MyLargerVideoComp
-            e={largeVideo}
-            //num={4193}
-            isMobile={isMobile}
-          />
+          <div className="h-full meeting-panel overflow-hidden">
+            <MyLargerVideoComp e={largeVideo} isMobile={isMobile} />
+          </div>
         )
       )}
     </div>

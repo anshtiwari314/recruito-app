@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useData } from "@/context/DataWrapper";
 import { v4 as uuidv4 } from "uuid";
@@ -11,276 +11,244 @@ import RightPanel from "@/components/RightPanel";
 import NotFound from "./NotFoundPage";
 import Leave from "./LeavePage";
 import MeetingPageHeader from "../components/MeetingPageHeader";
-import ShowMessage from "../components/ShowMessage";
-import Modal from "../components/Modal";
+import {
+  getParticipantName,
+  isRoomAdmin,
+  isValidParticipantName,
+  normalizeParticipantName,
+  setParticipantName,
+} from "@/utils/meetingStorage";
+import "@/styles/meeting.css";
 
 export default function MainPage() {
   //@ts-ignore
-  const { setMyId, setName,myId,Socket } = useData();
-  const { isHost, meetingIsLegit } = useAppSelector((state) => state.qpReducer);
-  const { jobTitle } = useAppSelector((state) => state.cuesReducer);
+  const { setMyId, setName } = useData();
   const { closeCall } = useAppSelector((state) => state.nvReducer);
+  const { roomId: roomIdFromStore } = useAppSelector(
+    (state) => state.qpReducer
+  );
 
   const dispatch = useDispatch();
+  const { roomId: roomIdParam } = useParams<{ roomId: string }>();
   const [meetingIsLegitMain, setMeetingIsLegitMain] = useState<boolean>(true);
-
-  const { link } = useParams();
-  // const [searchParams,setSearchParams] = useSearchParams()
   const [isMobile, setIsMobile] = useState(false);
-  const [tempIsHost, settempIsHost] = useState<boolean | null>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [initialized, setInitialized] = useState(false);
+  const [nameInput, setNameInput] = useState("");
+  const [nameError, setNameError] = useState("");
+  const [pendingJoin, setPendingJoin] = useState(false);
 
-  
   useEffect(() => {
-    function Resizing() {
-      // Use window.innerWidth to get the current viewport width
-      if (window.innerWidth < 800) {
-        setIsMobile(true);
-      } else {
-        setIsMobile(false);
+    function onResize() {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      if (mobile) {
+        setSidebarCollapsed(true);
       }
     }
-
-    // Initial check
-    Resizing();
-
-    // Add event listener for window resizing
-    window.addEventListener("resize", Resizing);
-
-    // Cleanup function to remove the event listener when the component unmounts
-    return () => {
-      window.removeEventListener("resize", Resizing);
-    };
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   useEffect(() => {
-   
-    let params = new URL(window.location.href).searchParams;
-    let isMounted = true;
+    const roomId = roomIdParam?.trim() ?? "";
 
     if (sessionStorage.getItem("exitdone") !== null) {
       setMeetingIsLegitMain(false);
+      setInitialized(true);
       return;
     }
 
-    if (
-      !params.get("room_id")?.trim() ||
-      !params.get("cust_email_id")?.trim() ||
-      !params.get("agent_id")?.trim() ||
-      !params.get("job_id")?.trim()
-    ) {
+    if (!roomId) {
       setMeetingIsLegitMain(false);
-    } else {
-      // Determine if the user is the host based on api calls by first fetching name of user and then authenticating password
-      let myName: string = "";
-      myName = sessionStorage.getItem("userName") ?? "";
-
-      // Check if the user's name is already stored in sessionStorage
-      if (myName.length > 2) {
-        // If the name is found, set it using setName function
-        setName(myName);
-      } else {
-        // If the name is not found, prompt the user to enter their name
-        while (myName.length < 2) {
-          myName = prompt("Please enter your name") ?? "";
-
-          // Alert the user if the entered name is less than 2 characters long
-          if (myName.length < 2) alert("Name must have 2 letters long");
-        }
-        // Set the entered name using setName function
-        setName(myName);
-        // Store the entered name in sessionStorage
-        sessionStorage.setItem("userName", myName);
-      }
-
-      const checkLogin = async () => {
-        // ✅ Step 1. Make a post api call here to check if user is present in server database -
-        try {
-          const response = await fetch(
-            "https://recruito.vitti.insure/lms_router",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                  "route_name": "main_router", 
-                  "json_data": {
-                    "trigger_func": "check_userid", 
-                    "params": {"userid": myName}}
-                  
-                  }),
-                }
-                
-          );
-
-          const data = await response.json();
-          // ✅ Step 2: If the user exists, check the password
-          if (data.result === true) {
-            let password = prompt("Please provide the password") ?? "";
-            const passwordResponse = await fetch(
-              "https://recruito.vitti.insure/lms_router",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  "route_name": "main_router", 
-                  "json_data": {
-                    "trigger_func": "check_password", 
-                    "params": {password}}
-                  }),
-              }
-            );
-
-            const passwordData = await passwordResponse.json();
-
-            return { isAuthenticated: passwordData.result === true };
-          } else {
-            return { isAuthenticated: false };
-          }
-        } catch (error) {
-          console.error("Error:", error);
-          return { isAuthenticated: false };
-        }
-      };
-
-      // Call async checkLogin function here
-      const checkLoginData = async () => {
-        const loginResult = await checkLogin(); // Wait for checkLogin to complete
-        if (isMounted) {
-          settempIsHost(loginResult?.isAuthenticated ?? false);
-          const qParams: QPState = {
-            roomId: params.get("room_id") ?? "",
-            jobId: params.get("job_id") ?? "",
-            custEmailId: params.get("cust_email_id") ?? "",
-            agentId: params.get("agent_id") ?? "",
-            isHost: loginResult?.isAuthenticated ?? false,
-            name: sessionStorage.getItem("userName") ?? "",
-            meetingIsLegit: true,
-          };
-          // Set the query params state for this meeting
-          dispatch(setQP(qParams));
-          
-          // Set the myId state variable to the temporary ID
-          setMyId(uuidv4())
-
-
-          // the below code is for only testing
-
-        //   if(loginResult?.isAuthenticated===true){
-        //   setMyId(uuidv4())
-        //   }
-        //   else{
-        //   setMyId('febc1696-f7f3-41ad-a8f8-ba0bd6865286')
-        //     setTimeout(()=>{
-        //       setMyId('febc1696-f7f3-41ad-a8f8-ba0bd6865286')
-        //     },2000)
-        //}
-
-        }
-      };
-
-      console.log("control reached here 55")
-      checkLoginData();
+      setInitialized(true);
+      return;
     }
 
-    return () => {
-      isMounted = false; // Cleanup to prevent memory leaks
-    };
-  }, []);
+    const savedName = getParticipantName();
+    if (savedName) {
+      setNameInput(savedName);
+      setPendingJoin(false);
+    } else {
+      setPendingJoin(true);
+    }
 
-  /* Executes beforeunload */
+    setInitialized(true);
+  }, [roomIdParam]);
+
+  useEffect(() => {
+    if (!initialized || pendingJoin || !meetingIsLegitMain) return;
+
+    const roomId = roomIdParam?.trim() ?? "";
+    if (!roomId) return;
+
+    const displayName = normalizeParticipantName(
+      getParticipantName() || nameInput
+    );
+    if (!isValidParticipantName(displayName)) return;
+
+    const isHost = isRoomAdmin(roomId);
+
+    setName(displayName);
+    setParticipantName(displayName);
+
+    const qParams: QPState = {
+      roomId,
+      jobId: uuidv4(),
+      custEmailId: uuidv4(),
+      agentId: uuidv4(),
+      isHost,
+      name: displayName,
+      meetingIsLegit: true,
+    };
+
+    dispatch(setQP(qParams));
+    setMyId(uuidv4());
+  }, [
+    initialized,
+    pendingJoin,
+    meetingIsLegitMain,
+    roomIdParam,
+    nameInput,
+    dispatch,
+    setMyId,
+    setName,
+  ]);
+
   useEffect(() => {
     function executeBeforeTabClose(e: BeforeUnloadEvent) {
       e.preventDefault();
-      // Some browsers require returnValue, even though it's deprecated
       if ("returnValue" in e) {
-        e.returnValue = ""; // Still required for confirmation dialog
+        e.returnValue = "";
       }
-      return ""; // Some TypeScript versions require an explicit return
+      return "";
     }
 
     window.addEventListener("beforeunload", executeBeforeTabClose);
-
-    return () => {
-      window.removeEventListener("beforeunload", executeBeforeTabClose);
-    };
+    return () => window.removeEventListener("beforeunload", executeBeforeTabClose);
   }, []);
 
-    //http://localhost:5173/?room_id=abc-123-fgh-456&cust_email_id=saurabhahlawat89@gmail.com&agent_id=1234&job_id=1
-  //http://localhost:5173/?room_id=anuj-anuj-anuj-anuj&cust_email_id=saurabhahlawat89@gmail.com&agent_id=1234&job_id=1
+  const handleJoinWithName = () => {
+    const displayName = normalizeParticipantName(nameInput);
+    if (!isValidParticipantName(displayName)) {
+      setNameError("Enter your name (2–40 characters).");
+      return;
+    }
 
-
-
-  const [showModal, setShowModal] = useState(null);
-
-  // Define callback functions for when the modal is dismissed or 'Fix' is clicked
-  const handleDismiss = () => {
-    console.log('Modal dismissed!');
-    // Set showModal to null to hide the modal
-    setShowModal(null);
+    setNameError("");
+    setParticipantName(displayName);
+    setPendingJoin(false);
   };
 
-  const handleFix = () => {
-    console.log('Fix button clicked!');
-    // Perform your fix logic here
-    // Then hide the modal
-    setShowModal(null);
-  };
+  if (!initialized) {
+    return (
+      <div className="meeting-shell h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div
+            className="w-10 h-10 border-2 rounded-full animate-spin"
+            style={{
+              borderColor: "var(--meeting-accent-soft)",
+              borderTopColor: "var(--meeting-accent)",
+            }}
+          />
+          <p className="text-sm landing-subtitle">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
-  
+  if (pendingJoin && meetingIsLegitMain && roomIdParam?.trim()) {
+    return (
+      <div className="meeting-shell h-[100dvh] flex items-center justify-center p-4">
+        <div className="landing-card landing-card--elevated w-full max-w-md p-6 sm:p-8">
+          <h1 className="landing-title text-xl sm:text-2xl font-semibold mb-2">
+            Join meeting
+          </h1>
+          <p className="landing-subtitle text-sm mb-6">
+            Enter your name before joining room{" "}
+            <span className="text-slate-300">{roomIdParam.trim()}</span>
+          </p>
+
+          <label className="landing-label text-sm font-medium block mb-2">
+            Your name
+          </label>
+          <input
+            type="text"
+            value={nameInput}
+            onChange={(e) => {
+              setNameInput(e.target.value);
+              setNameError("");
+            }}
+            onKeyDown={(e) => e.key === "Enter" && handleJoinWithName()}
+            placeholder="e.g. Alex Johnson"
+            className="landing-input mb-4"
+            autoFocus
+          />
+
+          {nameError ? (
+            <p className="landing-error text-sm mb-4">{nameError}</p>
+          ) : null}
+
+          <button
+            type="button"
+            onClick={handleJoinWithName}
+            className="landing-btn-primary w-full py-2.5 px-4"
+          >
+            Continue to meeting
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (
+    !pendingJoin &&
+    meetingIsLegitMain &&
+    roomIdParam?.trim() &&
+    !roomIdFromStore
+  ) {
+    return (
+      <div className="meeting-shell h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div
+            className="w-10 h-10 border-2 rounded-full animate-spin"
+            style={{
+              borderColor: "var(--meeting-accent-soft)",
+              borderTopColor: "var(--meeting-accent)",
+            }}
+          />
+          <p className="text-sm landing-subtitle">Joining meeting...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
-      {tempIsHost === null ? (
-        "Authenticating ..."
-      ) : meetingIsLegitMain ? (
+      {meetingIsLegitMain && roomIdFromStore ? (
         closeCall ? (
           <Leave />
         ) : (
-          <div className="overflow-y-auto w-screen min-h-screen relative bg-neutral-50" style={{height:'100vh',width:'100vw',overflow:'hidden'}}>
-            {/* App header */}
-            {/* <div style={{textAlign:'center'}}>
-            {myId}
-            <br/>
-            {Socket?.id}
-            </div> */}
-            
-            <MeetingPageHeader/>
-            {/* <Modal
-          {...showModal} // Spreads all properties from the showModal object as props
-          onDismiss={handleDismiss} // Always pass the dismiss handler
-          x={'25%'}
-          y={'50%'}
-         // msg={'please enable microphone from your browser settings'}
-          type={'info'}
-          //time={10}
-          heading={'Microphone not available'}
-          width={'50%'}
-          height={'10%'}
-          // onFix is conditionally passed if type is 'error'
-          // If showModal.type === 'error', then showModal.onFix will be defined and passed
-          // Otherwise, it will be undefined, which is fine for the Modal component
-        /> */}
-            {/* <ShowMessage/> */}
-            {/* Main Content */}
-            <main id="main-content" className="flex h-[calc(100vh-120px)]" 
-            style={{height:'90vh'}}
-            >
-              {/* Content Panel */}
+          <div className="meeting-shell h-[100dvh] w-screen flex flex-col overflow-hidden">
+            <MeetingPageHeader />
+            <main id="main-content" className="meeting-main">
               <div
                 id="content-panel"
-                className="relative grow w-10/12 p-6 overflow-y-hidden"
-                //style={{border:'0.1rem solid red'}}
+                className="meeting-content p-2 sm:p-3 lg:p-4"
               >
-                
                 <ContentPanel isMobile={isMobile} />
-                {/**/}
-
               </div>
-
-              {/* Right Panel */}
-              <RightPanel />
+              <div
+                className={`meeting-sidebar${
+                  sidebarCollapsed ? " meeting-sidebar--collapsed" : ""
+                }`}
+              >
+                <RightPanel
+                  isMobile={isMobile}
+                  onCollapsedChange={setSidebarCollapsed}
+                />
+              </div>
             </main>
           </div>
         )
@@ -290,5 +258,3 @@ export default function MainPage() {
     </>
   );
 }
-
-

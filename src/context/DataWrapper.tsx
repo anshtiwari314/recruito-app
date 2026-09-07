@@ -9,6 +9,7 @@ import React, {
 import io from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 import Peer from "peerjs";
+import { MEETING_SERVER_URL } from "@/constants/app";
 import WavToMp3 from "../functions/wavToMp3";
 import type { CuesDataType } from "@/reducers/cuesReducer";
 import {
@@ -176,6 +177,8 @@ export default function DataWrapper({
   const [microphoneToggle, setMicroPhoneToggle] = useState(true);
   const [chatToggle,setChatToggle] = useState(false);
   const microphoneToggleRef = useRef(true);
+  const prevCameraToggleRef = useRef<boolean | null>(null);
+  const prevMicrophoneToggleRef = useRef<boolean | null>(null);
   const [screenSharing, setScreenSharing] = useState(false);
   const screenStreamRef = useRef(null);
   const vadEffectRender = useRef(0);
@@ -219,6 +222,7 @@ export default function DataWrapper({
       iceServers: [
 
         // commenting some servers bcz it duplicating connections
+        { urls: "stun:stun.l.google.com:19302" },
         {
           urls: "turn:34.100.145.102:3478",
           username: "anshtiwari314",
@@ -630,6 +634,67 @@ export default function DataWrapper({
     });
   }
 
+  function replaceTrackOnPeerCalls(
+    peersObj: Record<string, { call: any }>,
+    kind: "video" | "audio",
+    track: MediaStreamTrack | null
+  ) {
+    Object.values(peersObj).forEach(({ call }) => {
+      const pc = call?.peerConnection as RTCPeerConnection | undefined;
+      if (!pc) return;
+      const sender = pc
+        .getSenders()
+        .find((s) => s.track?.kind === kind || (!s.track && track === null));
+      if (sender) {
+        sender.replaceTrack(track).catch((err) => {
+          console.log("replaceTrack error", err);
+        });
+      }
+    });
+  }
+
+  function stopLocalVideoTracks() {
+    if (videoStreamRef.current instanceof MediaStream) {
+      videoStreamRef.current.getTracks().forEach((track) => track.stop());
+      videoStreamRef.current = null;
+    }
+    if (usersArrRef.current[0]) {
+      usersArrRef.current[0].videoStream = false;
+    }
+    setMyStream(false);
+  }
+
+  function stopLocalAudioTracks() {
+    if (
+      globalStreamRef.current &&
+      globalStreamRef.current.state === "recording"
+    ) {
+      globalStreamRef.current.stop();
+    }
+    if (audioStreamRef.current instanceof MediaStream) {
+      audioStreamRef.current.getTracks().forEach((track) => track.stop());
+      audioStreamRef.current = null;
+    }
+    if (usersArrRef.current[0]) {
+      usersArrRef.current[0].audioStream = false;
+    }
+    setMyAudioStream(false);
+  }
+
+  function hasActiveVideoStream() {
+    return (
+      videoStreamRef.current instanceof MediaStream &&
+      videoStreamRef.current.getVideoTracks().some((track) => track.readyState === "live")
+    );
+  }
+
+  function hasActiveAudioStream() {
+    return (
+      audioStreamRef.current instanceof MediaStream &&
+      audioStreamRef.current.getAudioTracks().some((track) => track.readyState === "live")
+    );
+  }
+
   /* ========================================================================= */
   /* ========================================================================= */
   /* function used for creating a cues box based on response from socket2 server - deprecated */
@@ -1014,16 +1079,7 @@ export default function DataWrapper({
 
     //This is a socket connection to handle live messages between participants
 
-    let url1 = 'https://vitt-jarvis-node-production.up.railway.app/'
-    let url2 = 'http://localhost:3005'
-    let url3 = 'https://temp-meeting-server-production.up.railway.app/'
-    let url4 = 'https://temp-meeting-server.vercel.app/'
-    let url5 = 'https://temp-meeting-server.onrender.com'
-    let url6 = 'wss://recruitonodesocket.vitti.insure'
-    let url7 = 'https://be80-103-173-124-200.ngrok-free.app/'
-    let url8 = 'https://babb-103-173-124-203.ngrok-free.app'
-
-    //let url9 = 'http://192.168.1.10:3000'
+    let url6 = MEETING_SERVER_URL;
 
     let tempSocket = io(url6);
 
@@ -1299,24 +1355,12 @@ export default function DataWrapper({
   /* ========================================================================= */
   /* 3.2. Set users and usersarrref consts here (from the perspective of this user, put first user in usersarrref) */
   
-  function enableDisabledCamera(){
-    gettingVideoStream()
-      .then((videoStream) => {
-        console.log('videostream',videoStream)
-      })
-      .catch((err)=>{
-        console.log('err in enableDisabledCamera',err)
-      })
+  function enableDisabledCamera() {
+    setCameraToggle(true);
   }
 
-  function enableDisabledMicrophone(){
-    gettingAudioStream()
-    .then((audioStream) => {
-      console.log('audiostream',audioStream)
-    })
-    .catch((err)=>{
-      console.log('err in enableDisabledMic',err)
-    })
+  function enableDisabledMicrophone() {
+    setMicroPhoneToggle(true);
   }
   
   useEffect(() => {
@@ -1350,10 +1394,21 @@ export default function DataWrapper({
       .then((videoStream) => {
         setMyStream(videoStream);
 
-        tempObj.videoStream = videoStream;
+        if (usersArrRef.current[0]) {
+          usersArrRef.current[0] = {
+            ...usersArrRef.current[0],
+            videoStream,
+            isCameraAvailable: true,
+            cameraStatus: true,
+          };
+        } else {
+          tempObj.videoStream = videoStream;
+          tempObj.isCameraAvailable = true;
+          tempObj.cameraStatus = true;
+        }
         videoStreamRef.current = videoStream;
-        tempObj.isCameraAvailable = true;
         tempObj.isAudioStream = false;
+        setUsers([...usersArrRef.current]);
       })
       .catch((err) => {
         // let tempStream = new MediaStream()
@@ -1400,10 +1455,19 @@ export default function DataWrapper({
     gettingAudioStream()
       .then((audioStream) => {
         setMyAudioStream(audioStream);
-        tempObj.audioStream = audioStream;
-        tempObj.isMicrophoneAvailable = true;
+        if (usersArrRef.current[0]) {
+          usersArrRef.current[0] = {
+            ...usersArrRef.current[0],
+            audioStream,
+            isMicrophoneAvailable: true,
+          };
+        } else {
+          tempObj.audioStream = audioStream;
+          tempObj.isMicrophoneAvailable = true;
+        }
         audioStreamRef.current = audioStream;
         handleRecordings(audioStream);
+        setUsers([...usersArrRef.current]);
       })
       .catch((err) => {
         // let tempStream = new MediaStream()
@@ -1451,132 +1515,123 @@ export default function DataWrapper({
 
   /* ========================================================================= */
   /* ========================================================================= */
-  /* 4.1. This code is responsible for enable & disable videostream */
+  /* 4.1. Release or re-acquire camera hardware when toggled */
   useEffect(() => {
-    if (socket === null || myStream === null || myStream === false) return;
-    //@ts-ignore
+    if (socket === null || usersArrRef.current.length === 0) return;
 
-    //let d = new Date();
-    //console.log("before accessing usersArrRef", d.toLocaleTimeString());
+    const self = usersArrRef.current[0];
+    if (!self) return;
 
-    if (
-      usersArrRef.current &&
-      usersArrRef.current[0]?.videoStream instanceof MediaStream
-    ) {
-      const isVideoEnabled =
-        usersArrRef.current[0].videoStream.getVideoTracks()[0].enabled;
-      usersArrRef.current[0].videoStream.getVideoTracks()[0].enabled =
-        cameraToggle;
-      console.log(isVideoEnabled);
-    } else {
-      console.log("Video stream is unavailable");
-    }
+    const emitCameraStatus = (status: boolean) => {
+      self.cameraStatus = status;
+      socket.emit("camera-toggle-transmitter", {
+        cameraStatus: status,
+        id: self.id,
+      });
+      setUsers(() => [...usersArrRef.current]);
+    };
 
-    usersArrRef.current[0].cameraStatus = cameraToggle;
+    const toggleChanged =
+      prevCameraToggleRef.current !== null &&
+      prevCameraToggleRef.current !== cameraToggle;
 
-    socket.emit("camera-toggle-transmitter", {
-      cameraStatus: cameraToggle,
-      id: usersArrRef.current[0].id,
-    });
-
-    setUsers((prev) => [...usersArrRef.current]);
-
-    console.log("myData modified", usersArrRef.current, cameraToggle);
-  }, [socket, myStream, cameraToggle]);
-
-  // useEffect(()=>{
-  //   if (socket === null || myStream === null || myStream === false) return;
-
-  //   if(cameraToggle){
-
-  //     gettingVideoStream()
-  //     .then(videoStream=>{
-
-        
-  //       try{
-  //         let peerConnection = peersObjRef.current[usersArrRef.current[1].id].call.peerConnection
-  //         let call = peersObjRef.current[usersArrRef.current[1].id].call
-          
-  //         let senders = peerConnection.getSenders()
-  //         let receivers = peerConnection.getReceivers()
-  //         //console.log('call',call)
-  //         console.log('senders',senders)
-  //         console.log('receivers',receivers)
-    
-  //         let sender =senders.find(s => s.track === usersArrRef.current[0].videoStream.getVideoTracks()[0]);
-          
-          
-  //         console.log('sender',sender)
-  //         sender.replaceTrack(videoStream.getVideoTracks()[0])
-  //       }catch(err){
-  //         console.log('err',err)
-  //       }finally{
-  //         console.log('just before init videostream')
-  //         usersArrRef.current[0].videoStream = videoStream
-  //         setUsers(prev=>[...usersArrRef.current])
-  //       }      
-
-  //     })
-      
-    
-  //   }else{
-  //     let tracks= usersArrRef.current[0].videoStream.getTracks()
-      
-  //     tracks.forEach((track)=>{
-  //       track.stop()
-  //     })
-    
-  //     console.log('after stopping videotrack',tracks)
-
-
-  //     // let peerConnection = peersObjRef.current[usersArrRef.current[1].id].call.peerConnection
-  //     // let call = peersObjRef.current[usersArrRef.current[1].id].call
-      
-  //     // let senders = peerConnection.getSenders()
-  //     // let receivers = peerConnection.getReceivers()
-  //     // //console.log('call',call)
-  //     // console.log('senders',senders)
-  //     // console.log('receivers',receivers)
-
-  //     // let sender =senders.find(s => s.track === usersArrRef.current[0].videoStream.getVideoTracks()[0]);
-  //     // console.log('sender',sender)
-  //     // sender.replaceTrack(null)
-
-  //     //usersArrRef.current[0].videoStream = new MediaStream()
-      
-  //     //setMyStream(usersArrRef.current[0].videoStream)
-  //     //setUsers((prev) => [...usersArrRef.current]);
-      
-  //   }
-  // },[cameraToggle])
-  /* ========================================================================= */
-  /* ========================================================================= */
-  /* 4.2. this code is responsible for enable & disable audiostream */
-  useEffect(() => {
-    if (socket === null || myAudioStream === null || myAudioStream === false)
+    if (!toggleChanged) {
+      self.cameraStatus = cameraToggle && hasActiveVideoStream();
+      socket.emit("camera-toggle-transmitter", {
+        cameraStatus: self.cameraStatus,
+        id: self.id,
+      });
+      prevCameraToggleRef.current = cameraToggle;
+      setUsers([...usersArrRef.current]);
       return;
-    //@ts-ignore
-
-    if (
-      usersArrRef.current &&
-      usersArrRef.current[0]?.audioStream instanceof MediaStream
-    ) {
-      const isAudioEnabled =
-        usersArrRef.current[0].audioStream.getAudioTracks()[0].enabled;
-      usersArrRef.current[0].audioStream.getAudioTracks()[0].enabled =
-        microphoneToggle;
-      console.log(isAudioEnabled);
-    } else {
-      console.log("Audio stream is unavailable");
     }
 
-    usersArrRef.current[0].microphoneStatus = microphoneToggle;
-    socket.emit("microphone-toggle-transmitter", {
-      microphoneStatus: microphoneToggle,
-      id: usersArrRef.current[0].id,
-    });
-    setUsers((prev) => [...usersArrRef.current]);
-  }, [socket, myAudioStream, microphoneToggle]);
+    prevCameraToggleRef.current = cameraToggle;
+
+    if (!cameraToggle) {
+      replaceTrackOnPeerCalls(peersObjRef.current, "video", null);
+      stopLocalVideoTracks();
+      emitCameraStatus(false);
+      return;
+    }
+
+    gettingVideoStream()
+      .then((videoStream) => {
+        videoStreamRef.current = videoStream;
+        setMyStream(videoStream);
+        self.videoStream = videoStream;
+        self.isCameraAvailable = true;
+        const track = videoStream.getVideoTracks()[0] ?? null;
+        replaceTrackOnPeerCalls(peersObjRef.current, "video", track);
+        emitCameraStatus(true);
+      })
+      .catch((err) => {
+        console.log("camera re-acquire error", err);
+        self.isCameraAvailable = false;
+        self.videoStream = false;
+        setMyStream(false);
+        emitCameraStatus(false);
+      });
+  }, [socket, cameraToggle]);
+
+  /* 4.2. Release or re-acquire microphone hardware when toggled */
+  useEffect(() => {
+    if (socket === null || usersArrRef.current.length === 0) return;
+
+    const self = usersArrRef.current[0];
+    if (!self) return;
+
+    const emitMicStatus = (status: boolean) => {
+      self.microphoneStatus = status;
+      socket.emit("microphone-toggle-transmitter", {
+        microphoneStatus: status,
+        id: self.id,
+      });
+      setUsers(() => [...usersArrRef.current]);
+    };
+
+    const toggleChanged =
+      prevMicrophoneToggleRef.current !== null &&
+      prevMicrophoneToggleRef.current !== microphoneToggle;
+
+    if (!toggleChanged) {
+      self.microphoneStatus = microphoneToggle && hasActiveAudioStream();
+      socket.emit("microphone-toggle-transmitter", {
+        microphoneStatus: self.microphoneStatus,
+        id: self.id,
+      });
+      prevMicrophoneToggleRef.current = microphoneToggle;
+      return;
+    }
+
+    prevMicrophoneToggleRef.current = microphoneToggle;
+
+    if (!microphoneToggle) {
+      replaceTrackOnPeerCalls(audioPeersObjRef.current, "audio", null);
+      stopLocalAudioTracks();
+      emitMicStatus(false);
+      return;
+    }
+
+    gettingAudioStream()
+      .then((audioStream) => {
+        audioStreamRef.current = audioStream;
+        setMyAudioStream(audioStream);
+        self.audioStream = audioStream;
+        self.isMicrophoneAvailable = true;
+        const track = audioStream.getAudioTracks()[0] ?? null;
+        replaceTrackOnPeerCalls(audioPeersObjRef.current, "audio", track);
+        handleRecordings(audioStream);
+        emitMicStatus(true);
+      })
+      .catch((err) => {
+        console.log("microphone re-acquire error", err);
+        self.isMicrophoneAvailable = false;
+        self.audioStream = false;
+        setMyAudioStream(false);
+        emitMicStatus(false);
+      });
+  }, [socket, microphoneToggle]);
 
   /* ========================================================================= */
   /* ========================================================================= */
@@ -2440,6 +2495,7 @@ export default function DataWrapper({
             };
 
             usersFlag.current = 2;
+            setUsers([...usersArrRef.current]);
           }
         }
 

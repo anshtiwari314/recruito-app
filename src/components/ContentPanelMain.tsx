@@ -22,20 +22,14 @@ export function SingleCue({
 }) {
   return (
     <div
-      className="p-3 bg-neutral-50 rounded-lg border border-neutral-200 w-[95%]"
-      style={{ backgroundColor: "#f2f2f2" }}
+      className="p-3 rounded-xl border border-slate-700/50 bg-slate-800/50 w-[95%]"
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-3">
-            {/* {isAnswered ? (
-            <i className="fa-solid fa-circle-check text-neutral-600"></i>
-          ) : (
-            <i className="fa-regular fa-circle text-neutral-600"></i>
-          )} */}
-          <span className="text-neutral-900">{parse(question?.similarity_query)}</span>
+          <span className="text-slate-200 text-sm">{parse(question?.similarity_query)}</span>
         </div>
         {isAnswered ? (
-          <span className="px-2 py-1 bg-neutral-200 rounded text-sm">
+          <span className="px-2 py-1 bg-indigo-500/20 text-indigo-300 rounded-md text-xs">
             {question?.match_score ? `${question.match_score} match` : ""}
           </span>
         ) : null}
@@ -43,20 +37,9 @@ export function SingleCue({
       {!isAnswered ? (
         <div className="ml-8"></div>
       ) : (
-        <div className="ml-8 text-sm text-neutral-600">
-            {/* <button
-            className="mt-2 text-neutral-700 hover:text-neutral-900"
-            onClick={() => setToggleDetails((p) => !p)}
-          >
-            {toggleDetails ? (
-              <i className="fa-solid fa-chevron-down mr-1" />
-            ) : (
-              <i className="fa-solid fa-chevron-right mr-1" />
-            )}
-            View Details
-          </button> */}
+        <div className="ml-4 text-sm text-slate-400">
           <div>
-            <p className="mt-2 pl-2 pr-2">{parse(question?.content)}</p>
+            <p className="mt-2 pl-2 pr-2 leading-relaxed">{parse(question?.content)}</p>
           </div>
         </div>
       )}
@@ -111,72 +94,38 @@ export function ClickableTopic({ topic, selectedTopic, isAnswered = false }) {
 
   return (
     <div
-      className="bg-neutral-50 rounded-lg border border-neutral-200 mx-3 my-5 w-full transition-all duration-300 ease-in-out cursor-pointer"
+      className="rounded-xl border border-slate-700/50 bg-slate-800/40 mx-1 my-3 w-full transition-all duration-300 ease-in-out cursor-pointer hover:border-indigo-500/30"
       onClick={handleTopicClick}
       style={{
-        height: isExpanded ? "auto" : "80px", 
+        height: isExpanded ? "auto" : "72px",
         minHeight: "60px",
-        //border:'0.2rem solid tomato'
       }}
     >
       <div className="flex items-center justify-between p-3">
         <div className="flex items-center space-x-3 flex-1 min-w-0">
           {selectedTopic === topic.topic ? (
-            <i className="fa-solid fa-circle-check text-neutral-600 flex-shrink-0"></i>
+            <i className="fa-solid fa-circle-check text-indigo-400 flex-shrink-0"></i>
           ) : (
-            <i className="fa-regular fa-circle text-neutral-600 flex-shrink-0"></i>
+            <i className="fa-regular fa-circle text-slate-500 flex-shrink-0"></i>
           )}
-          <span className="text-neutral-900 font-bold capitalize truncate">{parse(topic?.topic)}</span>
+          <span className="text-slate-200 font-semibold capitalize truncate text-sm">{parse(topic?.topic)}</span>
 
-          {/* Show spinner when loading, this topic is selected, and box is closed */}
-          {isLoading && !isExpanded && <FaSpinner className="w-4 h-4 text-blue-500 animate-spin ml-2" />}
-            {/* {isAnswered ? (
-          <span className="px-2 py-1 bg-neutral-200 rounded text-sm">
-            {question?.match_score ? `${question.match_score} match` : ""}
-          </span>
-        ) : null} */}
+          {isLoading && !isExpanded && <FaSpinner className="w-4 h-4 text-indigo-400 animate-spin ml-2" />}
         </div>
-        {/*       
-      {!isAnswered ? (
-        <div className="ml-8">
-        </div>
-      ) : (
-        <div className="ml-8 text-sm text-neutral-600">
-          {/* <button
-            className="mt-2 text-neutral-700 hover:text-neutral-900"
-            onClick={() => setToggleDetails((p) => !p)}
-          >
-            {toggleDetails ? (
-              <i className="fa-solid fa-chevron-down mr-1" />
-            ) : (
-              <i className="fa-solid fa-chevron-right mr-1" />
-            )}
-            View Details
-          </button> 
-
-          <div>
-            {toggleDetails && (
-              <p className="mt-2 pl-2 pr-2" >
-                {parse(question?.content)}
-              </p>
-            )}
-          </div>
-        </div>
-      )} */}
         <button
-          className="expand-button p-1 hover:bg-neutral-200 rounded transition-colors duration-200 flex-shrink-0"
+          className="expand-button p-1.5 hover:bg-slate-700/60 rounded-lg transition-colors duration-200 flex-shrink-0"
           onClick={(e) => {
             e.stopPropagation()
             setIsExpanded(!isExpanded)
             if (!isExpanded) {
-              setIsLoading(false) // Stop loading when expanded
+              setIsLoading(false)
             }
           }}
         >
           {isExpanded ? (
-            <FaChevronUp className="w-4 h-4 text-neutral-600" />
+            <FaChevronUp className="w-4 h-4 text-slate-400" />
           ) : (
-            <FaChevronDown className="w-4 h-4 text-neutral-600" />
+            <FaChevronDown className="w-4 h-4 text-slate-400" />
           )}
         </button>
       </div>
@@ -245,50 +194,44 @@ useEffect(() => {
 
   return (
     <div
-      className="px-3 py-2 bg-neutral-50 rounded-lg border border-neutral-200 mx-3 my-5 w-full transition-all duration-300 ease-in-out cursor-pointer"
+      className="px-3 py-2 rounded-xl border border-slate-700/50 bg-slate-800/40 mx-1 my-3 w-full transition-all duration-300 ease-in-out cursor-pointer hover:border-indigo-500/30"
       onClick={() => {
         dispatch(updateSelectedTopic(topic.topic));
       }}
       style={{
-        height: isExpanded ? "auto" : "80px",
+        height: isExpanded ? "auto" : "72px",
         minHeight: "60px",
-        //border:'0.2rem solid blue'
       }}
     >
       <div className="flex items-center justify-between mb-2 ">
         <div className="flex items-center space-x-3">
           {selectedTopic === topic.topic ? (
-            <i className="fa-solid fa-circle-check text-neutral-600"></i>
+            <i className="fa-solid fa-circle-check text-indigo-400"></i>
           ) : (
-            <i className="fa-regular fa-circle text-neutral-600"></i>
+            <i className="fa-regular fa-circle text-slate-500"></i>
           )}
 
-          <span className="text-neutral-900" style={{ textTransform: 'capitalize', fontWeight: 'bold' }}>
+          <span className="text-slate-200 capitalize font-semibold text-sm">
             {parse(topic?.topic)}
           </span>
-          {isLoading && <FaSpinner className="w-4 h-4 text-blue-500 animate-spin ml-2" />}
+          {isLoading && <FaSpinner className="w-4 h-4 text-indigo-400 animate-spin ml-2" />}
         </div>
         <button
-          className="expand-button p-1 hover:bg-neutral-200 rounded transition-colors duration-200 flex-shrink-0"
+          className="expand-button p-1.5 hover:bg-slate-700/60 rounded-lg transition-colors duration-200 flex-shrink-0"
           onClick={(e) => {
             e.stopPropagation();
             setIsExpanded(!isExpanded);
             if (!isExpanded) {
-              setIsLoading(false); // Stop loading when expanded
+              setIsLoading(false);
             }
           }}
         >
           {isExpanded ? (
-            <FaChevronUp className="w-4 h-4 text-neutral-600" />
+            <FaChevronUp className="w-4 h-4 text-slate-400" />
           ) : (
-            <FaChevronDown className="w-4 h-4 text-neutral-600" />
+            <FaChevronDown className="w-4 h-4 text-slate-400" />
           )}
         </button>
-        {/* {isAnswered ? (
-          <span className="px-2 py-1 bg-neutral-200 rounded text-sm">
-            {question?.match_score ? `${question.match_score} match` : ""}
-          </span>
-        ) : null} */}
       </div>
       {/*       
       {!isAnswered ? (
@@ -420,54 +363,28 @@ export default function ContentPanelMain() {
   }
 
   return (
-    <div className={`${!isExpanded ? "flex justify-between" : "flex flex-col"}`} style={{ flex: 0.75, height: "75%" }}>
-      
-      {/* <div
-        id="transcription"
-        style={{ overflowY: "hidden", height: "60vh", padding: "0 0.8rem" }}
-        className={`${!isExpanded ? "flex-grow-0 flex-shrink-0 w-1/4 min-h-96 max-h-lvh mr-6" : "max-h-96 w-full"} mb-6 bg-white rounded-lg shadow-sm border-2 border-zinc-500 `}
-      >
-        <div className="flex items-center justify-between mb-4" style={{ height: "10%" }}>
-          <h2 className="text-lg font-semibold text-neutral-900">Live Transcription</h2>
-          <button className="text-sm text-neutral-600 hover:text-neutral-700" onClick={toggleExpand}>
-            <i className={`fa-solid fa-${isExpanded ? "compress" : "expand"} mr-1`}></i>
-            {isExpanded ? "Collapse" : "Expand"}
-          </button>
-        </div>
-
-        <div className="space-y-8 flex-1" style={{ overflowY: "scroll", height: "85%" }} ref={transcriptionRef}>
-          {transcriptions.map((transcription, i) => (
-            <SingleTranscription data={transcription} key={i} />
-          ))}
-        </div>
-      </div> */}
-
+    <div className={`${!isExpanded ? "flex justify-between" : "flex flex-col"} h-full min-h-0`}>
       <div
         id="ai-suggestions"
-        style={{ overflowY: "hidden", height: "60vh", padding: "0 0.8rem", paddingBottom: "5rem" }}
-        className={`${!isExpanded ? "flex-grow-0 w-full min-h-96 max-h-lvh" : "w-full max-h-96"} mb-6 bg-white rounded-lg shadow-sm border-2 border-zinc-500 overflow-y-auto`}
+        className={`${!isExpanded ? "flex-grow-0 w-full" : "w-full"} flex flex-col flex-1 min-h-0 meeting-panel overflow-hidden`}
         ref={fullscreenElement}
       >
-        <div className="flex items-center justify-between mb-4" style={{ height: "10%" }}>
-          <h3 className="text-lg font-semibold text-neutral-900">AI Suggestions</h3>
+        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700/50 shrink-0">
+          <div>
+            <h3 className="text-sm font-semibold text-slate-100">AI Suggestions</h3>
+            <p className="text-xs text-slate-500">Real-time coaching cues</p>
+          </div>
           <button
-            className="text-sm text-neutral-600 hover:text-neutral-700"
+            className="text-xs px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700/60 transition-colors"
             onClick={isFullscreen ? exitFullscreen : goFullscreen}
           >
-            <i className={`fa-solid fa-${isFullscreen ? "compress" : "expand"} mr-1`}></i>
-            {isFullscreen ? "Collapse" : "Expand to full screen"}
+            <i className={`fa-solid fa-${isFullscreen ? "compress" : "expand"} mr-1.5`}></i>
+            {isFullscreen ? "Exit" : "Fullscreen"}
           </button>
         </div>
 
         <div
-          className="space-y-3 py-2 w-full"
-          style={{
-            overflowY: "scroll",
-            height: "100%",
-            display: "flex",
-            alignItems: "flex-start",
-            flexWrap: "wrap",
-          }}
+          className="flex-1 min-h-0 overflow-y-auto meeting-scroll p-3 space-y-2"
         >
           {cuesState &&
             cuesState.topics.map((topic: CuesDataType, index: number) => {

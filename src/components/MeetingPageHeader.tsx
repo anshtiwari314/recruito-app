@@ -1,344 +1,295 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-//@ts-ignore
 import { useAppSelector } from "@/store/store";
-import { setNVclosecall, setNVaudioUploadAnimation } from "@/reducers/navigationparamReducer";
+import {
+  setNVclosecall,
+  setNVaudioUploadAnimation,
+} from "@/reducers/navigationparamReducer";
 import { useData } from "../context/DataWrapper";
 import MeetingPageHeaderTimer from "./MeetingPageHeaderTimer";
-import playSound from '../assets/sound-play.gif'
+import playSound from "../assets/sound-play.gif";
 import { useVad } from "../context/VadWrapper";
-import LoadingIcons, { 
-  Audio, BallTriangle, Bars, Circles, Grid, Hearts, Oval, 
-  Puff, Rings, SpinningCircles, TailSpin, ThreeDots 
-} from 'react-loading-icons';
-import rectLoading from '../assets/reactangle-loading.gif'
+import { TailSpin } from "react-loading-icons";
+import rectLoading from "../assets/reactangle-loading.gif";
+import { APP_NAME } from "@/constants/app";
 
-
-export function CameraIcon(){
-  
+export function CameraIcon() {
   //@ts-ignore
-  const {myStream,cameraToggle,setCameraToggle,enableDisabledCamera}=useData();
+  const { myStream, cameraToggle, setCameraToggle, enableDisabledCamera } =
+    useData();
 
-  
   const toggleVideo = () => {
     setCameraToggle((p: boolean) => !p);
-    console.log("toggling the video...");
   };
 
-  if(myStream===false || myStream===null)
+  if (myStream === false || myStream === null) {
+    return (
+      <button
+        type="button"
+        className="control-btn control-btn--danger"
+        onClick={enableDisabledCamera}
+        title="Enable camera"
+      >
+        <i className="fa-solid fa-video-slash" />
+      </button>
+    );
+  }
+
   return (
     <button
-              className="py-3 px-6 bg-neutral-200 bg-red-600 rounded-lg text-neutral-700"
-              onClick={enableDisabledCamera}
-              //disabled={true}
-            >
-              <i className="fa-solid fa-video-slash fa-lg" style={{color:'white'}}></i>
-            </button>
-  )
-  else{
-      return (
-        <button
-            className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
-            onClick={toggleVideo}
-          >
-          {cameraToggle ? (
-          <i className="fa-solid fa-video fa-lg"></i>
-          ) : (
-          <i className="fa-solid fa-video-slash fa-lg"></i>
-          )}
-        </button>
-          )
-  }
-  
-  
+      type="button"
+      className={`control-btn ${cameraToggle ? "" : "control-btn--danger"}`}
+      onClick={toggleVideo}
+      title={cameraToggle ? "Turn off camera" : "Turn on camera"}
+    >
+      {cameraToggle ? (
+        <i className="fa-solid fa-video" />
+      ) : (
+        <i className="fa-solid fa-video-slash" />
+      )}
+    </button>
+  );
 }
 
-export function MicIcon(){
-  
-  //@ts-ignore
-  const {manualVadStatus,setManualVadStatus,vadRecordingOn,
-    setVadRecordingOn,vadStatus,setVadStatus,vadInstance,VAD2,userSpeaking} = useVad()
+export function MicIcon() {
+  const {
+    setManualVadStatus,
+    VAD2,
+  } = useVad();
 
   //@ts-ignore
-  const {myAudioStream,microphoneToggle,setMicroPhoneToggle,enableDisabledMicrophone}=useData();
+  const {
+    myAudioStream,
+    microphoneToggle,
+    setMicroPhoneToggle,
+    enableDisabledMicrophone,
+  } = useData();
 
   const toggleAudio = () => {
     setMicroPhoneToggle((p: boolean) => !p);
-    setManualVadStatus((p) => !p)
-    console.log("toggling the audio...");
+    setManualVadStatus((p) => !p);
   };
 
-
-  //console.log('myAudioStream',myAudioStream,microphoneToggle)
-
-  if(myAudioStream===false || myAudioStream===null)
-  return (
-    <button
-              className="py-3 px-6 bg-neutral-200 bg-red-600 rounded-lg text-neutral-700"
-              onClick={enableDisabledMicrophone}
-              //disabled={true}
-            >
-              <i className="fa-solid fa-microphone-slash fa-lg" style={{color:'white'}}></i>
-            </button>
-  )
-  else{
-      return (
-        <>
-        {
-          VAD2 !==undefined && !VAD2.loading ? 
-            <button
-              className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
-              onClick={toggleAudio}
-             // style={{border:'0.1rem solid red'}}
-            >
-              {microphoneToggle ? (
-                <i className="fa-solid fa-microphone fa-lg"></i>
-              ) : (
-                <i className="fa-solid fa-microphone-slash fa-lg"></i>
-              )}
-            </button>
-            
-            : 
-            <div style={{}}>
-                <TailSpin stroke="red"  strokeOpacity={1} speed={.95} style={{margin:'2rem'}}/>
-            </div>
-            }
-          </>
-          )
+  if (myAudioStream === false || myAudioStream === null) {
+    return (
+      <button
+        type="button"
+        className="control-btn control-btn--danger"
+        onClick={enableDisabledMicrophone}
+        title="Enable microphone"
+      >
+        <i className="fa-solid fa-microphone-slash" />
+      </button>
+    );
   }
-  
-  
+
+  if (VAD2 !== undefined && !VAD2.loading) {
+    return (
+      <button
+        type="button"
+        className={`control-btn ${microphoneToggle ? "" : "control-btn--danger"}`}
+        onClick={toggleAudio}
+        title={microphoneToggle ? "Mute" : "Unmute"}
+      >
+        {microphoneToggle ? (
+          <i className="fa-solid fa-microphone" />
+        ) : (
+          <i className="fa-solid fa-microphone-slash" />
+        )}
+      </button>
+    );
+  }
+
+  return (
+    <div className="control-btn !border-transparent">
+      <TailSpin stroke="#818cf8" strokeOpacity={1} speed={0.95} />
+    </div>
+  );
 }
 
 export default function MeetingPageHeader() {
   const dispatch = useDispatch();
-
   const { jobTitle } = useAppSelector((state) => state.cuesReducer);
-  const { isHost } = useAppSelector((state) => state.qpReducer);
+  const { isHost, roomId } = useAppSelector((state) => state.qpReducer);
+  const { VAD2, userSpeaking } = useVad();
 
-  const {manualVadStatus,setManualVadStatus,vadRecordingOn,
-    setVadRecordingOn,vadStatus,setVadStatus,vadInstance,VAD2,userSpeaking} = useVad()
-  //@ts-ignore
-  
   //@ts-ignore
   const {
     name,
-    
     setCameraToggle,
-    microphoneToggle,
     setMicroPhoneToggle,
-    setScreenSharing,
-    stopVideoRecording,
+    microphoneToggle,
     setUnreadCount,
     unreadCount,
-    chatToggle,setChatToggle,
-    screenRecording,setScreenRecording,ngrokServerUrl,setNgrokServerUrl
-  }:any = useData();
+    chatToggle,
+    setChatToggle,
+    screenRecording,
+    setScreenRecording,
+    ngrokServerUrl,
+    setNgrokServerUrl,
+  }: any = useData();
+
+  const [showDevSettings, setShowDevSettings] = useState(false);
 
   async function handleCloseCall() {
     const confirmQuit = window.confirm("Are you sure you want to quit?");
-
     if (confirmQuit) {
       sessionStorage.setItem("exitdone", "true");
       setMicroPhoneToggle(false);
       setCameraToggle(false);
       dispatch(setNVclosecall(true));
       dispatch(setNVaudioUploadAnimation(true));
-
-     // await stopVideoRecording(); // Wait for recording to stop
-
-      // Include logic here to send audio out along with corresponding ui
-      console.log("Closing the call...");
-    }
-  };
-
-  const shareScreen = () => {
-    setScreenSharing((p: boolean) => !p);
-    console.log("Sharing the screen...");
-  };
-
-  
-
-  
-
-  const toggleScreenRecording = () => {
-    setScreenRecording((p:boolean)=>!p)
-    console.log("toggling the screen recording...");
-  };
-
-  const toggleChatWindow = () => {
-    setChatToggle(true)
-    console.log(unreadCount)
-    // Reset unread count when opening chat
-    if (!chatToggle) {
-      setUnreadCount(0)
     }
   }
 
-  // useEffect(()=>{
-  //   console.log('vad2 loading status',VAD2.loading)
-  // },[VAD2.loading])
+  const toggleScreenRecording = () => {
+    setScreenRecording((p: boolean) => !p);
+  };
+
+  const toggleChatWindow = () => {
+    setChatToggle(true);
+    if (!chatToggle) {
+      setUnreadCount(0);
+    }
+  };
 
   return (
-    <>
-    
-    <div style={{textAlign:'center',display:'flex',justifyContent:'space-around',width:'80%',margin:'0 auto'}}>
-          <div>
-          {/* <FileLoadChecker/> */}
-          {VAD2 !==undefined && !VAD2.loading ? (
-              <h3 style={{ color: "green",margin:'0.5rem 0',fontWeight:700,textTransform:'capitalize'}}>Vad files are loaded ✅</h3>
-            ) : (
-              <div style={{display:'flex',alignItems:'center'}}>
-              <h3 style={{ color: "red",margin:'0.5rem 0',fontWeight:700,textTransform:'capitalize' }}>Vad is loading Wait...
-                
-              </h3>
-              <img
-                    src={rectLoading}
-                    style={{height:'2rem',width:'2rem'}}
-                  />
-              </div>
-            )}
-          </div>
-          <div style={{flex:0.8}}>
-          <input
-          type="text"
-          placeholder="Enter your ngrok url"
-          value={ngrokServerUrl}
-          onChange={(e)=>setNgrokServerUrl(e.target.value)}
-          style={{width: "100%",
-            padding: "10px",
-            fontSize: "16px",
-            border: "1px solid #ccc",
-            borderRadius: "5px",
-            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-            outline: "none",
-            transition: "border-color 0.3s",}}
-          />
-          </div>
-        </div>
-    
     <header
       id="header"
-      className="w-full bg-white border-b border-neutral-200 px-4 py-3 flex place-items-center justify-between shadow-sm"
-      style={{ height: "10vh" }}
+      className="shrink-0 meeting-glass"
+      style={{ borderBottom: "1px solid var(--meeting-border)" }}
     >
-      <div className="flex place-items-center space-x-4" style={{}}>
-            
-            <div className="h-8 w-[2px] bg-neutral-200"></div>
-            <img
-              src="https://api.dicebear.com/7.x/notionists/svg?scale=200&amp;seed=Logo"
-              className="h-8"
-              alt="Logo"
-            />
-            {jobTitle ? (
-              <div className="text-md text-neutral-500">
-                <div>{jobTitle}</div>
-                <div style={{ textTransform: "capitalize" }}>{name}</div>
-              </div>
+      {showDevSettings && (
+        <div
+          className="px-3 sm:px-4 py-2 flex flex-wrap items-center gap-3"
+          style={{
+            borderBottom: "1px solid var(--meeting-border)",
+            background: "var(--meeting-bg)",
+          }}
+        >
+          <div className="flex items-center gap-2 text-xs">
+            {VAD2 !== undefined && !VAD2.loading ? (
+              <span style={{ color: "var(--meeting-success)" }} className="font-medium">
+                VAD loaded
+              </span>
             ) : (
-              <div className="text-md text-neutral-500"></div>
-            )}
-            {/*<div className="text-md text-neutral-500">Recruiter Copilot</div>*/}
-            
-            
-          </div>
-      
-      
-      
-      
-      <div className="flex items-center space-x-4">
-
-            
-            <CameraIcon/>
-
-            <MicIcon/>
-
-            
-            
-            <button
-              className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
-              onClick={toggleScreenRecording}
-            >
-              {screenRecording 
-              ? 
-              <i className="fa-solid fa-circle-dot fa-lg text-red-500 animate-pulse"></i>
-              :
-              <i className="fa-solid fa-circle-dot fa-lg text-black-500"></i>
-              }
-              
-              
-                {/* <i className="fa-solid fa-microphone-slash fa-lg"></i> */}
-              
-            </button>
-     <div className="relative">
-             <button 
-            className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-700"
-            onClick={toggleChatWindow}
-            >
-              {
-                chatToggle ? 
-              <i className="fas fa-comment text-black-500 fa-lg" ></i>:
-              <i className="far fa-comment text-black-500 fa-lg" ></i>
-              }
-              {unreadCount > 0 && (
-                <span
-                  className={`absolute -top-1 -right-1 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center shadow-md border border-white z-10 ${
-                    chatToggle
-                      ? "bg-red-500 animate-pulse"
-                      : "bg-red-600 animate-bounce"
-                  }`}
-                >
-                  {unreadCount > 9 ? "9+" : unreadCount}
+              <>
+                <span className="font-medium" style={{ color: "#fbbf24" }}>
+                  VAD loading
                 </span>
-              )}
-            
-            </button>
-     </div>
-            {/*
-              <button
-                className="py-3 px-6 bg-neutral-200 hover:bg-neutral-300 rounded-lg text-neutral-600"
-                onClick={shareScreen}
-              >
-                {screenSharing ? (
-                  <i className="fa-solid fa-window-close fa-lg"></i>
-                  
-                ) : (
-                  <i className="fa-solid fa-laptop fa-lg"></i>
-                )}
-              </button>
-              */}
-            
-            <div style={{height:'3.5rem',width:'6rem',backgroundColor:'white',display:'flex',alignItems:'center',justifyContent:'center'}}>
-              {
-                userSpeaking ? 
-                <img src={playSound} style={{width:'6rem',height:'3.5rem'}}/>:
-                null
-              }
-              {
-                VAD2?.userSpeaking && microphoneToggle ?             
-                <img src={playSound} style={{width:'6rem',height:'3.5rem'}}/>:
-                null
-              }
-            {/* <img src={playSound} style={{width:'8rem',height:'4.5rem'}}/> */}
+                <img src={rectLoading} alt="" className="h-4 w-4" />
+              </>
+            )}
+          </div>
+          <input
+            type="text"
+            placeholder="Ngrok server URL"
+            value={ngrokServerUrl}
+            onChange={(e) => setNgrokServerUrl(e.target.value)}
+            className="landing-input flex-1 min-w-[200px] !py-1.5 !text-xs"
+          />
+        </div>
+      )}
 
-            </div>
+      <div className="meeting-header-row px-3 sm:px-4 py-2.5 sm:py-3">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+          <div className="app-brand-icon">
+            <i className="fa-solid fa-video text-xs" aria-hidden="true" />
+          </div>
+          <div className="min-w-0">
+            <h1 className="app-brand-title truncate">
+              {jobTitle || APP_NAME}
+            </h1>
+            <p className="app-brand-subtitle capitalize truncate">
+              {name}
+              {roomId ? (
+                <span className="hidden sm:inline"> · {roomId}</span>
+              ) : null}
+            </p>
+          </div>
+        </div>
 
-            <div className="h-8 w-[2px] bg-neutral-200"></div>
-            <button
-              className="px-8 py-2 bg-neutral-600 hover:bg-neutral-700 text-white rounded-lg flex items-center text-lg"
-              onClick={handleCloseCall}
+        {isHost && (
+          <div className="hidden xl:block shrink-0">
+            <MeetingPageHeaderTimer />
+          </div>
+        )}
+
+        <div className="meeting-header-controls w-full sm:w-auto">
+          {(userSpeaking || (VAD2?.userSpeaking && microphoneToggle)) && (
+            <div
+              className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-medium"
+              style={{
+                background: "rgba(74, 222, 128, 0.12)",
+                border: "1px solid rgba(74, 222, 128, 0.28)",
+                color: "var(--meeting-success)",
+              }}
             >
-              <i className="fa-solid fa-xmark mr-4 fa-lg"></i>
-              End Call
-            </button>
+              <img src={playSound} alt="" className="h-5 w-8 object-contain" />
+              Speaking
+            </div>
+          )}
 
-            
+          <CameraIcon />
+          <MicIcon />
+
+          <button
+            type="button"
+            className={`control-btn ${screenRecording ? "control-btn--danger" : ""}`}
+            onClick={toggleScreenRecording}
+            title={screenRecording ? "Stop recording" : "Start recording"}
+          >
+            <i
+              className={`fa-solid fa-circle-dot ${screenRecording ? "animate-pulse" : ""}`}
+              style={{ color: screenRecording ? "var(--meeting-danger)" : "var(--meeting-text-muted)" }}
+            />
+          </button>
+
+          <div className="relative">
+            <button
+              type="button"
+              className={`control-btn ${chatToggle ? "control-btn--active" : ""}`}
+              onClick={toggleChatWindow}
+              title="Chat"
+            >
+              <i className={`${chatToggle ? "fas" : "far"} fa-comment`} />
+            </button>
+            {unreadCount > 0 && (
+              <span
+                className="absolute -top-1 -right-1 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center z-10"
+                style={{ background: "var(--meeting-danger)", border: "2px solid var(--meeting-bg)" }}
+              >
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
+          </div>
+
+          <button
+            type="button"
+            className={`control-btn hidden sm:inline-flex ${showDevSettings ? "control-btn--active" : ""}`}
+            onClick={() => setShowDevSettings((p) => !p)}
+            title="Developer settings"
+          >
+            <i className="fa-solid fa-gear" />
+          </button>
+
+          <button
+            type="button"
+            className="px-3 sm:px-4 py-2 rounded-xl text-white text-sm font-medium flex items-center gap-2 transition-colors"
+            style={{ background: "#dc2626" }}
+            onClick={handleCloseCall}
+          >
+            <i className="fa-solid fa-phone-slash text-xs" />
+            <span className="hidden sm:inline">Leave</span>
+          </button>
+        </div>
       </div>
-      
+
       {isHost && (
-        <MeetingPageHeaderTimer />
+        <div className="xl:hidden px-3 sm:px-4 pb-2.5">
+          <MeetingPageHeaderTimer />
+        </div>
       )}
     </header>
-    </>
   );
 }

@@ -1,114 +1,88 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMicrophone,
   faMicrophoneSlash,
   faVideoSlash,
 } from "@fortawesome/free-solid-svg-icons";
-import { FaVideo } from "react-icons/fa6"
-
-
-function getColorFromInitial(initial: string) {
-  const colors: Record<string, string> = {
-    A: "#E27D60", B: "#92A8D1", C: "#E8A87C", D: "#C38D9E", E: "#41B3A3",
-    F: "#6B5B95", G: "#F7CAC9", H: "#92A8D1", I: "#955251", J: "#B565A7",
-    K: "#009B77", L: "#DD4124", M: "#45B8AC", N: "#EFC050", O: "#5B5EA6",
-    P: "#9B2335", Q: "#D65076", R: "#45ADA8", S: "#9DE0AD", T: "#E1B16A",
-    U: "#2E7D32", V: "#FF6F61", W: "#88B04B", X: "#F1948A", Y: "#BB8FCE",
-    Z: "#4FC1E9",
-  };
-  return colors[initial] || "#777";
-}
-
-function darkenHexColor(hex: string, factor: number) {
-  const num = parseInt(hex.replace("#", ""), 16);
-  const r = Math.floor(((num >> 16) & 255) * factor);
-  const g = Math.floor(((num >> 8) & 255) * factor);
-  const b = Math.floor((num & 255) * factor);
-  return `rgb(${r}, ${g}, ${b})`;
-}
+import { FaVideo } from "react-icons/fa6";
+import {
+  adjustColor,
+  getColorFromInitial,
+  getParticipantInitials,
+} from "@/utils/participantUtils";
 
 export function TextPlaceHolder({ e }: { e: any }) {
-  const initials = e?.name?.substring(0, 2)?.toUpperCase() || "??";
-  const firstLetter = initials[0];
-  const baseColor = getColorFromInitial(firstLetter);
-  const darkColor = darkenHexColor(baseColor, 0.7);
-
-  const fullBgGradient = {
-    background: `radial-gradient(circle at center, ${darkColor} 30%, ${baseColor} 90%)`,
-  };
-
-  const circleGradient = {
-    background: `radial-gradient(circle at center, ${darkColor} 50%, ${baseColor} 100%)`,
-  };
+  const name = e?.name || "Guest";
+  const initials = getParticipantInitials(name);
+  const baseColor = getColorFromInitial(initials[0]);
+  const darkerColor = adjustColor(baseColor, -35);
 
   return (
     <div
-      className="w-full h-full absolute flex justify-center items-center z-5"
-      style={fullBgGradient}
+      className="w-32 h-32 md:w-64 md:h-64 rounded-full flex items-center justify-center font-semibold text-white shadow-lg ring-2 ring-white/10"
+      style={{
+        background: `linear-gradient(135deg, ${baseColor}, ${darkerColor})`,
+      }}
     >
-      <div
-        className="w-32 h-32 md:w-64 md:h-64 rounded-full mx-auto flex items-center justify-center"
-        style={circleGradient}
-      >
-        <p className="text-3xl md:text-6xl text-white">{initials}</p>
-      </div>
+      <span className="text-3xl md:text-6xl">{initials}</span>
     </div>
   );
 }
 
-
 export function Display({ e, isMobile }: { e: any; isMobile: boolean }) {
-  const vidRef = useRef<HTMLVideoElement>(null)
-  const [videoLoaded, setVideoLoaded] = useState(false)
+  const vidRef = useRef<HTMLVideoElement>(null);
+
+  const name = e?.name || "Guest";
+  const initials = getParticipantInitials(name);
+  const baseColor = getColorFromInitial(initials[0]);
+  const lighterColor = adjustColor(baseColor, 30);
+
+  const hasVideo =
+    Boolean(e?.videoStream) && e?.isCameraAvailable !== false;
 
   useEffect(() => {
-    const vid = vidRef.current
-    if (!e || !vid) return
+    const vid = vidRef.current;
+    if (!vid) return;
 
-    setVideoLoaded(false)
-
-    if (e?.isCameraAvailable && e?.cameraStatus && e?.videoStream) {
-      vid.srcObject = e.videoStream
-
-      const onLoaded = () => {
-        setVideoLoaded(true)
-        vid.play().catch(console.error)
+    if (hasVideo) {
+      vid.srcObject = e.videoStream;
+      const onLoaded = () => vid.play().catch(() => {});
+      vid.addEventListener("loadedmetadata", onLoaded);
+      if (vid.readyState >= HTMLMediaElement.HAVE_METADATA) {
+        vid.play().catch(() => {});
       }
-
-      const onError = () => {
-        console.error("Video loading error")
-        setVideoLoaded(false)
-      }
-
-      vid.addEventListener("loadedmetadata", onLoaded)
-      vid.addEventListener("error", onError)
-
       return () => {
-        vid.removeEventListener("loadedmetadata", onLoaded)
-        vid.removeEventListener("error", onError)
-      }
+        vid.removeEventListener("loadedmetadata", onLoaded);
+        vid.pause();
+        vid.srcObject = null;
+      };
     }
-  }, [e?.videoStream, e?.cameraStatus, e?.isCameraAvailable])
 
-  const showPlaceholder =
-    !e?.isCameraAvailable || !e?.cameraStatus || !e?.videoStream || !videoLoaded
+    vid.pause();
+    vid.srcObject = null;
+  }, [e.videoStream, hasVideo]);
 
   return (
-    <div className="relative w-full h-full bg-black rounded-lg overflow-hidden">
-      {showPlaceholder && <TextPlaceHolder e={e} />}
-
-      <video
-        ref={vidRef}
-        className="w-full h-full object-cover"
-        autoPlay
-        muted
-        playsInline
+    <div className="relative w-full h-full rounded-xl overflow-hidden border border-slate-700/60 bg-slate-900/80">
+      <div
+        className="absolute inset-0 flex items-center justify-center"
         style={{
-          display: showPlaceholder ? "none" : "block",
-          minHeight: "90%",
+          background: `linear-gradient(145deg, ${lighterColor}22, ${baseColor}44)`,
         }}
-      />
+      >
+        {hasVideo ? (
+          <video
+            ref={vidRef}
+            className="w-full h-full object-cover"
+            autoPlay
+            muted
+            playsInline
+          />
+        ) : (
+          <TextPlaceHolder e={e} />
+        )}
+      </div>
 
       <div className="absolute left-4 bottom-4 flex gap-3 items-center z-20">
         {!e?.isMicrophoneAvailable ? (
@@ -166,8 +140,9 @@ export function Display({ e, isMobile }: { e: any; isMobile: boolean }) {
         </div>
       )}
     </div>
-  )
+  );
 }
+
 export default function MyLargerVideoComp({
   e,
   isMobile,
@@ -177,7 +152,7 @@ export default function MyLargerVideoComp({
 }) {
   const ref = useRef<any>(null);
   return (
-    <div ref={ref} className="h-[80vh] w-full ">
+    <div ref={ref} className="h-full w-full">
       <Display e={e} isMobile={isMobile} />
     </div>
   );

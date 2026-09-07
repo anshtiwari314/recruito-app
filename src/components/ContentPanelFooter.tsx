@@ -1,18 +1,17 @@
-import React,{ useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAppSelector } from "@/store/store";
 import { useData } from "../context/DataWrapper";
 
-
 export default function ContentPanelFooter() {
-  const currentQPState = useAppSelector((state) => state.qpReducer);
   const [notes, setNotes] = useState("");
-  const [status, setStatus] = useState<string | null>(null); // 'success', 'error', or null
+  const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   //@ts-ignore
-  const {socket2} = useData()
-  const { jobId, roomId, custEmailId, agentId, isHost, meetingIsLegit,name } =
-  useAppSelector((state) => state.qpReducer);
+  const { socket2 } = useData();
+  const { jobId, roomId, agentId, name } = useAppSelector(
+    (state) => state.qpReducer
+  );
 
   const handleNotesChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setNotes(event.target.value);
@@ -23,116 +22,78 @@ export default function ContentPanelFooter() {
     setStatus(null);
 
     let data = {
-      jobid:jobId, 
-      roomid:roomId, 
-      agentid:agentId, 
-      agent_name:name, 
-      notes, 
-      candidateid: 'abc123'
-    }
+      jobid: jobId,
+      roomid: roomId,
+      agentid: agentId,
+      agent_name: name,
+      notes,
+      candidateid: "abc123",
+    };
 
-    console.log('recruiter_notes_req',data)
-    socket2.emit('recruiter_notes_req',data)
-
+    socket2.emit("recruiter_notes_req", data);
     setLoading(false);
-    // Simulate sending notes to an API
+
     setTimeout(() => {
-
-
-      const success = Math.random() > 0.5; // Simulate success or failure randomly
-
+      const success = Math.random() > 0.5;
       if (success) {
         setStatus("success");
-        setNotes(""); // Clear input after success
+        setNotes("");
       } else {
         setStatus("error");
       }
-
-      
     }, 2000);
-
-    // Replace 'apiurl' with your actual API URL
-    /*
-    const apiUrl = "https://example.com/api/endpoint";
-
-    fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ 
-        notes: notes,
-        jobId: currentQPState.jobId,
-        agentId: currentQPState.agentId,
-        custEmailId: currentQPState.custEmailId,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        // Handle the response from the API if needed
-        setStatus("success");
-        console.log(data);
-      })
-      .catch((error) => {
-        // Handle any errors that occur during the request
-        setStatus("error");
-        console.error(error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-    */
   };
 
   useEffect(() => {
     if (status) {
-      const timer = setTimeout(() => {
-        setStatus(null);
-      }, 5000);
-
-      return () => clearTimeout(timer); // Clear the timer when the component unmounts
+      const timer = setTimeout(() => setStatus(null), 5000);
+      return () => clearTimeout(timer);
     }
   }, [status]);
 
-  
-
   return (
-    <div id="ai-query" className="" style={{flex:0.2}}>
-      <div className="bg-white rounded-lg shadow-lg p-4 border border-neutral-200">
-        <div className="flex items-center space-x-3">
-          <textarea
-            placeholder="Enter your notes here ..."
-            className="flex-grow p-2.5 bg-neutral-50 rounded-lg border-0 focus:ring-2 focus:ring-neutral-200 resize-none max-h-[150px] overflow-y-auto"
-            value={notes}
-            onChange={handleNotesChange}
-            disabled={loading}
-            rows={3} // Use curly braces to pass a number value
-          ></textarea>
+    <div id="ai-query" className="shrink-0 mt-3">
+      <div className="meeting-panel p-3">
+        <div className="flex items-end gap-3">
+          <div className="flex-1">
+            <label className="block text-xs font-medium text-slate-400 mb-1.5">
+              Session notes
+            </label>
+            <textarea
+              placeholder="Capture key observations, follow-ups, or candidate notes..."
+              className="w-full p-3 bg-slate-900/60 rounded-xl border border-slate-700/60 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500/40 resize-none max-h-[120px] text-sm meeting-scroll"
+              value={notes}
+              onChange={handleNotesChange}
+              disabled={loading}
+              rows={2}
+            />
+          </div>
           <button
-            className="p-2.5 bg-neutral-600 hover:bg-neutral-700 rounded-lg text-white"
+            className="shrink-0 h-11 w-11 flex items-center justify-center rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-50 transition-colors"
             onClick={handleSendNotes}
-            disabled={loading}
+            disabled={loading || !notes.trim()}
+            title="Send notes"
           >
             {loading ? (
-              <i className="flex space-x-1">
-                <span className="w-2 h-2 bg-white rounded-full animate-bounce"></span>
-                <span className="w-2 h-2 bg-white rounded-full animate-bounce delay-150"></span>
-                <span className="w-2 h-2 bg-white rounded-full animate-bounce delay-300"></span>
-              </i>
+              <span className="flex gap-1">
+                <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" />
+                <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:150ms]" />
+                <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:300ms]" />
+              </span>
             ) : (
-              <i className="fa-solid fa-paper-plane"></i>
+              <i className="fa-solid fa-paper-plane" />
             )}
           </button>
-          {/* Status Messages */}
-          {status === "success" && (
-            <p className="mt-2 text-green-600 whitespace-normal max-w-24">Notes sent successfully!</p>
-          )}
-          {status === "error" && (
-            <p className="mt-2 text-red-600 whitespace-normal max-w-24">Failed to send notes. Try again</p>
-          )}
         </div>
+        {status === "success" && (
+          <p className="mt-2 text-xs text-emerald-400">Notes sent successfully</p>
+        )}
+        {status === "error" && (
+          <p className="mt-2 text-xs text-red-400">
+            Failed to send notes. Try again.
+          </p>
+        )}
       </div>
     </div>
   );
 }
-
