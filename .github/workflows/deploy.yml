@@ -6,7 +6,7 @@ on:
       - copilot-local
 
 jobs:
-  build-and-deploy:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,7 +27,7 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/meeting-app:latest
     
   deploy: 
-    needs: build and push 
+    needs: build-and-push 
     runs-on: ubuntu-latest
     steps:
         - name: Execute Remote ssh commands 
