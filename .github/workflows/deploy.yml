@@ -26,35 +26,35 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/meeting-app:staging-v1.1
             ${{ secrets.DOCKERHUB_USERNAME }}/meeting-app:latest
     
-deploy: 
-  needs: build and push 
-  runs-on: ubuntu-latest
-  steps:
-      - name: Execute Remote ssh commands 
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{secrets.SERVER_HOST}}
-          username: ${{secrets.SERVER_USER}}
-          key: ${{secrets.SSH_PRIVATE_KEY}}
-          port: 22
-          script: |
-            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+  deploy: 
+    needs: build and push 
+    runs-on: ubuntu-latest
+    steps:
+        - name: Execute Remote ssh commands 
+          uses: appleboy/ssh-action@v1.0.3
+          with:
+            host: ${{secrets.SERVER_HOST}}
+            username: ${{secrets.SERVER_USER}}
+            key: ${{secrets.SSH_PRIVATE_KEY}}
+            port: 22
+            script: |
+              echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-            #pull image 
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/meeting-app:latest
+              #pull image 
+              docker pull ${{ secrets.DOCKERHUB_USERNAME }}/meeting-app:latest
 
-            # stop & clear container 
-            docker stop meeting-app-container || true 
-            docker rm meeting-app-container || true
+              # stop & clear container 
+              docker stop meeting-app-container || true 
+              docker rm meeting-app-container || true
 
-            # Run the container 
-            docker run -d \
-              --name meeting-app-container \
-              -p 80:80
-              --restart always \
-               ${{ secrets.DOCKERHUB_USERNAME }}/meeting-app:latest
+              # Run the container 
+              docker run -d \
+                --name meeting-app-container \
+                -p 80:80
+                --restart always \
+                ${{ secrets.DOCKERHUB_USERNAME }}/meeting-app:latest
 
-            # Keep VirtualBox storage clean
-            docker image prune -f
+              # Keep VirtualBox storage clean
+              docker image prune -f
 
 
