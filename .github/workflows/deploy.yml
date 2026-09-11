@@ -54,11 +54,7 @@ jobs:
               docker rm meeting-app-container || true
 
               # Run the container 
-              docker run -d \
-                --name meeting-app-container \
-                -p 80:80
-                --restart always \
-                ${{ secrets.DOCKERHUB_USERNAME }}/meeting-app:latest
+              docker run -d --name meeting-app-container -p 80:80 --restart always ${{ secrets.DOCKERHUB_USERNAME }}/meeting-app:latest
 
               # Keep VirtualBox storage clean
               docker image prune -f
